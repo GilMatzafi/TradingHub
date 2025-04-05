@@ -10,8 +10,13 @@ stock_service = StockService()
 
 @main_bp.route('/')
 def index():
-    """Render the main page"""
-    return render_template('index.html')
+    """Render the strategy introduction page"""
+    return render_template('strategy.html')
+
+@main_bp.route('/analyzer')
+def analyzer():
+    """Render the pattern analyzer page"""
+    return render_template('analyzer.html')
 
 @main_bp.route('/analyze', methods=['POST'])
 def analyze():
