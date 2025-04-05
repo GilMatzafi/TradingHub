@@ -1,3 +1,6 @@
+// Store patterns data globally
+let patternsData = [];
+
 // Function to update range value display
 function updateRangeValue(input) {
     const container = input.closest('.range-container');
@@ -83,6 +86,48 @@ function updateCandlestickVisualization() {
     }, 300);
 }
 
+// Function to convert patterns to CSV
+function convertToCSV(patterns) {
+    // CSV header
+    const headers = ['Date & Time (Israel)', 'Trend', 'Open', 'High', 'Low', 'Close'];
+    
+    // Convert patterns to CSV rows
+    const rows = patterns.map(pattern => [
+        pattern.date,
+        pattern.trend,
+        pattern.open.toFixed(2),
+        pattern.high.toFixed(2),
+        pattern.low.toFixed(2),
+        pattern.close.toFixed(2)
+    ]);
+    
+    // Combine headers and rows
+    return [headers, ...rows]
+        .map(row => row.join(','))
+        .join('\n');
+}
+
+// Function to download CSV
+function downloadCSV() {
+    // Create CSV content
+    const csv = convertToCSV(patternsData);
+    
+    // Create blob and download link
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    // Create download URL
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, 'hammer_patterns.csv');
+    } else {
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'hammer_patterns.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
 // Add event listeners to update the visualization when parameters change
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize the visualization
@@ -113,6 +158,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listener for the require green checkbox
     document.getElementById('require_green').addEventListener('change', updateCandlestickVisualization);
     
+    // Add event listener for download CSV button
+    document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
+    
     // Form submission handler
     document.getElementById('strategyForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -126,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear previous results
         document.getElementById('resultsBody').innerHTML = '';
         document.querySelector('.pattern-count').textContent = '';
+        document.getElementById('downloadCSV').style.display = 'none';
         
         // Collect form data
         const formData = {
@@ -158,11 +207,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Store patterns data globally
+            patternsData = data.patterns;
+            
             // Display pattern count with animation
             const patternCount = document.querySelector('.pattern-count');
             patternCount.textContent = `Found ${data.count} hammer pattern${data.count !== 1 ? 's' : ''}`;
             patternCount.style.opacity = '0';
             setTimeout(() => patternCount.style.opacity = '1', 50);
+            
+            // Show download button if patterns were found
+            const downloadBtn = document.getElementById('downloadCSV');
+            if (data.count > 0) {
+                downloadBtn.style.display = 'block';
+                downloadBtn.style.opacity = '0';
+                setTimeout(() => downloadBtn.style.opacity = '1', 50);
+            }
             
             // Display results with animation
             const resultsBody = document.getElementById('resultsBody');
