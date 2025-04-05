@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hammer Pattern Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #343a40;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .results-table {
+            font-size: 0.9rem;
+        }
+        .uptrend {
+            color: #28a745;
+        }
+        .downtrend {
+            color: #dc3545;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .pattern-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        /* Candlestick visualization styles */
+        .candlestick-container {
+            width: 100%;
+            height: 200px;
+            margin: 20px 0;
+            position: relative;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .candlestick {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 100px;
+        }
+        
+        .candlestick-body {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            background-color: #28a745;
+            border-radius: 2px;
+        }
+        
+        .candlestick-body.red {
+            background-color: #dc3545;
+        }
+        
+        .candlestick-shadow {
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            background-color: #343a40;
+        }
+        
+        .candlestick-upper-shadow {
+            top: 0;
+        }
+        
+        .candlestick-lower-shadow {
+            bottom: 0;
+        }
+        
+        .candlestick-legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .candlestick-legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        
+        .candlestick-legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 2px;
+        }
+        
+        .candlestick-legend-color.green {
+            background-color: #28a745;
+        }
+        
+        .candlestick-legend-color.red {
+            background-color: #dc3545;
+        }
+        
+        .candlestick-legend-color.shadow {
+            background-color: #343a40;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Hammer Pattern Detector</h1>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Strategy Parameters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="strategyForm">
+                            <div class="mb-3">
+                                <label for="symbol" class="form-label">Stock Symbol</label>
+                                <input type="text" class="form-control" id="symbol" value="AAPL" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="days" class="form-label">Days to Analyze</label>
+                                <input type="number" class="form-control" id="days" value="50" min="1" max="365" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="interval" class="form-label">Time Interval</label>
+                                <select class="form-select" id="interval">
+                                    <option value="1m">1 Minute</option>
+                                    <option value="5m" selected>5 Minutes</option>
+                                    <option value="15m">15 Minutes</option>
+                                    <option value="30m">30 Minutes</option>
+                                    <option value="1h">1 Hour</option>
+                                    <option value="1d">1 Day</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Candlestick Visualization -->
+                            <div class="candlestick-container">
+                                <div class="candlestick">
+                                    <div class="candlestick-body"></div>
+                                    <div class="candlestick-shadow candlestick-upper-shadow"></div>
+                                    <div class="candlestick-shadow candlestick-lower-shadow"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="candlestick-legend">
+                                <div class="candlestick-legend-item">
+                                    <div class="candlestick-legend-color green"></div>
+                                    <span>Bullish</span>
+                                </div>
+                                <div class="candlestick-legend-item">
+                                    <div class="candlestick-legend-color red"></div>
+                                    <span>Bearish</span>
+                                </div>
+                                <div class="candlestick-legend-item">
+                                    <div class="candlestick-legend-color shadow"></div>
+                                    <span>Shadow</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="body_size_ratio" class="form-label">Body Size Ratio</label>
+                                <input type="number" class="form-control" id="body_size_ratio" value="0.3" step="0.05" min="0.1" max="0.5" required>
+                                <div class="form-text">Maximum body size as a fraction of total range (0.1-0.5)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lower_shadow_ratio" class="form-label">Lower Shadow Ratio</label>
+                                <input type="number" class="form-control" id="lower_shadow_ratio" value="2.0" step="0.5" min="1.0" max="5.0" required>
+                                <div class="form-text">Minimum lower shadow size relative to body (1.0-5.0)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="upper_shadow_ratio" class="form-label">Upper Shadow Ratio</label>
+                                <input type="number" class="form-control" id="upper_shadow_ratio" value="0.1" step="0.05" min="0.05" max="0.3" required>
+                                <div class="form-text">Maximum upper shadow size as a fraction of total range (0.05-0.3)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="ma_period" class="form-label">Moving Average Period</label>
+                                <input type="number" class="form-control" id="ma_period" value="5" min="3" max="50" required>
+                                <div class="form-text">Period for trend determination (3-50)</div>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="require_green" checked>
+                                <label class="form-check-label" for="require_green">Require Green Candle</label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">Analyze</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Analyzing data...</p>
+                        </div>
+                        
+                        <div id="results">
+                            <div class="pattern-count text-center"></div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date & Time (Israel)</th>
+                                            <th>Trend</th>
+                                            <th>Open</th>
+                                            <th>High</th>
+                                            <th>Low</th>
+                                            <th>Close</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resultsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to update the candlestick visualization
+        function updateCandlestickVisualization() {
+            const bodySizeRatio = parseFloat(document.getElementById('body_size_ratio').value);
+            const lowerShadowRatio = parseFloat(document.getElementById('lower_shadow_ratio').value);
+            const upperShadowRatio = parseFloat(document.getElementById('upper_shadow_ratio').value);
+            const requireGreen = document.getElementById('require_green').checked;
+            
+            // Get the candlestick elements
+            const candlestickBody = document.querySelector('.candlestick-body');
+            const upperShadow = document.querySelector('.candlestick-upper-shadow');
+            const lowerShadow = document.querySelector('.candlestick-lower-shadow');
+            
+            // Calculate the total height of the candlestick (100px)
+            const totalHeight = 100;
+            
+            // Calculate the body height based on the body size ratio
+            const bodyHeight = totalHeight * bodySizeRatio;
+            
+            // Calculate the lower shadow height based on the lower shadow ratio
+            // For a hammer, the lower shadow is much longer than the body
+            const lowerShadowHeight = bodyHeight * lowerShadowRatio;
+            
+            // Calculate the upper shadow height based on the upper shadow ratio
+            const upperShadowHeight = totalHeight * upperShadowRatio;
+            
+            // Position the body in the middle of the candlestick
+            const bodyTop = (totalHeight - bodyHeight) / 2;
+            
+            // Update the body
+            candlestickBody.style.height = `${bodyHeight}px`;
+            candlestickBody.style.top = `${bodyTop}px`;
+            
+            // Update the shadows
+            upperShadow.style.height = `${upperShadowHeight}px`;
+            upperShadow.style.top = `${bodyTop - upperShadowHeight}px`;
+            
+            lowerShadow.style.height = `${lowerShadowHeight}px`;
+            lowerShadow.style.top = `${bodyTop + bodyHeight}px`;
+            
+            // Set the color based on whether it's a green or red candle
+            if (requireGreen) {
+                candlestickBody.classList.add('green');
+                candlestickBody.classList.remove('red');
+            } else {
+                // For demonstration, we'll toggle between green and red
+                // In a real application, you might want to add a separate toggle for this
+                const isGreen = Math.random() > 0.5;
+                if (isGreen) {
+                    candlestickBody.classList.add('green');
+                    candlestickBody.classList.remove('red');
+                } else {
+                    candlestickBody.classList.add('red');
+                    candlestickBody.classList.remove('green');
+                }
+            }
+        }
+        
+        // Add event listeners to update the visualization when parameters change
+        document.getElementById('body_size_ratio').addEventListener('input', updateCandlestickVisualization);
+        document.getElementById('lower_shadow_ratio').addEventListener('input', updateCandlestickVisualization);
+        document.getElementById('upper_shadow_ratio').addEventListener('input', updateCandlestickVisualization);
+        document.getElementById('require_green').addEventListener('change', updateCandlestickVisualization);
+        
+        // Initialize the visualization
+        updateCandlestickVisualization();
+        
+        // Form submission handler
+        document.getElementById('strategyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading indicator
+            document.querySelector('.loading').style.display = 'block';
+            document.getElementById('resultsBody').innerHTML = '';
+            document.querySelector('.pattern-count').textContent = '';
+            
+            // Collect form data
+            const formData = {
+                symbol: document.getElementById('symbol').value,
+                days: document.getElementById('days').value,
+                interval: document.getElementById('interval').value,
+                body_size_ratio: document.getElementById('body_size_ratio').value,
+                lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
+                upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
+                ma_period: document.getElementById('ma_period').value,
+                require_green: document.getElementById('require_green').checked
+            };
+            
+            // Send request to server
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading indicator
+                document.querySelector('.loading').style.display = 'none';
+                
+                if (data.error) {
+                    document.querySelector('.pattern-count').textContent = data.error;
+                    return;
+                }
+                
+                // Display pattern count
+                document.querySelector('.pattern-count').textContent = 
+                    `Found ${data.count} hammer pattern${data.count !== 1 ? 's' : ''}`;
+                
+                // Display results
+                const resultsBody = document.getElementById('resultsBody');
+                resultsBody.innerHTML = '';
+                
+                data.patterns.forEach(pattern => {
+                    const row = document.createElement('tr');
+                    
+                    // Format date
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = pattern.date;
+                    row.appendChild(dateCell);
+                    
+                    // Format trend with color
+                    const trendCell = document.createElement('td');
+                    trendCell.textContent = pattern.trend;
+                    trendCell.classList.add(pattern.trend === 'uptrend' ? 'uptrend' : 'downtrend');
+                    row.appendChild(trendCell);
+                    
+                    // Format OHLC values
+                    ['open', 'high', 'low', 'close'].forEach(field => {
+                        const cell = document.createElement('td');
+                        cell.textContent = pattern[field].toFixed(2);
+                        row.appendChild(cell);
+                    });
+                    
+                    resultsBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                document.querySelector('.loading').style.display = 'none';
+                document.querySelector('.pattern-count').textContent = 
+                    `Error: ${error.message}. Please try again.`;
+            });
+        });
+    </script>
+</body>
+</html> 

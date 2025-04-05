@@ -1,0 +1,124 @@
+body {
+    background-color: #f8f9fa;
+    padding-top: 20px;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #343a40;
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.results-table {
+    font-size: 0.9rem;
+}
+
+.uptrend {
+    color: #28a745;
+}
+
+.downtrend {
+    color: #dc3545;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.pattern-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Candlestick visualization styles */
+.candlestick-container {
+    width: 100%;
+    height: 200px;
+    margin: 20px 0;
+    position: relative;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.candlestick {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 100px;
+}
+
+.candlestick-body {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-color: #28a745;
+    border-radius: 2px;
+}
+
+.candlestick-body.red {
+    background-color: #dc3545;
+}
+
+.candlestick-shadow {
+    position: absolute;
+    left: 50%;
+    width: 2px;
+    background-color: #343a40;
+}
+
+.candlestick-upper-shadow {
+    top: 0;
+}
+
+.candlestick-lower-shadow {
+    bottom: 0;
+}
+
+.candlestick-legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 0.8rem;
+}
+
+.candlestick-legend-item {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.candlestick-legend-color {
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border-radius: 2px;
+}
+
+.candlestick-legend-color.green {
+    background-color: #28a745;
+}
+
+.candlestick-legend-color.red {
+    background-color: #dc3545;
+}
+
+.candlestick-legend-color.shadow {
+    background-color: #343a40;
+} 

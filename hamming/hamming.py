@@ -32,20 +32,7 @@ def detect_hammer_patterns(df):
         (df['upper_shadow'] < 0.1 * df['total_range']) &  # Little or no upper shadow
         (df['is_green'])  # Green candle (bullish)
     )
-    
-    # Detect inverted hammer patterns (bullish)
-    # Criteria:
-    # 1. Small real body (less than 30% of the total range)
-    # 2. Long upper shadow (at least twice the size of the real body)
-    # 3. Little or no lower shadow (less than 10% of the total range)
-    # 4. Red candle (bearish) - inverted hammer often forms after a downtrend
-    df['is_inverted_hammer'] = (
-        (df['body_size'] < 0.3 * df['total_range']) &  # Small real body
-        (df['upper_shadow'] > 2 * df['body_size']) &    # Long upper shadow
-        (df['lower_shadow'] < 0.1 * df['total_range']) &  # Little or no lower shadow
-        (~df['is_green'])  # Red candle (bearish)
-    )
-    
+        
     # Add trend context (simple 5-period moving average)
     df['MA5'] = df['Close'].rolling(window=5).mean()
     df['trend'] = np.where(df['Close'] > df['MA5'], 'uptrend', 'downtrend')
@@ -82,9 +69,8 @@ def main():
     
     # Find hammer patterns
     hammers = df[df['is_hammer']]
-    inverted_hammers = df[df['is_inverted_hammer']]
     
-    if len(hammers) == 0 and len(inverted_hammers) == 0:
+    if len(hammers) == 0:
         print("No hammer patterns detected in the given time range.")
     else:
         if len(hammers) > 0:
@@ -93,11 +79,6 @@ def main():
                 israel_time = convert_to_israel_time(date)
                 print(f"Date and Time: {israel_time.strftime('%Y-%m-%d %H:%M')} - Trend: {row['trend']}")
         
-        if len(inverted_hammers) > 0:
-            print(f"\nFound {len(inverted_hammers)} inverted hammer patterns (times in Israel):")
-            for date, row in inverted_hammers.iterrows():
-                israel_time = convert_to_israel_time(date)
-                print(f"Date and Time: {israel_time.strftime('%Y-%m-%d %H:%M')} - Trend: {row['trend']}")
 
 if __name__ == "__main__":
     main()
