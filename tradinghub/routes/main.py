@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from tradinghub.services.stock_service import StockService
-from tradinghub.utils.time_utils import convert_to_israel_time
-from datetime import datetime, timedelta
+from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
 
 # Create blueprint
 main_bp = Blueprint('main', __name__)
@@ -17,51 +16,30 @@ def index():
 @main_bp.route('/analyze', methods=['POST'])
 def analyze():
     """Analyze stock data for hammer patterns"""
-    data = request.json
-    
-    # Extract parameters from request
-    symbol = data.get('symbol', 'AAPL')
-    days = int(data.get('days', 50))
-    interval = data.get('interval', '5m')
-    
-    # Strategy parameters
-    strategy_params = {
-        'body_size_ratio': float(data.get('body_size_ratio', 0.3)),
-        'lower_shadow_ratio': float(data.get('lower_shadow_ratio', 2.0)),
-        'upper_shadow_ratio': float(data.get('upper_shadow_ratio', 0.1)),
-        'ma_period': int(data.get('ma_period', 5)),
-        'require_green': data.get('require_green', True)
-    }
-    
-    # Calculate date range
-    end_date = datetime.now().strftime('%Y-%m-%d')
-    start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-    
-    # Download and analyze data
-    df = stock_service.download_stock_data(symbol, start_date, end_date, interval)
-    
-    if df.empty:
-        return jsonify({'error': 'No data found. Please check the symbol and date range.'})
-    
-    df = stock_service.detect_hammer_patterns(df, strategy_params)
-    
-    # Find hammer patterns
-    hammers = df[df['is_hammer']]
-    
-    # Prepare results
-    results = []
-    for date, row in hammers.iterrows():
-        israel_time = convert_to_israel_time(date)
-        results.append({
-            'date': israel_time.strftime('%Y-%m-%d %H:%M'),
-            'trend': row['trend'],
-            'open': float(row['Open']),
-            'high': float(row['High']),
-            'low': float(row['Low']),
-            'close': float(row['Close'])
-        })
-    
-    return jsonify({
-        'count': len(results),
-        'patterns': results
-    }) 
+    try:
+        data = request.json
+        
+        # Create pattern parameters
+        pattern_params = PatternParams(
+            body_size_ratio=float(data.get('body_size_ratio', 0.3)),
+            lower_shadow_ratio=float(data.get('lower_shadow_ratio', 2.0)),
+            upper_shadow_ratio=float(data.get('upper_shadow_ratio', 0.1)),
+            ma_period=int(data.get('ma_period', 5)),
+            require_green=data.get('require_green', True)
+        )
+        
+        # Create analysis request
+        request_obj = AnalysisRequest(
+            symbol=data.get('symbol', 'AAPL'),
+            days=int(data.get('days', 50)),
+            interval=data.get('interval', '5m'),
+            pattern_params=pattern_params
+        )
+        
+        # Perform analysis
+        result = stock_service.analyze_stock(request_obj)
+        
+        return jsonify(result.to_dict())
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400 
