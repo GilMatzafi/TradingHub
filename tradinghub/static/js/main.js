@@ -1,3 +1,21 @@
+// Function to update range value display
+function updateRangeValue(input) {
+    const container = input.closest('.range-container');
+    const valueDisplay = container.querySelector('.range-value');
+    const value = input.value;
+    
+    // Update the value display
+    valueDisplay.textContent = value;
+    
+    // Calculate the position
+    const percent = (value - input.min) / (input.max - input.min);
+    const leftOffset = percent * (input.offsetWidth - 20); // 20 is thumb width
+    
+    // Update value display position
+    valueDisplay.style.left = `${leftOffset + 10}px`; // 10 is half of thumb width
+    valueDisplay.style.transform = 'translateX(-50%)';
+}
+
 // Function to update the candlestick visualization
 function updateCandlestickVisualization() {
     const bodySizeRatio = parseFloat(document.getElementById('body_size_ratio').value);
@@ -10,14 +28,13 @@ function updateCandlestickVisualization() {
     const upperShadow = document.querySelector('.candlestick-upper-shadow');
     const lowerShadow = document.querySelector('.candlestick-lower-shadow');
     
-    // Calculate the total height of the candlestick (100px)
-    const totalHeight = 100;
+    // Calculate the total height of the candlestick (120px)
+    const totalHeight = 120;
     
     // Calculate the body height based on the body size ratio
     const bodyHeight = totalHeight * bodySizeRatio;
     
     // Calculate the lower shadow height based on the lower shadow ratio
-    // For a hammer, the lower shadow is much longer than the body
     const lowerShadowHeight = bodyHeight * lowerShadowRatio;
     
     // Calculate the upper shadow height based on the upper shadow ratio
@@ -25,6 +42,11 @@ function updateCandlestickVisualization() {
     
     // Position the body in the middle of the candlestick
     const bodyTop = (totalHeight - bodyHeight) / 2;
+    
+    // Add transition class for smooth animation
+    candlestickBody.classList.add('transitioning');
+    upperShadow.classList.add('transitioning');
+    lowerShadow.classList.add('transitioning');
     
     // Update the body
     candlestickBody.style.height = `${bodyHeight}px`;
@@ -43,7 +65,6 @@ function updateCandlestickVisualization() {
         candlestickBody.classList.remove('red');
     } else {
         // For demonstration, we'll toggle between green and red
-        // In a real application, you might want to add a separate toggle for this
         const isGreen = Math.random() > 0.5;
         if (isGreen) {
             candlestickBody.classList.add('green');
@@ -53,6 +74,13 @@ function updateCandlestickVisualization() {
             candlestickBody.classList.remove('green');
         }
     }
+    
+    // Remove transition class after animation completes
+    setTimeout(() => {
+        candlestickBody.classList.remove('transitioning');
+        upperShadow.classList.remove('transitioning');
+        lowerShadow.classList.remove('transitioning');
+    }, 300);
 }
 
 // Add event listeners to update the visualization when parameters change
@@ -60,24 +88,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the visualization
     updateCandlestickVisualization();
     
-    // Add event listeners to update the visualization when parameters change
-    document.getElementById('body_size_ratio').addEventListener('input', updateCandlestickVisualization);
-    document.getElementById('lower_shadow_ratio').addEventListener('input', updateCandlestickVisualization);
-    document.getElementById('upper_shadow_ratio').addEventListener('input', updateCandlestickVisualization);
+    // Add event listeners for range inputs
+    const rangeInputs = document.querySelectorAll('input[type="range"]');
+    rangeInputs.forEach(input => {
+        // Initialize range value displays
+        updateRangeValue(input);
+        
+        // Add event listeners for range input changes
+        input.addEventListener('input', () => {
+            updateRangeValue(input);
+            if (input.id === 'body_size_ratio' || 
+                input.id === 'lower_shadow_ratio' || 
+                input.id === 'upper_shadow_ratio') {
+                updateCandlestickVisualization();
+            }
+        });
+        
+        // Add event listener for when dragging ends
+        input.addEventListener('change', () => {
+            updateRangeValue(input);
+        });
+    });
+    
+    // Add event listener for the require green checkbox
     document.getElementById('require_green').addEventListener('change', updateCandlestickVisualization);
     
     // Form submission handler
     document.getElementById('strategyForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Show loading indicator
-        document.querySelector('.loading').style.display = 'block';
+        // Show loading indicator with animation
+        const loading = document.querySelector('.loading');
+        loading.style.display = 'block';
+        loading.style.opacity = '0';
+        setTimeout(() => loading.style.opacity = '1', 50);
+        
+        // Clear previous results
         document.getElementById('resultsBody').innerHTML = '';
         document.querySelector('.pattern-count').textContent = '';
         
         // Collect form data
         const formData = {
-            symbol: document.getElementById('symbol').value,
+            symbol: document.getElementById('symbol').value.toUpperCase(),
             days: document.getElementById('days').value,
             interval: document.getElementById('interval').value,
             body_size_ratio: document.getElementById('body_size_ratio').value,
@@ -97,24 +149,29 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            // Hide loading indicator
-            document.querySelector('.loading').style.display = 'none';
+            // Hide loading indicator with animation
+            loading.style.opacity = '0';
+            setTimeout(() => loading.style.display = 'none', 300);
             
             if (data.error) {
-                document.querySelector('.pattern-count').textContent = data.error;
+                showError(data.error);
                 return;
             }
             
-            // Display pattern count
-            document.querySelector('.pattern-count').textContent = 
-                `Found ${data.count} hammer pattern${data.count !== 1 ? 's' : ''}`;
+            // Display pattern count with animation
+            const patternCount = document.querySelector('.pattern-count');
+            patternCount.textContent = `Found ${data.count} hammer pattern${data.count !== 1 ? 's' : ''}`;
+            patternCount.style.opacity = '0';
+            setTimeout(() => patternCount.style.opacity = '1', 50);
             
-            // Display results
+            // Display results with animation
             const resultsBody = document.getElementById('resultsBody');
             resultsBody.innerHTML = '';
             
-            data.patterns.forEach(pattern => {
+            data.patterns.forEach((pattern, index) => {
                 const row = document.createElement('tr');
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
                 
                 // Format date
                 const dateCell = document.createElement('td');
@@ -135,12 +192,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 resultsBody.appendChild(row);
+                
+                // Animate row appearance
+                setTimeout(() => {
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
             });
         })
         .catch(error => {
-            document.querySelector('.loading').style.display = 'none';
-            document.querySelector('.pattern-count').textContent = 
-                `Error: ${error.message}. Please try again.`;
+            // Hide loading indicator with animation
+            loading.style.opacity = '0';
+            setTimeout(() => loading.style.display = 'none', 300);
+            
+            showError(`Error: ${error.message}. Please try again.`);
         });
     });
-}); 
+});
+
+// Function to show error messages
+function showError(message) {
+    const patternCount = document.querySelector('.pattern-count');
+    patternCount.textContent = message;
+    patternCount.style.color = 'var(--danger-color)';
+    patternCount.style.opacity = '0';
+    setTimeout(() => patternCount.style.opacity = '1', 50);
+} 
