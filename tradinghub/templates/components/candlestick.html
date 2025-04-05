@@ -1,0 +1,24 @@
+{% macro candlestick_visualization() %}
+<div class="candlestick-container mb-4">
+    <div class="candlestick">
+        <div class="candlestick-body"></div>
+        <div class="candlestick-shadow candlestick-upper-shadow"></div>
+        <div class="candlestick-shadow candlestick-lower-shadow"></div>
+    </div>
+</div>
+
+<div class="candlestick-legend mb-4">
+    <div class="candlestick-legend-item">
+        <div class="candlestick-legend-color green"></div>
+        <span>Bullish</span>
+    </div>
+    <div class="candlestick-legend-item">
+        <div class="candlestick-legend-color red"></div>
+        <span>Bearish</span>
+    </div>
+    <div class="candlestick-legend-item">
+        <div class="candlestick-legend-color shadow"></div>
+        <span>Shadow</span>
+    </div>
+</div>
+{% endmacro %} 

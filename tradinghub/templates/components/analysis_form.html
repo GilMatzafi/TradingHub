@@ -1,0 +1,40 @@
+{% macro analysis_form(form_id="strategyForm") %}
+<form id="{{ form_id }}">
+    <div class="mb-4">
+        <label for="symbol" class="form-label">
+            <i class="bi bi-graph-up me-2"></i>Stock Symbol
+        </label>
+        <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="text" class="form-control" id="symbol" value="AAPL" required>
+        </div>
+    </div>
+    
+    <div class="mb-4">
+        <label for="days" class="form-label">
+            <i class="bi bi-calendar-range me-2"></i>Days to Analyze
+        </label>
+        <input type="number" class="form-control" id="days" value="50" min="1" max="365" required>
+    </div>
+    
+    <div class="mb-4">
+        <label for="interval" class="form-label">
+            <i class="bi bi-clock me-2"></i>Time Interval
+        </label>
+        <select class="form-select" id="interval">
+            <option value="1m">1 Minute</option>
+            <option value="5m" selected>5 Minutes</option>
+            <option value="15m">15 Minutes</option>
+            <option value="30m">30 Minutes</option>
+            <option value="1h">1 Hour</option>
+            <option value="1d">1 Day</option>
+        </select>
+    </div>
+    
+    {% block additional_form_fields %}{% endblock %}
+    
+    <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-search me-2"></i>Analyze Patterns
+    </button>
+</form>
+{% endmacro %} 
