@@ -1,0 +1,17 @@
+{% from "dashboard/components/strategy_card.html" import strategy_card %}
+{% from "dashboard/data/strategies.html" import strategies %}
+
+{% macro strategy_list() %}
+<section id="strategies" class="strategy-section">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Trading Strategies</h2>
+        <p class="text-center lead mb-5">Choose from our collection of proven trading strategies designed to help you identify profitable opportunities in the market.</p>
+        
+        <div class="row g-4">
+            {% for strategy in strategies %}
+                {{ strategy_card(**strategy) }}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endmacro %} 
