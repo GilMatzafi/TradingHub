@@ -158,6 +158,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listener for the require green checkbox
     document.getElementById('require_green').addEventListener('change', updateCandlestickVisualization);
     
+    // Add event listener for the volume filter toggle
+    document.getElementById('use_volume_filter').addEventListener('change', function() {
+        const volumeParams = document.getElementById('volume-params');
+        if (this.checked) {
+            volumeParams.style.display = 'block';
+        } else {
+            volumeParams.style.display = 'none';
+        }
+    });
+    
     // Add event listener for download CSV button
     document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
     
@@ -185,10 +195,15 @@ document.addEventListener('DOMContentLoaded', function() {
             lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
             upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
             ma_period: document.getElementById('ma_period').value,
-            require_green: document.getElementById('require_green').checked,
-            min_relative_volume: document.getElementById('min_relative_volume').value,
-            volume_lookback: document.getElementById('volume_lookback').value
+            require_green: document.getElementById('require_green').checked
         };
+        
+        // Add volume parameters only if volume filter is enabled
+        const useVolumeFilter = document.getElementById('use_volume_filter').checked;
+        if (useVolumeFilter) {
+            formData.min_relative_volume = document.getElementById('min_relative_volume').value;
+            formData.volume_lookback = document.getElementById('volume_lookback').value;
+        }
         
         // Send request to server
         fetch('/analyze', {

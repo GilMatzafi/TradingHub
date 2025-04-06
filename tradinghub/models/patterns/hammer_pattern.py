@@ -19,8 +19,8 @@ class HammerPattern(BasePattern):
                 - upper_shadow_ratio (float): Maximum upper shadow size as fraction of total range
                 - ma_period (int): Period for moving average calculation
                 - require_green (bool): Whether to require green (bullish) candles
-                - min_relative_volume (float): Minimum relative volume compared to average
-                - volume_lookback (int): Number of candles to look back for volume comparison
+                - min_relative_volume (float, optional): Minimum relative volume compared to average
+                - volume_lookback (int, optional): Number of candles to look back for volume comparison
                 
         Returns:
             pd.DataFrame: DataFrame with hammer pattern detection results
@@ -48,7 +48,7 @@ class HammerPattern(BasePattern):
             hammer_condition = hammer_condition & df['is_green']
             
         # Add volume condition if Volume column exists and parameters are provided
-        if 'Volume' in df.columns and 'min_relative_volume' in params:
+        if 'Volume' in df.columns and 'min_relative_volume' in params and params.get('min_relative_volume') is not None:
             lookback = params.get('volume_lookback', 20)
             volume_ma = df['Volume'].rolling(window=lookback).mean()
             relative_volume = df['Volume'] / volume_ma
