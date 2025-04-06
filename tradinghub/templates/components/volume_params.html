@@ -1,0 +1,40 @@
+{% macro volume_params() %}
+<div class="mb-4 form-check form-switch">
+    <input type="checkbox" class="form-check-input" id="use_volume_filter">
+    <label class="form-check-label" for="use_volume_filter">
+        <i class="bi bi-bar-chart-fill me-2"></i>Use Volume Filter
+    </label>
+</div>
+
+<div id="volume-params" class="volume-params" style="display: none;">
+    <div class="mb-4">
+        <label for="min_relative_volume" class="form-label">
+            <i class="bi bi-bar-chart-fill me-2"></i>Minimum Relative Volume
+        </label>
+        <div class="range-container">
+            <div class="range-value">1.0</div>
+            <input type="range" class="form-range" id="min_relative_volume" value="1.0" step="0.1" min="0.5" max="3.0">
+            <div class="range-labels">
+                <span class="min">0.5</span>
+                <span class="description">Minimum volume relative to average</span>
+                <span class="max">3.0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-4">
+        <label for="volume_lookback" class="form-label">
+            <i class="bi bi-clock-history me-2"></i>Volume Lookback Period
+        </label>
+        <div class="range-container">
+            <div class="range-value">1</div>
+            <input type="range" class="form-range" id="volume_lookback" value="1" min="1" max="50">
+            <div class="range-labels">
+                <span class="min">1</span>
+                <span class="description">Number of candles to look back for volume comparison</span>
+                <span class="max">50</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %} 

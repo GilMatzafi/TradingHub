@@ -13,10 +13,10 @@ def index():
     """Render the strategy introduction page"""
     return render_template('strategy.html')
 
-@main_bp.route('/analyzer')
-def analyzer():
-    """Render the pattern analyzer page"""
-    return render_template('analyzer.html')
+@main_bp.route('/hammer')
+def hammer_analyzer():
+    """Render the hammer pattern analyzer page"""
+    return render_template('hammer_analyzer.html')
 
 @main_bp.route('/analyze', methods=['POST'])
 def analyze():

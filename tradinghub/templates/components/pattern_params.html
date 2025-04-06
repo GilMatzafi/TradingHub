@@ -1,0 +1,68 @@
+{% macro pattern_params() %}
+<div class="mb-4">
+    <label for="body_size_ratio" class="form-label">
+        <i class="bi bi-arrows-expand me-2"></i>Body Size Ratio
+    </label>
+    <div class="range-container">
+        <div class="range-value">0.3</div>
+        <input type="range" class="form-range" id="body_size_ratio" value="0.3" step="0.05" min="0.1" max="0.5">
+        <div class="range-labels">
+            <span class="min">0.1</span>
+            <span class="description">Maximum body size as a fraction of total range</span>
+            <span class="max">0.5</span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label for="lower_shadow_ratio" class="form-label">
+        <i class="bi bi-arrow-down me-2"></i>Lower Shadow Ratio
+    </label>
+    <div class="range-container">
+        <div class="range-value">2.0</div>
+        <input type="range" class="form-range" id="lower_shadow_ratio" value="2.0" step="0.5" min="1.0" max="5.0">
+        <div class="range-labels">
+            <span class="min">1.0</span>
+            <span class="description">Minimum lower shadow size relative to body</span>
+            <span class="max">5.0</span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label for="upper_shadow_ratio" class="form-label">
+        <i class="bi bi-arrow-up me-2"></i>Upper Shadow Ratio
+    </label>
+    <div class="range-container">
+        <div class="range-value">0.1</div>
+        <input type="range" class="form-range" id="upper_shadow_ratio" value="0.1" step="0.05" min="0.05" max="0.3">
+        <div class="range-labels">
+            <span class="min">0.05</span>
+            <span class="description">Maximum upper shadow size as a fraction of total range</span>
+            <span class="max">0.3</span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label for="ma_period" class="form-label">
+        <i class="bi bi-graph-up-arrow me-2"></i>Moving Average Period
+    </label>
+    <div class="range-container">
+        <div class="range-value">5</div>
+        <input type="range" class="form-range" id="ma_period" value="5" min="3" max="50">
+        <div class="range-labels">
+            <span class="min">3</span>
+            <span class="description">Period for trend determination</span>
+            <span class="max">50</span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4 form-check form-switch">
+    <input type="checkbox" class="form-check-input" id="require_green" checked>
+    <label class="form-check-label" for="require_green">
+        <i class="bi bi-check-circle me-2"></i>Require Green Candle
+    </label>
+</div>
+{% endmacro %} 
