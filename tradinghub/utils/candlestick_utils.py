@@ -22,6 +22,12 @@ class CandlestickUtils:
         df['body_size'] = abs(df['body'])
         df['total_range'] = df['High'] - df['Low']
         df['is_green'] = df['Close'] > df['Open']
+        
+        # Add volume calculations if Volume column exists
+        if 'Volume' in df.columns:
+            df['volume_ma'] = df['Volume'].rolling(window=20).mean()
+            df['relative_volume'] = df['Volume'] / df['volume_ma']
+        
         return df
     
     @staticmethod

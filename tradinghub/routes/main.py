@@ -30,7 +30,9 @@ def analyze():
             lower_shadow_ratio=float(data.get('lower_shadow_ratio', 2.0)),
             upper_shadow_ratio=float(data.get('upper_shadow_ratio', 0.1)),
             ma_period=int(data.get('ma_period', 5)),
-            require_green=data.get('require_green', True)
+            require_green=data.get('require_green', True),
+            min_relative_volume=float(data.get('min_relative_volume', 1.0)),
+            volume_lookback=int(data.get('volume_lookback', 20))
         )
         
         # Create analysis request

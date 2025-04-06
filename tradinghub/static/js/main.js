@@ -185,7 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
             lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
             upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
             ma_period: document.getElementById('ma_period').value,
-            require_green: document.getElementById('require_green').checked
+            require_green: document.getElementById('require_green').checked,
+            min_relative_volume: document.getElementById('min_relative_volume').value,
+            volume_lookback: document.getElementById('volume_lookback').value
         };
         
         // Send request to server

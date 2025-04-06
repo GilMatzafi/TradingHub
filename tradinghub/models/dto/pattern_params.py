@@ -9,6 +9,8 @@ class PatternParams:
     upper_shadow_ratio: float = 0.1
     ma_period: int = 5
     require_green: bool = True
+    min_relative_volume: float = 1.0
+    volume_lookback: int = 20
 
 @dataclass
 class AnalysisRequest:
