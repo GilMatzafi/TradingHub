@@ -347,4 +347,54 @@ body {
 
 .btn-success:active {
     transform: translateY(0);
+}
+
+/* Dashboard specific styles */
+.feature-card {
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.strategy-section {
+    padding: 4rem 0;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+    color: white;
+    padding: 6rem 0;
+}
+
+.strategy-card {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.strategy-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.strategy-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+}
+
+.strategy-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
 } 
