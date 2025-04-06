@@ -4,6 +4,7 @@
 {% from "hammer_analyzer/components/results_table.html" import results_table %}
 {% from "hammer_analyzer/components/pattern_params.html" import pattern_params %}
 {% from "hammer_analyzer/components/volume_params.html" import volume_params %}
+{% from "hammer_analyzer/components/backtest_params.html" import backtest_params %}
 
 {% block title %}TradingHub - Hammer Pattern Detector{% endblock %}
 
@@ -27,6 +28,7 @@
                     {{ candlestick_visualization() }}
                     {{ pattern_params() }}
                     {{ volume_params() }}
+                    {{ backtest_params() }}
                     {% endblock %}
                 </div>
             </div>
