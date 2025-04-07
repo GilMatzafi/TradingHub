@@ -66,86 +66,75 @@
         <h5 class="mb-0">Backtest Results</h5>
     </div>
     <div class="card-body">
-        <!-- Performance Metrics -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <h6 class="mb-3">Performance Metrics</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <tr>
-                            <td>Total Trades:</td>
-                            <td id="totalTrades">0</td>
-                        </tr>
-                        <tr>
-                            <td>Winning Trades:</td>
-                            <td id="winningTrades">0</td>
-                        </tr>
-                        <tr>
-                            <td>Losing Trades:</td>
-                            <td id="losingTrades">0</td>
-                        </tr>
-                        <tr>
-                            <td>Win Rate:</td>
-                            <td id="winRate">0%</td>
-                        </tr>
-                        <tr>
-                            <td>Profit Factor:</td>
-                            <td id="profitFactor">0.00</td>
-                        </tr>
-                        <tr>
-                            <td>Average Profit per Trade:</td>
-                            <td id="averageProfit">0%</td>
-                        </tr>
-                        <tr>
-                            <td>Total Profit:</td>
-                            <td id="totalProfit">0%</td>
-                        </tr>
-                    </table>
+        <!-- Performance Metrics and Portfolio Summary -->
+        <div class="backtest-metrics">
+            <div class="metric-group">
+                <h6>Performance Metrics</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Total Trades</span>
+                    <span class="metric-value" id="totalTrades">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Winning Trades</span>
+                    <span class="metric-value positive" id="winningTrades">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Losing Trades</span>
+                    <span class="metric-value negative" id="losingTrades">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Win Rate</span>
+                    <span class="metric-value" id="winRate">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Profit Factor</span>
+                    <span class="metric-value" id="profitFactor">0.00</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Profit per Trade</span>
+                    <span class="metric-value" id="averageProfit">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Profit</span>
+                    <span class="metric-value" id="totalProfit">0%</span>
                 </div>
             </div>
             
-            <!-- Portfolio Summary -->
-            <div class="col-md-6">
-                <h6 class="mb-3">Portfolio Summary</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <tr>
-                            <td>Initial Portfolio Value:</td>
-                            <td id="initialPortfolioValue">$0</td>
-                        </tr>
-                        <tr>
-                            <td>Final Portfolio Value:</td>
-                            <td id="finalPortfolioValue">$0</td>
-                        </tr>
-                        <tr>
-                            <td>Total Commission Paid:</td>
-                            <td id="totalCommission">$0</td>
-                        </tr>
-                        <tr>
-                            <td>Total Slippage Cost:</td>
-                            <td id="totalSlippage">$0</td>
-                        </tr>
-                    </table>
+            <div class="metric-group">
+                <h6>Portfolio Summary</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Initial Portfolio Value</span>
+                    <span class="metric-value" id="initialPortfolioValue">$0</span>
                 </div>
-                
-                <!-- Portfolio Chart Button -->
-                <div class="text-center mt-3">
-                    <button type="button" class="btn btn-outline-primary" id="showPortfolioChart">
-                        <i class="bi bi-graph-up me-2"></i>Show Portfolio Chart
+                <div class="metric-row">
+                    <span class="metric-label">Final Portfolio Value</span>
+                    <span class="metric-value" id="finalPortfolioValue">$0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Commission Paid</span>
+                    <span class="metric-value negative" id="totalCommission">$0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Slippage Cost</span>
+                    <span class="metric-value negative" id="totalSlippage">$0</span>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="button" class="btn-chart" id="showPortfolioChart">
+                        <i class="bi bi-graph-up"></i>Show Portfolio Chart
                     </button>
                 </div>
             </div>
         </div>
         
         <!-- Portfolio Chart -->
-        <div id="portfolioChartContainer" class="d-none">
+        <div id="portfolioChartContainer" class="portfolio-chart-container d-none">
             <canvas id="portfolioChart"></canvas>
         </div>
         
-        <!-- Trades Table -->
-        <h6 class="mb-3">Trade History</h6>
-        <div class="table-responsive">
-            <table class="table table-sm table-hover">
+        <!-- Trade History -->
+        <div class="trade-history">
+            <h6 class="mb-3">Trade History</h6>
+            <table>
                 <thead>
                     <tr>
                         <th>Entry Date</th>

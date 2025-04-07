@@ -397,4 +397,152 @@ body {
     top: 1rem;
     right: 1rem;
     z-index: 1;
+}
+
+/* Backtest Results Styling */
+.backtest-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.metric-group {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.metric-group h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(78, 205, 196, 0.3);
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.metric-row:last-child {
+    border-bottom: none;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.metric-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.metric-value.positive {
+    color: var(--success-color);
+}
+
+.metric-value.negative {
+    color: var(--danger-color);
+}
+
+/* Trade History Table Styling */
+.trade-history {
+    margin-top: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.trade-history table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.trade-history th {
+    background: var(--dark-gradient);
+    color: white;
+    font-weight: 500;
+    padding: 1rem;
+    text-align: left;
+}
+
+.trade-history td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.trade-history tr:last-child td {
+    border-bottom: none;
+}
+
+.trade-history tr:hover {
+    background: rgba(78, 205, 196, 0.05);
+}
+
+.profit-amount.positive {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.profit-amount.negative {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+/* Portfolio Chart Styling */
+.portfolio-chart-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.portfolio-chart-container canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.btn-chart {
+    background: var(--dark-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-chart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-chart i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .backtest-metrics {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .trade-history {
+        overflow-x: auto;
+    }
+    
+    .trade-history table {
+        min-width: 800px;
+    }
 } 

@@ -259,5 +259,66 @@ function renderPortfolioChart(portfolioHistory) {
     });
 }
 
+function renderBacktestResults(results) {
+    const backtestResults = document.getElementById('backtestResults');
+    backtestResults.classList.remove('d-none');
+
+    // Update metrics with proper formatting
+    document.getElementById('totalTrades').textContent = results.total_trades;
+    document.getElementById('winningTrades').textContent = results.winning_trades;
+    document.getElementById('losingTrades').textContent = results.losing_trades;
+    document.getElementById('winRate').textContent = `${(results.win_rate * 100).toFixed(2)}%`;
+    document.getElementById('profitFactor').textContent = results.profit_factor.toFixed(2);
+    document.getElementById('averageProfit').textContent = `${(results.average_profit * 100).toFixed(2)}%`;
+    
+    const totalProfitElement = document.getElementById('totalProfit');
+    const totalProfitValue = (results.total_profit * 100).toFixed(2);
+    totalProfitElement.textContent = `${totalProfitValue}%`;
+    totalProfitElement.classList.add(totalProfitValue >= 0 ? 'positive' : 'negative');
+
+    // Update portfolio values with currency formatting
+    const formatCurrency = (value) => `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    
+    document.getElementById('initialPortfolioValue').textContent = formatCurrency(results.initial_portfolio_value);
+    document.getElementById('finalPortfolioValue').textContent = formatCurrency(results.final_portfolio_value);
+    document.getElementById('totalCommission').textContent = formatCurrency(results.total_commission);
+    document.getElementById('totalSlippage').textContent = formatCurrency(results.total_slippage);
+
+    // Render trades table
+    const tradesTable = document.getElementById('tradesTable');
+    tradesTable.innerHTML = '';
+
+    if (results.trades.length === 0) {
+        const noTradesRow = document.createElement('tr');
+        noTradesRow.innerHTML = '<td colspan="8" class="text-center">No trades executed during the backtest period.</td>';
+        tradesTable.appendChild(noTradesRow);
+        return;
+    }
+
+    results.trades.forEach(trade => {
+        const row = document.createElement('tr');
+        const profitClass = trade.profit_pct >= 0 ? 'positive' : 'negative';
+        
+        row.innerHTML = `
+            <td>${new Date(trade.entry_date).toLocaleDateString()}</td>
+            <td>${new Date(trade.exit_date).toLocaleDateString()}</td>
+            <td>${formatCurrency(trade.entry_price)}</td>
+            <td>${formatCurrency(trade.exit_price)}</td>
+            <td class="${profitClass}">${(trade.profit_pct * 100).toFixed(2)}%</td>
+            <td class="${profitClass}">${formatCurrency(trade.profit_amount)}</td>
+            <td>${trade.periods_held}</td>
+            <td>${trade.exit_reason}</td>
+        `;
+        
+        tradesTable.appendChild(row);
+    });
+
+    // Update portfolio chart if visible
+    const chartContainer = document.getElementById('portfolioChartContainer');
+    if (!chartContainer.classList.contains('d-none')) {
+        renderPortfolioChart(results.portfolio_history);
+    }
+}
+
 // Export the initialization function
 export { initBacktest }; 
