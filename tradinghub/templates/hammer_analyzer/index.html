@@ -25,14 +25,12 @@
             <div class="row">
                 <!-- Basic Parameters (Left Side) -->
                 <div class="col-md-5 border-end">
-                    <h6 class="mb-4">Analysis Settings</h6>
                     {{ analysis_form() }}
-                    {{ candlestick_visualization() }}
                 </div>
                 
                 <!-- Pattern Parameters (Right Side) -->
                 <div class="col-md-7">
-                    <h6 class="mb-4">Pattern Configuration</h6>
+                    {{ candlestick_visualization() }}
                     {{ pattern_params() }}
                     {{ volume_params() }}
                 </div>
@@ -41,7 +39,7 @@
     </div>
 
     <!-- Analysis Results Section -->
-    <div class="card results-card mb-4">
+    <div class="card results-card mb-4 d-none" id="analysisResults">
         <div class="card-header d-flex align-items-center">
             <i class="bi bi-table me-2"></i>
             <h5 class="mb-0">Analysis Results</h5>
@@ -67,6 +65,8 @@
     </div>
 
     <!-- Backtest Parameters Section -->
-    {{ backtest_params() }}
+    <div id="backtestSection" class="d-none">
+        {{ backtest_params() }}
+    </div>
 </div>
 {% endblock %} 

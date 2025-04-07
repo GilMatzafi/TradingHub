@@ -184,91 +184,108 @@ function initHammerStrategy() {
     document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
     
     // Form submission handler
-    document.getElementById('strategyForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading indicator with animation
-        const loading = document.querySelector('.loading');
-        loading.style.display = 'block';
-        loading.style.opacity = '0';
-        setTimeout(() => loading.style.opacity = '1', 50);
-        
-        // Clear previous results
-        document.getElementById('resultsBody').innerHTML = '';
-        document.querySelector('.pattern-count').textContent = '';
-        document.getElementById('downloadCSV').style.display = 'none';
-        
-        // Collect form data
-        const formData = {
-            symbol: document.getElementById('symbol').value.toUpperCase(),
-            days: document.getElementById('days').value,
-            interval: document.getElementById('interval').value,
-            body_size_ratio: document.getElementById('body_size_ratio').value,
-            lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
-            upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
-            ma_period: document.getElementById('ma_period').value,
-            require_green: document.getElementById('require_green').checked
-        };
-        
-        // Add volume parameters only if volume filter is enabled
-        const useVolumeFilter = document.getElementById('use_volume_filter').checked;
-        if (useVolumeFilter) {
-            formData.min_relative_volume = document.getElementById('min_relative_volume').value;
-            formData.volume_lookback = document.getElementById('volume_lookback').value;
-        }
-        
-        // Send analysis request
-        fetch('/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
+    const strategyForm = document.getElementById('strategyForm');
+    const analysisResults = document.getElementById('analysisResults');
+    const backtestSection = document.getElementById('backtestSection');
+    const loadingIndicator = document.querySelector('.loading');
+    const resultsContent = document.getElementById('results');
+
+    if (strategyForm) {
+        strategyForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state and sections
+            analysisResults.classList.remove('d-none');
+            loadingIndicator.style.display = 'block';
+            resultsContent.style.display = 'none';
+            backtestSection.classList.remove('d-none');
+            
+            // Clear previous results
+            document.getElementById('resultsBody').innerHTML = '';
+            document.querySelector('.pattern-count').textContent = '';
+            document.getElementById('downloadCSV').style.display = 'none';
+            
+            // Collect form data
+            const formData = {
+                symbol: document.getElementById('symbol').value.toUpperCase(),
+                days: document.getElementById('days').value,
+                interval: document.getElementById('interval').value,
+                body_size_ratio: document.getElementById('body_size_ratio').value,
+                lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
+                upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
+                ma_period: document.getElementById('ma_period').value,
+                require_green: document.getElementById('require_green').checked
+            };
+            
+            // Add volume parameters only if volume filter is enabled
+            const useVolumeFilter = document.getElementById('use_volume_filter').checked;
+            if (useVolumeFilter) {
+                formData.min_relative_volume = document.getElementById('min_relative_volume').value;
+                formData.volume_lookback = document.getElementById('volume_lookback').value;
             }
             
-            // Store the patterns for backtesting
-            filteredPatterns = data.patterns;
-            
-            // Update pattern count with animation
-            const patternCount = document.querySelector('.pattern-count');
-            patternCount.textContent = data.count;
-            patternCount.style.opacity = '0';
-            setTimeout(() => patternCount.style.opacity = '1', 50);
-            
-            // Update results table
-            const tbody = document.getElementById('resultsBody');
-            data.patterns.forEach(pattern => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${pattern.date}</td>
-                    <td>${pattern.trend}</td>
-                    <td>${pattern.open.toFixed(2)}</td>
-                    <td>${pattern.high.toFixed(2)}</td>
-                    <td>${pattern.low.toFixed(2)}</td>
-                    <td>${pattern.close.toFixed(2)}</td>
+            try {
+                // Send analysis request
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Store the patterns for backtesting
+                patternsData = data.patterns;
+                filteredPatterns = data.patterns;
+                
+                // Update pattern count and results
+                const patternCount = document.querySelector('.pattern-count');
+                patternCount.textContent = `Found ${data.patterns.length} pattern(s)`;
+                
+                // Update results table
+                const tbody = document.getElementById('resultsBody');
+                data.patterns.forEach(pattern => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${pattern.date}</td>
+                        <td>${pattern.trend}</td>
+                        <td>${pattern.open.toFixed(2)}</td>
+                        <td>${pattern.high.toFixed(2)}</td>
+                        <td>${pattern.low.toFixed(2)}</td>
+                        <td>${pattern.close.toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                // Show download button if patterns found
+                if (data.patterns.length > 0) {
+                    document.getElementById('downloadCSV').style.display = 'block';
+                }
+                
+                // Show results content
+                loadingIndicator.style.display = 'none';
+                resultsContent.style.display = 'block';
+                
+                // Scroll to results
+                analysisResults.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingIndicator.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Error analyzing patterns: ${error.message}
+                    </div>
                 `;
-                tbody.appendChild(row);
-            });
-            
-            // Show download button if patterns found
-            if (data.count > 0) {
-                document.getElementById('downloadCSV').style.display = 'block';
             }
-        })
-        .catch(error => {
-            alert('Error analyzing patterns: ' + error.message);
-        })
-        .finally(() => {
-            // Hide loading indicator
-            loading.style.opacity = '0';
-            setTimeout(() => loading.style.display = 'none', 300);
         });
-    });
+    }
 }
 
 // Export functions for use in other modules
@@ -276,4 +293,106 @@ export {
     initHammerStrategy,
     filteredPatterns,
     showError
-}; 
+};
+
+// Handle form submission and section visibility
+document.addEventListener('DOMContentLoaded', function() {
+    const strategyForm = document.getElementById('strategyForm');
+    const analysisResults = document.getElementById('analysisResults');
+    const backtestSection = document.getElementById('backtestSection');
+    const loadingIndicator = document.querySelector('.loading');
+    const resultsContent = document.getElementById('results');
+
+    if (strategyForm) {
+        strategyForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Show loading state
+            analysisResults.classList.remove('d-none');
+            loadingIndicator.style.display = 'block';
+            resultsContent.style.display = 'none';
+            backtestSection.classList.remove('d-none');
+
+            try {
+                // Get form data
+                const formData = {
+                    symbol: document.getElementById('symbol').value,
+                    days: document.getElementById('days').value,
+                    interval: document.getElementById('interval').value,
+                    bodyRatio: document.getElementById('body_size_ratio').value,
+                    lowerShadowRatio: document.getElementById('lower_shadow_ratio').value,
+                    upperShadowRatio: document.getElementById('upper_shadow_ratio').value,
+                    maPeriod: document.getElementById('ma_period').value,
+                    requireGreen: document.getElementById('require_green').checked
+                };
+
+                // Make API call to analyze patterns
+                const response = await fetch('/api/analyze-patterns', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                
+                // Update results table with the data
+                updateResultsTable(data);
+                
+                // Show results and backtest sections
+                loadingIndicator.style.display = 'none';
+                resultsContent.style.display = 'block';
+                
+                // Scroll to results
+                analysisResults.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error:', error);
+                // Show error message to user
+                loadingIndicator.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Error analyzing patterns. Please try again.
+                    </div>
+                `;
+            }
+        });
+    }
+});
+
+// Function to update results table
+function updateResultsTable(data) {
+    const tableBody = document.querySelector('#tradesTable tbody');
+    const patternCount = document.querySelector('.pattern-count');
+    const downloadButton = document.getElementById('downloadCSV');
+
+    if (data.patterns && data.patterns.length > 0) {
+        patternCount.textContent = `Found ${data.patterns.length} pattern(s)`;
+        downloadButton.style.display = 'block';
+        
+        tableBody.innerHTML = data.patterns.map(pattern => `
+            <tr>
+                <td>${pattern.date}</td>
+                <td>${pattern.open}</td>
+                <td>${pattern.high}</td>
+                <td>${pattern.low}</td>
+                <td>${pattern.close}</td>
+                <td>${pattern.volume}</td>
+                <td>${pattern.type}</td>
+            </tr>
+        `).join('');
+    } else {
+        patternCount.textContent = 'No patterns found';
+        downloadButton.style.display = 'none';
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">No patterns found in the selected timeframe</td>
+            </tr>
+        `;
+    }
+} 
