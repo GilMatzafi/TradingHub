@@ -22,12 +22,21 @@
             <h5 class="mb-0">Strategy Parameters</h5>
         </div>
         <div class="card-body">
-            {{ analysis_form() }}
-            {% block additional_form_fields %}
-            {{ candlestick_visualization() }}
-            {{ pattern_params() }}
-            {{ volume_params() }}
-            {% endblock %}
+            <div class="row">
+                <!-- Basic Parameters (Left Side) -->
+                <div class="col-md-5 border-end">
+                    <h6 class="mb-4">Analysis Settings</h6>
+                    {{ analysis_form() }}
+                    {{ candlestick_visualization() }}
+                </div>
+                
+                <!-- Pattern Parameters (Right Side) -->
+                <div class="col-md-7">
+                    <h6 class="mb-4">Pattern Configuration</h6>
+                    {{ pattern_params() }}
+                    {{ volume_params() }}
+                </div>
+            </div>
         </div>
     </div>
 
