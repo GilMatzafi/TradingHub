@@ -1,91 +1,142 @@
 {% macro backtest_params() %}
-<div class="card mt-4">
-    <div class="card-header d-flex align-items-center">
-        <i class="bi bi-graph-up-arrow me-2"></i>
+<div class="card mb-4">
+    <div class="card-header">
         <h5 class="mb-0">Backtest Parameters</h5>
     </div>
     <div class="card-body">
-        <div class="mb-3">
-            <label for="initial_portfolio_size" class="form-label">Initial Portfolio Size ($)</label>
-            <input type="number" class="form-control" id="initial_portfolio_size" value="10000" min="100" max="1000000" step="100">
-        </div>
-        
-        <div class="mb-3">
-            <label for="stop_loss_pct" class="form-label">Stop Loss (%)</label>
-            <input type="number" class="form-control" id="stop_loss_pct" value="2" min="0.1" max="20" step="0.1">
-        </div>
-        
-        <div class="mb-3">
-            <label for="take_profit_pct" class="form-label">Take Profit (%)</label>
-            <input type="number" class="form-control" id="take_profit_pct" value="4" min="0.1" max="20" step="0.1">
-        </div>
-        
-        <div class="mb-3">
-            <label for="entry_delay" class="form-label">Entry Delay (candles)</label>
-            <input type="number" class="form-control" id="entry_delay" value="1" min="0" max="10" step="1">
-        </div>
-        
-        <div class="mb-3">
-            <label for="max_holding_periods" class="form-label">Max Holding Periods</label>
-            <input type="number" class="form-control" id="max_holding_periods" value="20" min="1" max="100" step="1">
-        </div>
-        
-        <button type="button" class="btn btn-primary w-100" id="runBacktest">
-            <i class="bi bi-play-fill me-2"></i>Run Backtest
-        </button>
+        <form id="backtest-form">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="stop_loss_pct" class="form-label">Stop Loss (%)</label>
+                        <input type="number" class="form-control" id="stop_loss_pct" name="stop_loss_pct" value="2" min="0.1" max="10" step="0.1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="take_profit_pct" class="form-label">Take Profit (%)</label>
+                        <input type="number" class="form-control" id="take_profit_pct" name="take_profit_pct" value="4" min="0.1" max="20" step="0.1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="initial_portfolio_size" class="form-label">Initial Portfolio Size ($)</label>
+                        <input type="number" class="form-control" id="initial_portfolio_size" name="initial_portfolio_size" value="10000" min="1000" step="1000">
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="entry_delay" class="form-label">Entry Delay (candles)</label>
+                        <input type="number" class="form-control" id="entry_delay" name="entry_delay" value="1" min="0" max="5">
+                    </div>
+                    <div class="mb-3">
+                        <label for="max_holding_periods" class="form-label">Max Holding Period (candles)</label>
+                        <input type="number" class="form-control" id="max_holding_periods" name="max_holding_periods" value="20" min="1" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="commission" class="form-label">Commission per Trade ($)</label>
+                        <input type="number" class="form-control" id="commission" name="commission" value="0.65" min="0" step="0.01">
+                        <div class="form-text">Typical commission per trade (e.g., $0.65 for most brokers)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="slippage_pct" class="form-label">Slippage (%)</label>
+                        <input type="number" class="form-control" id="slippage_pct" name="slippage_pct" value="0.1" min="0" max="1" step="0.01">
+                        <div class="form-text">Expected price slippage as percentage of entry/exit price</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-primary" id="runBacktest">
+                    <i class="bi bi-play-fill me-2"></i>Run Backtest
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="card mt-4 d-none" id="backtestResults">
-    <div class="card-header d-flex align-items-center">
-        <i class="bi bi-bar-chart-fill me-2"></i>
+<div id="backtestResults" class="card mb-4 d-none">
+    <div class="card-header">
         <h5 class="mb-0">Backtest Results</h5>
     </div>
     <div class="card-body">
-        <div class="row">
+        <!-- Performance Metrics -->
+        <div class="row mb-4">
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">Total Trades</label>
-                    <p class="h4" id="totalTrades">-</p>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Win Rate</label>
-                    <p class="h4" id="winRate">-</p>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Profit Factor</label>
-                    <p class="h4" id="profitFactor">-</p>
+                <h6 class="mb-3">Performance Metrics</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Total Trades:</td>
+                            <td id="totalTrades">0</td>
+                        </tr>
+                        <tr>
+                            <td>Winning Trades:</td>
+                            <td id="winningTrades">0</td>
+                        </tr>
+                        <tr>
+                            <td>Losing Trades:</td>
+                            <td id="losingTrades">0</td>
+                        </tr>
+                        <tr>
+                            <td>Win Rate:</td>
+                            <td id="winRate">0%</td>
+                        </tr>
+                        <tr>
+                            <td>Profit Factor:</td>
+                            <td id="profitFactor">0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Average Profit per Trade:</td>
+                            <td id="averageProfit">0%</td>
+                        </tr>
+                        <tr>
+                            <td>Total Profit:</td>
+                            <td id="totalProfit">0%</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
+            
+            <!-- Portfolio Summary -->
             <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">Average Profit</label>
-                    <p class="h4" id="averageProfit">-</p>
+                <h6 class="mb-3">Portfolio Summary</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Initial Portfolio Value:</td>
+                            <td id="initialPortfolioValue">$0</td>
+                        </tr>
+                        <tr>
+                            <td>Final Portfolio Value:</td>
+                            <td id="finalPortfolioValue">$0</td>
+                        </tr>
+                        <tr>
+                            <td>Total Commission Paid:</td>
+                            <td id="totalCommission">$0</td>
+                        </tr>
+                        <tr>
+                            <td>Total Slippage Cost:</td>
+                            <td id="totalSlippage">$0</td>
+                        </tr>
+                    </table>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Total Profit</label>
-                    <p class="h4" id="totalProfit">-</p>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Final Portfolio Value</label>
-                    <p class="h4" id="finalPortfolioValue">-</p>
+                
+                <!-- Portfolio Chart Button -->
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-outline-primary" id="showPortfolioChart">
+                        <i class="bi bi-graph-up me-2"></i>Show Portfolio Chart
+                    </button>
                 </div>
             </div>
         </div>
         
-        <!-- Portfolio Chart Button and Container -->
-        <div class="mt-4 mb-4">
-            <button type="button" class="btn btn-outline-primary mb-3" id="showPortfolioChart">
-                <i class="bi bi-graph-up me-2"></i>Show Portfolio Chart
-            </button>
-            <div id="portfolioChartContainer" class="d-none">
-                <h5>Portfolio Value Over Time</h5>
-                <canvas id="portfolioChart" height="200"></canvas>
-            </div>
+        <!-- Portfolio Chart -->
+        <div id="portfolioChartContainer" class="d-none">
+            <canvas id="portfolioChart"></canvas>
         </div>
         
-        <div class="table-responsive mt-4">
-            <table class="table table-striped" id="tradesTable">
+        <!-- Trades Table -->
+        <h6 class="mb-3">Trade History</h6>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
                 <thead>
                     <tr>
                         <th>Entry Date</th>
@@ -93,11 +144,14 @@
                         <th>Entry Price</th>
                         <th>Exit Price</th>
                         <th>Profit %</th>
-                        <th>Periods</th>
+                        <th>Profit $</th>
+                        <th>Periods Held</th>
                         <th>Exit Reason</th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody id="tradesTable">
+                    <!-- Trades will be inserted here -->
+                </tbody>
             </table>
         </div>
     </div>

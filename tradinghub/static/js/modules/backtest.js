@@ -42,7 +42,7 @@ function initBacktest() {
             alert('Please run pattern analysis first before running backtest');
             return;
         }
-
+        
         // Show loading indicator
         const loading = document.querySelector('.loading');
         loading.style.display = 'block';
@@ -64,6 +64,8 @@ function initBacktest() {
             entry_delay: document.getElementById('entry_delay').value,
             max_holding_periods: document.getElementById('max_holding_periods').value,
             initial_portfolio_size: parseFloat(document.getElementById('initial_portfolio_size').value),
+            commission: parseFloat(document.getElementById('commission').value),
+            slippage_pct: parseFloat(document.getElementById('slippage_pct').value) / 100,
             patterns: filteredPatterns  // Add the filtered patterns to the request
         };
         
@@ -99,15 +101,29 @@ function initBacktest() {
             
             // Safely update metrics with null checks
             document.getElementById('totalTrades').textContent = data.total_trades || 0;
+            document.getElementById('winningTrades').textContent = data.winning_trades || 0;
+            document.getElementById('losingTrades').textContent = data.losing_trades || 0;
             document.getElementById('winRate').textContent = data.win_rate ? (data.win_rate * 100).toFixed(2) + '%' : '0%';
             document.getElementById('profitFactor').textContent = data.profit_factor ? data.profit_factor.toFixed(2) : '0.00';
             document.getElementById('averageProfit').textContent = data.average_profit ? (data.average_profit * 100).toFixed(2) + '%' : '0%';
             document.getElementById('totalProfit').textContent = data.total_profit_pct ? data.total_profit_pct.toFixed(2) + '%' : '0%';
             
-            // Update portfolio value
+            // Update portfolio values
+            if (data.initial_portfolio_value) {
+                document.getElementById('initialPortfolioValue').textContent = 
+                    `$${data.initial_portfolio_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
             if (data.final_portfolio_value) {
                 document.getElementById('finalPortfolioValue').textContent = 
                     `$${data.final_portfolio_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+            if (data.total_commission) {
+                document.getElementById('totalCommission').textContent = 
+                    `$${data.total_commission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+            if (data.total_slippage) {
+                document.getElementById('totalSlippage').textContent = 
+                    `$${data.total_slippage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             }
             
             // Store portfolio history data for later use
@@ -122,14 +138,19 @@ function initBacktest() {
             }
             
             // Update trades table
-            const tbody = document.querySelector('#tradesTable tbody');
+            const tbody = document.getElementById('tradesTable');
+            if (!tbody) {
+                console.error('Could not find trades table body element');
+                return;
+            }
+            
             tbody.innerHTML = '';
             
             if (data.trades && Array.isArray(data.trades)) {
                 if (data.trades.length === 0) {
                     // Add a message if no trades were executed
                     const row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="7" class="text-center">No trades were executed during the backtest period.</td>';
+                    row.innerHTML = '<td colspan="8" class="text-center">No trades were executed during the backtest period.</td>';
                     tbody.appendChild(row);
                 } else {
                     data.trades.forEach(trade => {
@@ -140,6 +161,7 @@ function initBacktest() {
                             <td>${trade.entry_price ? trade.entry_price.toFixed(2) : '-'}</td>
                             <td>${trade.exit_price ? trade.exit_price.toFixed(2) : '-'}</td>
                             <td class="${trade.profit_pct >= 0 ? 'text-success' : 'text-danger'}">${trade.profit_pct ? trade.profit_pct.toFixed(2) : '0.00'}%</td>
+                            <td class="${trade.profit_amount >= 0 ? 'text-success' : 'text-danger'}">$${trade.profit_amount ? trade.profit_amount.toFixed(2) : '0.00'}</td>
                             <td>${trade.periods_held || 0}</td>
                             <td>${trade.exit_reason || '-'}</td>
                         `;
@@ -149,7 +171,7 @@ function initBacktest() {
             } else {
                 // Add a message if trades data is missing
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="7" class="text-center">No trade data available.</td>';
+                row.innerHTML = '<td colspan="8" class="text-center">No trade data available.</td>';
                 tbody.appendChild(row);
             }
         })

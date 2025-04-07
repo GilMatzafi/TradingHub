@@ -82,7 +82,9 @@ def backtest():
             take_profit_pct=float(data.get('take_profit_pct', 0.04)),
             entry_delay=int(data.get('entry_delay', 1)),
             max_holding_periods=int(data.get('max_holding_periods', 20)),
-            initial_portfolio_size=float(data.get('initial_portfolio_size', 10000))
+            initial_portfolio_size=float(data.get('initial_portfolio_size', 10000)),
+            commission=float(data.get('commission', 0.65)),
+            slippage_pct=float(data.get('slippage_pct', 0.001))
         )
         
         # Get historical data
