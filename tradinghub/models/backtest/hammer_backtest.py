@@ -10,7 +10,7 @@ class BacktestParams:
     take_profit_pct: float  # Take profit as percentage of entry price
     entry_delay: int  # Number of candles to wait before entering
     max_holding_periods: int  # Maximum number of periods to hold a trade
-    position_size: float  # Position size as percentage of capital
+    initial_portfolio_size: float  # Initial portfolio size in dollars
 
 @dataclass
 class Trade:
@@ -20,6 +20,7 @@ class Trade:
     entry_price: float
     exit_price: float
     profit_pct: float
+    profit_amount: float  # Added to track actual dollar profit/loss
     periods_held: int
     exit_reason: str  # 'stop_loss', 'take_profit', or 'max_periods'
 
@@ -46,6 +47,8 @@ class HammerBacktest:
         # Initialize backtest results
         trades: List[Trade] = []
         current_position = None
+        portfolio_value = backtest_params.initial_portfolio_size
+        portfolio_history = [{'date': df.index[0], 'value': portfolio_value}]
         
         # Iterate through data
         for i in range(len(df) - backtest_params.entry_delay):
@@ -57,12 +60,17 @@ class HammerBacktest:
                     stop_loss = entry_price * (1 - backtest_params.stop_loss_pct)
                     take_profit = entry_price * (1 + backtest_params.take_profit_pct)
                     
+                    # Calculate position size (use 100% of portfolio for each trade)
+                    position_size = portfolio_value
+                    shares = position_size / entry_price
+                    
                     current_position = {
                         'entry_date': df.index[i + backtest_params.entry_delay],
                         'entry_price': entry_price,
                         'stop_loss': stop_loss,
                         'take_profit': take_profit,
-                        'periods_held': 0
+                        'periods_held': 0,
+                        'shares': shares
                     }
             
             # Manage open position
@@ -86,6 +94,14 @@ class HammerBacktest:
                     
                     if exit_reason:
                         profit_pct = (exit_price - current_position['entry_price']) / current_position['entry_price']
+                        profit_amount = current_position['shares'] * (exit_price - current_position['entry_price'])
+                        portfolio_value += profit_amount
+                        
+                        # Record portfolio value
+                        portfolio_history.append({
+                            'date': df.index[i + backtest_params.entry_delay],
+                            'value': portfolio_value
+                        })
                         
                         trade = Trade(
                             entry_date=current_position['entry_date'],
@@ -93,6 +109,7 @@ class HammerBacktest:
                             entry_price=current_position['entry_price'],
                             exit_price=exit_price,
                             profit_pct=profit_pct,
+                            profit_amount=profit_amount,
                             periods_held=current_position['periods_held'],
                             exit_reason=exit_reason
                         )
@@ -102,6 +119,14 @@ class HammerBacktest:
                     # We've reached the end of the data, close the position
                     exit_price = df.iloc[-1]['Close']
                     profit_pct = (exit_price - current_position['entry_price']) / current_position['entry_price']
+                    profit_amount = current_position['shares'] * (exit_price - current_position['entry_price'])
+                    portfolio_value += profit_amount
+                    
+                    # Record portfolio value
+                    portfolio_history.append({
+                        'date': df.index[-1],
+                        'value': portfolio_value
+                    })
                     
                     trade = Trade(
                         entry_date=current_position['entry_date'],
@@ -109,6 +134,7 @@ class HammerBacktest:
                         entry_price=current_position['entry_price'],
                         exit_price=exit_price,
                         profit_pct=profit_pct,
+                        profit_amount=profit_amount,
                         periods_held=current_position['periods_held'],
                         exit_reason='end_of_data'
                     )
@@ -116,7 +142,14 @@ class HammerBacktest:
                     current_position = None
         
         # Calculate performance metrics
-        return self._calculate_performance_metrics(trades)
+        results = self._calculate_performance_metrics(trades)
+        
+        # Add portfolio tracking information
+        results['initial_portfolio_value'] = backtest_params.initial_portfolio_size
+        results['final_portfolio_value'] = portfolio_value
+        results['portfolio_history'] = portfolio_history
+        
+        return results
     
     def _calculate_performance_metrics(self, trades: List[Trade]) -> Dict[str, Any]:
         """Calculate performance metrics from trades"""
@@ -159,6 +192,7 @@ class HammerBacktest:
                     'entry_price': t.entry_price,
                     'exit_price': t.exit_price,
                     'profit_pct': t.profit_pct * 100,
+                    'profit_amount': t.profit_amount,
                     'periods_held': t.periods_held,
                     'exit_reason': t.exit_reason
                 }

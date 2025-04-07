@@ -82,7 +82,7 @@ def backtest():
             take_profit_pct=float(data.get('take_profit_pct', 0.04)),
             entry_delay=int(data.get('entry_delay', 1)),
             max_holding_periods=int(data.get('max_holding_periods', 20)),
-            position_size=float(data.get('position_size', 0.02))
+            initial_portfolio_size=float(data.get('initial_portfolio_size', 10000))
         )
         
         # Get historical data
@@ -174,6 +174,9 @@ def backtest():
                 'profit_factor': 0,
                 'average_profit': 0,
                 'total_profit_pct': 0,
+                'initial_portfolio_value': backtest_params.initial_portfolio_size,
+                'final_portfolio_value': backtest_params.initial_portfolio_size,
+                'portfolio_history': [{'date': df.index[0], 'value': backtest_params.initial_portfolio_size}],
                 'trades': []
             }
         

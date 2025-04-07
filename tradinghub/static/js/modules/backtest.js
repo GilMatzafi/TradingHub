@@ -3,6 +3,27 @@ import { HammerStrategy } from './hammer-strategy.js';
 
 // Backtest functionality
 function initBacktest() {
+    // Add event listener for the portfolio chart button
+    document.getElementById('showPortfolioChart')?.addEventListener('click', function() {
+        const chartContainer = document.getElementById('portfolioChartContainer');
+        const button = document.getElementById('showPortfolioChart');
+        
+        if (chartContainer.classList.contains('d-none')) {
+            // Show the chart
+            chartContainer.classList.remove('d-none');
+            button.innerHTML = '<i class="bi bi-graph-down me-2"></i>Hide Portfolio Chart';
+            
+            // If we have portfolio history data, render the chart
+            if (window.portfolioHistory && window.portfolioHistory.length > 0) {
+                renderPortfolioChart(window.portfolioHistory);
+            }
+        } else {
+            // Hide the chart
+            chartContainer.classList.add('d-none');
+            button.innerHTML = '<i class="bi bi-graph-up me-2"></i>Show Portfolio Chart';
+        }
+    });
+    
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the hammer strategy instance from the global window object
         // This is set in hammer-strategy.js
@@ -42,7 +63,7 @@ function initBacktest() {
             take_profit_pct: document.getElementById('take_profit_pct').value / 100,
             entry_delay: document.getElementById('entry_delay').value,
             max_holding_periods: document.getElementById('max_holding_periods').value,
-            position_size: document.getElementById('position_size').value / 100,
+            initial_portfolio_size: parseFloat(document.getElementById('initial_portfolio_size').value),
             patterns: filteredPatterns  // Add the filtered patterns to the request
         };
         
@@ -82,6 +103,23 @@ function initBacktest() {
             document.getElementById('profitFactor').textContent = data.profit_factor ? data.profit_factor.toFixed(2) : '0.00';
             document.getElementById('averageProfit').textContent = data.average_profit ? (data.average_profit * 100).toFixed(2) + '%' : '0%';
             document.getElementById('totalProfit').textContent = data.total_profit_pct ? data.total_profit_pct.toFixed(2) + '%' : '0%';
+            
+            // Update portfolio value
+            if (data.final_portfolio_value) {
+                document.getElementById('finalPortfolioValue').textContent = 
+                    `$${data.final_portfolio_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+            
+            // Store portfolio history data for later use
+            if (data.portfolio_history && data.portfolio_history.length > 0) {
+                window.portfolioHistory = data.portfolio_history;
+                
+                // Reset the chart button and container
+                const chartContainer = document.getElementById('portfolioChartContainer');
+                const button = document.getElementById('showPortfolioChart');
+                chartContainer.classList.add('d-none');
+                button.innerHTML = '<i class="bi bi-graph-up me-2"></i>Show Portfolio Chart';
+            }
             
             // Update trades table
             const tbody = document.querySelector('#tradesTable tbody');
@@ -124,6 +162,78 @@ function initBacktest() {
             loading.style.opacity = '0';
             setTimeout(() => loading.style.display = 'none', 300);
         });
+    });
+}
+
+/**
+ * Render the portfolio chart using Chart.js
+ * @param {Array} portfolioHistory - Array of portfolio value data points
+ */
+function renderPortfolioChart(portfolioHistory) {
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded');
+        return;
+    }
+    
+    // Get the canvas element
+    const canvas = document.getElementById('portfolioChart');
+    
+    // Set a fixed height for the chart container
+    const chartContainer = canvas.parentElement;
+    chartContainer.style.height = '300px';
+    
+    // Destroy existing chart if it exists
+    if (window.portfolioChart && typeof window.portfolioChart.destroy === 'function') {
+        window.portfolioChart.destroy();
+    }
+    
+    // Prepare data for the chart
+    const labels = portfolioHistory.map(item => item.date);
+    const values = portfolioHistory.map(item => item.value);
+    
+    // Create the chart
+    window.portfolioChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Portfolio Value ($)',
+                data: values,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.y.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                    }
+                }
+            }
+        }
     });
 }
 
