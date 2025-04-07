@@ -1,9 +1,22 @@
-// Import filteredPatterns from hammer-strategy module
-import { filteredPatterns } from './hammer-strategy.js';
+// Import HammerStrategy from hammer-strategy module
+import { HammerStrategy } from './hammer-strategy.js';
 
 // Backtest functionality
 function initBacktest() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
+        // Get the hammer strategy instance from the global window object
+        // This is set in hammer-strategy.js
+        const hammerStrategy = window.hammerStrategy;
+        
+        if (!hammerStrategy) {
+            console.error('HammerStrategy not initialized');
+            alert('Error: HammerStrategy not initialized');
+            return;
+        }
+        
+        // Get the filtered patterns from the pattern data manager
+        const filteredPatterns = hammerStrategy.dataManager.getFilteredPatterns();
+        
         if (filteredPatterns.length === 0) {
             alert('Please run pattern analysis first before running backtest');
             return;

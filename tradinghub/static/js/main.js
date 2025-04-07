@@ -1,5 +1,4 @@
 // Import modules
-import { initHammerStrategy } from './modules/hammer-strategy.js';
 import { initBacktest } from './modules/backtest.js';
 import { initDashboard } from './modules/dashboard.js';
 
@@ -10,7 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (path.includes('/hammer')) {
         // Initialize hammer strategy page
-        initHammerStrategy();
+        // The HammerStrategy class is already initialized in the hammer-strategy.js file
+        // We just need to initialize the backtest functionality
         initBacktest();
     } else if (path === '/' || path.includes('/dashboard')) {
         // Initialize dashboard
