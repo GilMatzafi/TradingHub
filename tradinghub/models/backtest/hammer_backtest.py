@@ -12,7 +12,7 @@ class BacktestParams:
     max_holding_periods: int = 20  # Maximum number of periods to hold a trade
     initial_portfolio_size: float = 10000.0  # Initial portfolio size in dollars
     commission: float = 0.65  # Commission per trade in dollars
-    slippage_pct: float = 0.001  # Slippage as percentage of entry/exit price
+    slippage: float = 0.1  # Slippage per trade in dollars (fixed dollar amount)
 
 @dataclass
 class Trade:
@@ -62,20 +62,29 @@ class HammerBacktest:
             if df.iloc[i]['is_hammer'] and current_position is None:
                 # Enter position after entry_delay
                 if i + backtest_params.entry_delay < len(df):
-                    # Apply slippage to entry price
+                    # Get base entry price
                     base_entry_price = df.iloc[i + backtest_params.entry_delay]['Open']
-                    entry_price = base_entry_price * (1 + backtest_params.slippage_pct)
+                    
+                    # Calculate position size and shares (use 100% of portfolio for each trade)
+                    position_size = portfolio_value
+                    shares = position_size / base_entry_price
+                    
+                    # Apply fixed dollar slippage to entry price
+                    slippage_cost = backtest_params.slippage
+                    entry_price = base_entry_price + (slippage_cost / shares)
+                    
+                    # Calculate stop loss and take profit levels
                     stop_loss = entry_price * (1 - backtest_params.stop_loss_pct)
                     take_profit = entry_price * (1 + backtest_params.take_profit_pct)
-                    
-                    # Calculate position size (use 100% of portfolio for each trade)
-                    position_size = portfolio_value
-                    shares = position_size / entry_price
                     
                     # Pay commission for entry
                     commission = backtest_params.commission
                     total_commission += commission
                     portfolio_value -= commission
+                    
+                    # Pay slippage for entry
+                    total_slippage += slippage_cost
+                    portfolio_value -= slippage_cost
                     
                     current_position = {
                         'entry_date': df.index[i + backtest_params.entry_delay],
@@ -84,7 +93,8 @@ class HammerBacktest:
                         'take_profit': take_profit,
                         'periods_held': 0,
                         'shares': shares,
-                        'commission': commission
+                        'commission': commission,
+                        'slippage_cost': slippage_cost
                     }
             
             # Manage open position
@@ -165,17 +175,17 @@ class HammerBacktest:
             total_commission: Running total of commission paid
             total_slippage: Running total of slippage cost
         """
-        # Apply slippage to exit price
+        # Apply fixed dollar slippage to exit price
         base_exit_price = exit_price
-        exit_price = base_exit_price * (1 - backtest_params.slippage_pct)
+        slippage_cost = backtest_params.slippage
+        exit_price = base_exit_price - (slippage_cost / position['shares'])  # Adjust price by slippage per share
         
         # Calculate profit/loss
         profit_pct = (exit_price - position['entry_price']) / position['entry_price']
         profit_amount = position['shares'] * (exit_price - position['entry_price'])
         
-        # Calculate commission and slippage costs
+        # Calculate commission
         commission = backtest_params.commission
-        slippage_cost = position['shares'] * (base_exit_price - exit_price)
         
         # Update totals
         total_commission += commission

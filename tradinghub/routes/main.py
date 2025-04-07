@@ -84,7 +84,7 @@ def backtest():
             max_holding_periods=int(data.get('max_holding_periods', 20)),
             initial_portfolio_size=float(data.get('initial_portfolio_size', 10000)),
             commission=float(data.get('commission', 0.65)),
-            slippage_pct=float(data.get('slippage_pct', 0.001))
+            slippage=float(data.get('slippage', 0.1))
         )
         
         # Get historical data

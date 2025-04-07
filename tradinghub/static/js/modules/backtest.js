@@ -65,7 +65,7 @@ function initBacktest() {
             max_holding_periods: document.getElementById('max_holding_periods').value,
             initial_portfolio_size: parseFloat(document.getElementById('initial_portfolio_size').value),
             commission: parseFloat(document.getElementById('commission').value),
-            slippage_pct: parseFloat(document.getElementById('slippage_pct').value) / 100,
+            slippage: parseFloat(document.getElementById('slippage').value),
             patterns: filteredPatterns  // Add the filtered patterns to the request
         };
         
