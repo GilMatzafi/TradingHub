@@ -106,7 +106,12 @@ function initBacktest() {
             document.getElementById('winRate').textContent = data.win_rate ? (data.win_rate * 100).toFixed(2) + '%' : '0%';
             document.getElementById('profitFactor').textContent = data.profit_factor ? data.profit_factor.toFixed(2) : '0.00';
             document.getElementById('averageProfit').textContent = data.average_profit ? (data.average_profit * 100).toFixed(2) + '%' : '0%';
-            document.getElementById('totalProfit').textContent = data.total_profit_pct ? data.total_profit_pct.toFixed(2) + '%' : '0%';
+            
+            const totalProfitElement = document.getElementById('totalProfit');
+            const totalProfitValue = data.total_profit_pct ? data.total_profit_pct.toFixed(2) : '0.00';
+            totalProfitElement.textContent = totalProfitValue + '%';
+            totalProfitElement.classList.remove('positive', 'negative');
+            totalProfitElement.classList.add(parseFloat(totalProfitValue) >= 0 ? 'positive' : 'negative');
             
             // Update portfolio values
             if (data.initial_portfolio_value) {
