@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from tradinghub.services.stock_service import StockService
 from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
 from tradinghub.models.backtest.hammer_backtest import BacktestParams, HammerBacktest
@@ -12,8 +12,8 @@ stock_service = StockService()
 
 @main_bp.route('/')
 def index():
-    """Render the strategy introduction page"""
-    return render_template('dashboard/index.html')
+    """Redirect to hammer pattern analyzer page"""
+    return redirect(url_for('main.hammer_analyzer'))
 
 @main_bp.route('/hammer')
 def hammer_analyzer():
