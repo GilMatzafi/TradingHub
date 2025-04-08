@@ -200,43 +200,124 @@ function renderPortfolioChart(portfolioHistory) {
     
     // Get the canvas element
     const canvas = document.getElementById('portfolioChart');
-    
-    // Set a fixed height for the chart container
     const chartContainer = canvas.parentElement;
-    chartContainer.style.height = '300px';
     
-    // Destroy existing chart if it exists
-    if (window.portfolioChart && typeof window.portfolioChart.destroy === 'function') {
-        window.portfolioChart.destroy();
-    }
+    // Clear existing content
+    chartContainer.innerHTML = '';
+    
+    // Create chart title
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'chart-title';
+    titleDiv.innerHTML = `
+        <span>Portfolio Performance</span>
+        <i class="bi bi-graph-up"></i>
+    `;
+    chartContainer.appendChild(titleDiv);
+    
+    // Create chart controls
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'chart-controls';
+    controlsDiv.innerHTML = `
+        <div class="chart-period-selector">
+            <button class="chart-period-btn active" data-period="all">All</button>
+            <button class="chart-period-btn" data-period="1m">1M</button>
+            <button class="chart-period-btn" data-period="1w">1W</button>
+            <button class="chart-period-btn" data-period="1d">1D</button>
+        </div>
+    `;
+    chartContainer.appendChild(controlsDiv);
+    
+    // Create new canvas
+    const newCanvas = document.createElement('canvas');
+    newCanvas.id = 'portfolioChart';
+    chartContainer.appendChild(newCanvas);
+    
+    // Create value indicator
+    const valueIndicator = document.createElement('div');
+    valueIndicator.className = 'chart-value-indicator';
+    const initialValue = portfolioHistory[0].value;
+    const finalValue = portfolioHistory[portfolioHistory.length - 1].value;
+    const percentChange = ((finalValue - initialValue) / initialValue) * 100;
+    const changeClass = percentChange >= 0 ? 'positive' : 'negative';
+    
+    valueIndicator.innerHTML = `
+        <div class="chart-value-label">Current Value</div>
+        <div class="chart-value ${changeClass}">
+            $${finalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            (${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(2)}%)
+        </div>
+    `;
+    chartContainer.appendChild(valueIndicator);
     
     // Prepare data for the chart
-    const labels = portfolioHistory.map(item => item.date);
+    const labels = portfolioHistory.map(item => {
+        const date = new Date(item.date);
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        });
+    });
     const values = portfolioHistory.map(item => item.value);
     
+    // Calculate gradient
+    const ctx = newCanvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(75, 192, 192, 0.4)');
+    gradient.addColorStop(1, 'rgba(75, 192, 192, 0.0)');
+    
     // Create the chart
-    window.portfolioChart = new Chart(canvas, {
+    window.portfolioChart = new Chart(newCanvas, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Portfolio Value ($)',
+                label: 'Portfolio Value',
                 data: values,
                 borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                backgroundColor: gradient,
                 borderWidth: 2,
                 fill: true,
-                tension: 0.1
+                tension: 0.4,
+                pointRadius: 0,
+                pointHitRadius: 20,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: 'rgba(75, 192, 192, 1)',
+                pointHoverBorderColor: 'white',
+                pointHoverBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: 2,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
             scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 8,
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
                 y: {
                     beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
                     ticks: {
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        font: {
+                            size: 11
+                        },
                         callback: function(value) {
                             return '$' + value.toLocaleString();
                         }
@@ -244,8 +325,29 @@ function renderPortfolioChart(portfolioHistory) {
                 }
             },
             plugins: {
+                legend: {
+                    display: false
+                },
                 tooltip: {
+                    backgroundColor: 'white',
+                    titleColor: 'rgba(0, 0, 0, 0.7)',
+                    bodyColor: 'rgba(0, 0, 0, 0.7)',
+                    titleFont: {
+                        size: 13,
+                        weight: 'normal'
+                    },
+                    bodyFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    padding: 12,
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    displayColors: false,
                     callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
                         label: function(context) {
                             return '$' + context.parsed.y.toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
@@ -257,6 +359,80 @@ function renderPortfolioChart(portfolioHistory) {
             }
         }
     });
+    
+    // Add event listeners for period buttons
+    const periodButtons = chartContainer.querySelectorAll('.chart-period-btn');
+    periodButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            periodButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Filter data based on selected period
+            const period = button.dataset.period;
+            let filteredHistory = [...portfolioHistory];
+            
+            if (period !== 'all') {
+                const now = new Date(portfolioHistory[portfolioHistory.length - 1].date);
+                let cutoff = new Date(now);
+                
+                switch (period) {
+                    case '1m':
+                        cutoff.setMonth(now.getMonth() - 1);
+                        break;
+                    case '1w':
+                        cutoff.setDate(now.getDate() - 7);
+                        break;
+                    case '1d':
+                        cutoff.setDate(now.getDate() - 1);
+                        break;
+                }
+                
+                filteredHistory = portfolioHistory.filter(item => 
+                    new Date(item.date) >= cutoff
+                );
+            }
+            
+            // Update chart data
+            window.portfolioChart.data.labels = filteredHistory.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                });
+            });
+            window.portfolioChart.data.datasets[0].data = filteredHistory.map(item => item.value);
+            window.portfolioChart.update();
+            
+            // Update value indicator
+            const initialValue = filteredHistory[0].value;
+            const finalValue = filteredHistory[filteredHistory.length - 1].value;
+            const percentChange = ((finalValue - initialValue) / initialValue) * 100;
+            const changeClass = percentChange >= 0 ? 'positive' : 'negative';
+            
+            valueIndicator.innerHTML = `
+                <div class="chart-value-label">Current Value</div>
+                <div class="chart-value ${changeClass}">
+                    $${finalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    (${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(2)}%)
+                </div>
+            `;
+        });
+    });
+    
+    // Create legend
+    const legendDiv = document.createElement('div');
+    legendDiv.className = 'chart-legend';
+    legendDiv.innerHTML = `
+        <div class="chart-legend-item">
+            <div class="chart-legend-color portfolio"></div>
+            <span>Portfolio Value</span>
+        </div>
+    `;
+    chartContainer.appendChild(legendDiv);
 }
 
 function renderBacktestResults(results) {
