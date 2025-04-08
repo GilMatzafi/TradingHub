@@ -1,83 +1,97 @@
-# TradingHub - Hammer Pattern Detector
+# TradingHub
 
-A web application for detecting hammer candlestick patterns in stock data. This tool allows users to customize their strategy parameters and visualize the patterns in real-time.
+TradingHub helps you detect and backtest the Hammer candlestick strategy with a clean, customizable interface.
 
 ## Features
 
-- Download historical stock data using Yahoo Finance API
-- Detect hammer candlestick patterns with customizable parameters
-- Interactive candlestick visualization
-- Results displayed in a clean, organized table
-- Timezone conversion to Israel time
+- **Technical Analysis**: Analyze market data with various technical indicators
+- **Pattern Recognition**: Identify and analyze Hammer candlestick
+- **Backtesting**: Test trading strategies using historical data
+- **Real-time Data**: Fetch and analyze real-time market data from Yahoo Finance
+- **Docker Support**: Easy deployment using Docker containers
 
 ## Project Structure
 
 ```
 tradinghub/
-├── __init__.py              # Application factory
-├── config/                  # Configuration files
-│   └── config.py            # App configuration classes
-├── models/                  # Data models
-├── routes/                  # Route blueprints
-│   └── main.py              # Main routes
-├── services/                # Business logic
-│   └── stock_service.py     # Stock data service
-├── static/                  # Static files
-│   ├── css/                 # CSS stylesheets
-│   │   └── styles.css       # Main stylesheet
-│   ├── js/                  # JavaScript files
-│   │   └── main.js          # Main JavaScript
-│   └── img/                 # Images
-├── templates/               # HTML templates
-│   └── index.html           # Main template
-└── utils/                   # Utility functions
-    └── time_utils.py        # Time conversion utilities
+├── config/         # Configuration files
+├── models/         # Data models and backtesting logic
+├── routes/         # API endpoints and route handlers
+├── services/       # Business logic and external service integrations
+├── static/         # Static assets (CSS, JavaScript, images)
+├── templates/      # HTML templates
+├── utils/          # Utility functions and helpers
+├── __init__.py     # Application factory
+└── main.py         # Main application logic
 ```
 
-## Setup
+## Prerequisites
+
+- Python 3.11 or higher
+- Docker (optional, for containerized deployment)
+- pip (Python package manager)
+
+## Installation
+
+### Local Development
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone https://github.com/yourusername/tradinghub.git
    cd tradinghub
    ```
 
-2. Create a virtual environment and activate it:
-   ```
+2. Create and activate a virtual environment:
+   ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
 3. Install dependencies:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
-4. Run the application:
-   ```
+4. Run the development server:
+   ```bash
    python run.py
    ```
 
-5. Open your browser and navigate to `http://127.0.0.1:5000`
+The application will be available at `http://localhost:5000`.
 
-## Usage
+### Docker Deployment
 
-1. Enter a stock symbol (e.g., AAPL, MSFT, GOOGL)
-2. Select the number of days to analyze
-3. Choose the time interval for the data
-4. Adjust the strategy parameters:
-   - Body Size Ratio: Maximum body size as a fraction of total range
-   - Lower Shadow Ratio: Minimum lower shadow size relative to body
-   - Upper Shadow Ratio: Maximum upper shadow size as a fraction of total range
-   - Moving Average Period: Period for trend determination
-   - Require Green Candle: Whether to only detect bullish hammers
-5. Click "Analyze" to run the detection
-6. View the results in the table below
+1. Build the Docker image:
+   ```bash
+   docker build -t tradinghub .
+   ```
 
-## Customization
+2. Run the container:
+   ```bash
+   docker run -p 5000:5000 tradinghub
+   ```
 
-You can customize the application by modifying the configuration in `tradinghub/config/config.py`. Different configuration classes are available for development, testing, and production environments.
+The application will be available at `http://localhost:5000`.
 
-## License
+## Dependencies
 
-MIT
+- Flask: Web framework
+- yfinance: Yahoo Finance API client
+- pandas: Data manipulation and analysis
+- numpy: Numerical computing
+- gunicorn: Production WSGI server
+- aiohttp: Async HTTP client
+- tenacity: Retry logic for API calls
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+
+Developed by me, with the assistance of LLM for ideation, code suggestions, and documentation.
+
+

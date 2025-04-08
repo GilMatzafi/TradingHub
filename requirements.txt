@@ -4,3 +4,9 @@ pandas==2.2.2
 numpy==1.26.4
 pytz==2024.1
 python-dotenv==1.0.1
+gunicorn==21.2.0
+requests[security]==2.31.0
+urllib3==2.2.1
+certifi==2024.2.2
+aiohttp==3.9.3  # For async HTTP requests
+tenacity==8.2.3  # For retry logic
