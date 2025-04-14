@@ -6,6 +6,8 @@ import { StrategyPerformanceChart } from './charts/strategyPerformanceChart.js';
 // Initialize chart instances
 let portfolioChart = null;
 let strategyChart = null;
+// Store trades data for sorting
+let tradesData = [];
 
 // Backtest functionality
 function initBacktest() {
@@ -146,8 +148,12 @@ function initBacktest() {
             document.getElementById('showPortfolioChart').innerHTML = '<i class="bi bi-graph-up me-2"></i>Show Portfolio Chart';
             document.getElementById('showHourlyChart').innerHTML = '<i class="bi bi-clock me-2"></i>Show Strategy Performance';
             
-            // Update trades table
-            updateTradesTable(data.trades);
+            // Store trades data and update trades table
+            tradesData = data.trades || [];
+            updateTradesTable(tradesData);
+            
+            // Add click event listener to the sortable column headers
+            setupTradeTableSorting();
         })
         .catch(error => {
             console.error('Backtest error:', error);
@@ -192,6 +198,107 @@ function updateMetrics(data) {
         document.getElementById('totalSlippage').textContent = 
             `$${data.total_slippage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     }
+}
+
+// Setup sorting functionality for the trade history table
+function setupTradeTableSorting() {
+    const table = document.querySelector('.trade-history table');
+    if (!table) return;
+    
+    const headerRow = table.querySelector('thead tr');
+    if (!headerRow) return;
+    
+    // Get the sortable column headers
+    const entryDateHeader = headerRow.querySelector('th:nth-child(1)');
+    const profitPercentHeader = headerRow.querySelector('th:nth-child(5)');
+    const profitDollarHeader = headerRow.querySelector('th:nth-child(6)');
+    
+    // Setup Entry Date column sorting
+    if (entryDateHeader) {
+        setupSortableHeader(entryDateHeader, 'Entry Date', sortTradesByEntryDate);
+    }
+    
+    // Setup Profit % column sorting
+    if (profitPercentHeader) {
+        setupSortableHeader(profitPercentHeader, 'Profit %', sortTradesByProfitPercent);
+    }
+    
+    // Setup Profit $ column sorting
+    if (profitDollarHeader) {
+        setupSortableHeader(profitDollarHeader, 'Profit $', sortTradesByProfitDollar);
+    }
+}
+
+// Helper function to setup a sortable header
+function setupSortableHeader(header, title, sortFunction) {
+    // Add sortable class and cursor pointer to indicate it's clickable
+    header.classList.add('sortable');
+    header.style.cursor = 'pointer';
+    
+    // Add sort icon
+    header.innerHTML = `${title} <i class="bi bi-arrow-down-up"></i>`;
+    
+    // Add click event listener
+    header.addEventListener('click', function() {
+        // Toggle sort direction
+        const isAscending = !header.classList.contains('asc');
+        
+        // Update sort icon and class
+        header.classList.remove('asc', 'desc');
+        header.classList.add(isAscending ? 'asc' : 'desc');
+        header.innerHTML = `${title} <i class="bi bi-arrow-${isAscending ? 'up' : 'down'}"></i>`;
+        
+        // Sort trades
+        sortFunction(isAscending);
+    });
+}
+
+// Sort trades by entry date
+function sortTradesByEntryDate(ascending = true) {
+    if (!tradesData || tradesData.length === 0) return;
+    
+    // Sort the trades array
+    tradesData.sort((a, b) => {
+        const dateA = a.entry_date ? new Date(a.entry_date) : new Date(0);
+        const dateB = b.entry_date ? new Date(b.entry_date) : new Date(0);
+        
+        return ascending ? dateA - dateB : dateB - dateA;
+    });
+    
+    // Update the table with sorted data
+    updateTradesTable(tradesData);
+}
+
+// Sort trades by profit percentage
+function sortTradesByProfitPercent(ascending = true) {
+    if (!tradesData || tradesData.length === 0) return;
+    
+    // Sort the trades array
+    tradesData.sort((a, b) => {
+        const profitA = a.profit_pct || 0;
+        const profitB = b.profit_pct || 0;
+        
+        return ascending ? profitA - profitB : profitB - profitA;
+    });
+    
+    // Update the table with sorted data
+    updateTradesTable(tradesData);
+}
+
+// Sort trades by profit dollar amount
+function sortTradesByProfitDollar(ascending = true) {
+    if (!tradesData || tradesData.length === 0) return;
+    
+    // Sort the trades array
+    tradesData.sort((a, b) => {
+        const profitA = a.profit_amount || 0;
+        const profitB = b.profit_amount || 0;
+        
+        return ascending ? profitA - profitB : profitB - profitA;
+    });
+    
+    // Update the table with sorted data
+    updateTradesTable(tradesData);
 }
 
 function updateTradesTable(trades) {

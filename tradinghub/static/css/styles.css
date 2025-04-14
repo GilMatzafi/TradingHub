@@ -938,3 +938,24 @@
         justify-content: center;
     }
   }
+  
+  /* Trade History Table Sorting Styles */
+  .trade-history table th.sortable {
+    position: relative;
+    transition: background-color 0.2s;
+    cursor: pointer;
+  }
+  
+  .trade-history table th.sortable:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .trade-history table th.sortable.asc,
+  .trade-history table th.sortable.desc {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .trade-history table th.sortable i {
+    margin-left: 5px;
+    font-size: 0.8em;
+  }
