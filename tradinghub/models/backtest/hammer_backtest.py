@@ -227,7 +227,8 @@ class HammerBacktest:
                 'profit_factor': 0,
                 'average_profit': 0,
                 'total_profit_pct': 0,
-                'trades': []
+                'trades': [],
+                'hourly_performance': self._calculate_hourly_performance(trades)
             }
         
         winning_trades = [t for t in trades if t.profit_pct > 0]
@@ -264,5 +265,61 @@ class HammerBacktest:
                     'exit_reason': t.exit_reason
                 }
                 for t in trades
-            ]
+            ],
+            'hourly_performance': self._calculate_hourly_performance(trades)
+        }
+        
+    def _calculate_hourly_performance(self, trades: List[Trade]) -> Dict[str, Any]:
+        """
+        Calculate performance metrics by hour of day
+        
+        Args:
+            trades: List of trades to analyze
+            
+        Returns:
+            Dictionary containing hourly performance metrics
+        """
+        if not trades:
+            return {
+                'hourly_trades': [0] * 24,
+                'hourly_profits': [0] * 24,
+                'hourly_win_rates': [0] * 24,
+                'hourly_avg_profits': [0] * 24
+            }
+        
+        # Initialize arrays for each hour (0-23)
+        hourly_trades = [0] * 24
+        hourly_profits = [0] * 24
+        hourly_wins = [0] * 24
+        
+        # Calculate metrics for each hour
+        for trade in trades:
+            # Extract hour from entry date
+            hour = trade.entry_date.hour
+            
+            # Update counts and profits
+            hourly_trades[hour] += 1
+            hourly_profits[hour] += trade.profit_pct
+            
+            if trade.profit_pct > 0:
+                hourly_wins[hour] += 1
+        
+        # Calculate win rates and average profits
+        hourly_win_rates = []
+        hourly_avg_profits = []
+        
+        for hour in range(24):
+            # Calculate win rate
+            win_rate = hourly_wins[hour] / hourly_trades[hour] if hourly_trades[hour] > 0 else 0
+            hourly_win_rates.append(win_rate)
+            
+            # Calculate average profit
+            avg_profit = hourly_profits[hour] / hourly_trades[hour] if hourly_trades[hour] > 0 else 0
+            hourly_avg_profits.append(avg_profit)
+        
+        return {
+            'hourly_trades': hourly_trades,
+            'hourly_profits': hourly_profits,
+            'hourly_win_rates': hourly_win_rates,
+            'hourly_avg_profits': hourly_avg_profits
         } 

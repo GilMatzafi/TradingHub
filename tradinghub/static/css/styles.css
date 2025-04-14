@@ -580,7 +580,19 @@
   }
   
   .chart-legend-color.portfolio {
-    background: linear-gradient(135deg, rgba(75, 192, 192, 0.2) 0%, rgba(75, 192, 192, 1) 100%);
+    background-color: rgba(75, 192, 192, 0.8);
+  }
+  
+  .chart-legend-color.profit {
+    background-color: rgba(75, 192, 75, 0.8);
+  }
+  
+  .chart-legend-color.win-rate {
+    background-color: rgba(54, 162, 235, 0.8);
+  }
+  
+  .chart-legend-color.trades {
+    background-color: rgba(255, 206, 86, 0.8);
   }
   
   /* Chart Title */
@@ -810,5 +822,119 @@
       top: auto;
       right: auto;
       margin-top: 1rem;
+    }
+  }
+  
+  /* Hour of Day Performance Chart Styling */
+  .hourly-chart-container {
+    background-color: var(--background-white);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .hourly-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hourly-chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .hourly-chart-title i {
+    color: var(--primary-color);
+  }
+  
+  .hourly-chart-toggle {
+    display: flex;
+    background-color: var(--background-light);
+    padding: 0.25rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+  }
+  
+  .hourly-chart-toggle button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .hourly-chart-toggle button.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .hourly-chart-toggle button:hover:not(.active) {
+    background-color: var(--background-hover);
+  }
+  
+  .hourly-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hourly-stat-card {
+    background-color: var(--background-light);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .hourly-stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+  
+  .hourly-stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .hourly-stat-value.positive {
+    color: var(--success-color);
+  }
+  
+  .hourly-stat-value.negative {
+    color: var(--danger-color);
+  }
+  
+  @media (max-width: 768px) {
+    .hourly-chart-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .hourly-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .hourly-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .hourly-chart-toggle {
+        width: 100%;
+        justify-content: center;
     }
   }

@@ -24,6 +24,27 @@ function initBacktest() {
         }
     });
     
+    // Add event listener for the hourly performance chart button
+    document.getElementById('showHourlyChart')?.addEventListener('click', function() {
+        const chartContainer = document.getElementById('hourlyChartContainer');
+        const button = document.getElementById('showHourlyChart');
+        
+        if (chartContainer.classList.contains('d-none')) {
+            // Show the chart
+            chartContainer.classList.remove('d-none');
+            button.innerHTML = '<i class="bi bi-clock me-2"></i>Hide Strategy Performance';
+            
+            // If we have hourly performance data, render the chart
+            if (window.hourlyPerformance) {
+                renderHourlyPerformanceChart(window.hourlyPerformance);
+            }
+        } else {
+            // Hide the chart
+            chartContainer.classList.add('d-none');
+            button.innerHTML = '<i class="bi bi-clock me-2"></i>Show Strategy Performance';
+        }
+    });
+    
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the hammer strategy instance from the global window object
         // This is set in hammer-strategy.js
@@ -93,8 +114,7 @@ function initBacktest() {
                 throw new Error(data.error);
             }
             
-            // Log the response for debugging
-            console.log('Backtest results:', data);
+            console.log('Backtest response:', data); // Debug log
             
             // Update results display
             document.getElementById('backtestResults').classList.remove('d-none');
@@ -140,6 +160,21 @@ function initBacktest() {
                 const button = document.getElementById('showPortfolioChart');
                 chartContainer.classList.add('d-none');
                 button.innerHTML = '<i class="bi bi-graph-up me-2"></i>Show Portfolio Chart';
+            }
+            
+            // Store hourly performance data and render chart
+            if (data.hourly_performance) {
+                window.hourlyPerformance = data.hourly_performance;
+                const hourlyChartContainer = document.getElementById('hourlyChartContainer');
+                // Make sure the container starts hidden
+                hourlyChartContainer.classList.add('d-none');
+                // Reset the button text to show state
+                const button = document.getElementById('showHourlyChart');
+                if (button) {
+                    button.innerHTML = '<i class="bi bi-clock me-2"></i>Show Strategy Performance';
+                }
+            } else {
+                console.error('No hourly performance data in response');
             }
             
             // Update trades table
@@ -499,6 +534,199 @@ function renderBacktestResults(results) {
     if (!chartContainer.classList.contains('d-none')) {
         renderPortfolioChart(results.portfolio_history);
     }
+}
+
+/**
+ * Render the hourly performance chart using Chart.js
+ * @param {Object} hourlyPerformance - Object containing hourly performance data
+ */
+function renderHourlyPerformanceChart(hourlyPerformance) {
+    // Debug log to check incoming data
+    console.log('Hourly Performance Data:', hourlyPerformance);
+
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded');
+        return;
+    }
+
+    // Check if we have valid data
+    if (!hourlyPerformance || !hourlyPerformance.hourly_avg_profits) {
+        console.error('Invalid hourly performance data');
+        return;
+    }
+    
+    // Get the canvas element
+    const canvas = document.getElementById('hourlyChart');
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+
+    // Get the canvas context
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Could not get canvas context');
+        return;
+    }
+
+    // Destroy existing chart if it exists
+    if (window.hourlyChart instanceof Chart) {
+        window.hourlyChart.destroy();
+        window.hourlyChart = null;
+    }
+
+    // Prepare data for the chart
+    const hours = Array.from({length: 24}, (_, i) => i);
+    const labels = hours.map(hour => `${hour.toString().padStart(2, '0')}:00`);
+    
+    // Get the data
+    const avgProfits = hourlyPerformance.hourly_avg_profits;
+    const tradeCounts = hourlyPerformance.hourly_trades;
+
+    // Calculate summary statistics
+    const bestHourIndex = avgProfits.indexOf(Math.max(...avgProfits));
+    const worstHourIndex = avgProfits.indexOf(Math.min(...avgProfits));
+    const mostActiveHourIndex = tradeCounts.indexOf(Math.max(...tradeCounts));
+    const avgTradesPerHour = tradeCounts.reduce((a, b) => a + b, 0) / tradeCounts.filter(x => x > 0).length || 0;
+    
+    // Update summary cards
+    const bestHourEl = document.getElementById('bestHour');
+    const worstHourEl = document.getElementById('worstHour');
+    const mostActiveHourEl = document.getElementById('mostActiveHour');
+    const avgTradesPerHourEl = document.getElementById('avgTradesPerHour');
+
+    if (bestHourEl) bestHourEl.textContent = `${labels[bestHourIndex]} (${(avgProfits[bestHourIndex] * 100).toFixed(2)}%)`;
+    if (worstHourEl) worstHourEl.textContent = `${labels[worstHourIndex]} (${(avgProfits[worstHourIndex] * 100).toFixed(2)}%)`;
+    if (mostActiveHourEl) mostActiveHourEl.textContent = `${labels[mostActiveHourIndex]} (${tradeCounts[mostActiveHourIndex]} trades)`;
+    if (avgTradesPerHourEl) avgTradesPerHourEl.textContent = avgTradesPerHour.toFixed(1);
+
+    // Create datasets
+    const datasets = [
+        {
+            label: 'Average Profit %',
+            data: avgProfits.map(profit => profit * 100),
+            backgroundColor: avgProfits.map(profit => 
+                profit >= 0 ? 'rgba(0, 200, 83, 0.6)' : 'rgba(211, 47, 47, 0.6)'
+            ),
+            borderColor: avgProfits.map(profit => 
+                profit >= 0 ? 'rgba(0, 200, 83, 1)' : 'rgba(211, 47, 47, 1)'
+            ),
+            borderWidth: 1,
+            yAxisID: 'y',
+            type: 'bar',
+            hidden: false
+        },
+        {
+            label: 'Number of Trades',
+            data: tradeCounts,
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1,
+            yAxisID: 'y2',
+            type: 'bar',
+            hidden: true  // Start with volume hidden
+        }
+    ];
+
+    // Create chart configuration
+    const config = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Average Profit %'
+                    },
+                    grid: {
+                        drawOnChartArea: true
+                    }
+                },
+                y2: {
+                    type: 'linear',
+                    display: false,  // Start with volume axis hidden
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Number of Trades'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+    };
+
+    // Create the chart
+    try {
+        window.hourlyChart = new Chart(ctx, config);
+    } catch (error) {
+        console.error('Error creating chart:', error);
+        return;
+    }
+
+    // Update the toggle buttons HTML
+    const toggleContainer = document.querySelector('.hourly-chart-toggle');
+    if (toggleContainer) {
+        toggleContainer.innerHTML = `
+            <button type="button" class="active" data-metric="profit">Profit</button>
+            <button type="button" data-metric="volume">Volume</button>
+        `;
+    }
+
+    // Add event listeners for metric toggle buttons
+    const toggleButtons = document.querySelectorAll('.hourly-chart-toggle button');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const metric = button.dataset.metric;
+            console.log('Toggle clicked:', metric);
+
+            // Update active state
+            toggleButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Update chart visibility
+            const chart = window.hourlyChart;
+            if (!chart) {
+                console.error('Chart not initialized');
+                return;
+            }
+
+            if (metric === 'profit') {
+                chart.data.datasets[0].hidden = false;
+                chart.data.datasets[1].hidden = true;
+                chart.options.scales.y.display = true;
+                chart.options.scales.y2.display = false;
+            } else if (metric === 'volume') {
+                chart.data.datasets[0].hidden = true;
+                chart.data.datasets[1].hidden = false;
+                chart.options.scales.y.display = false;
+                chart.options.scales.y2.display = true;
+            }
+
+            chart.update();
+        });
+    });
 }
 
 // Export the initialization function

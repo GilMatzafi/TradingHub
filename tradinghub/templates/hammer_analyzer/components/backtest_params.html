@@ -122,6 +122,9 @@
                     <button type="button" class="btn-chart" id="showPortfolioChart">
                         <i class="bi bi-graph-up"></i>Show Portfolio Chart
                     </button>
+                    <button type="button" class="btn-chart" id="showHourlyChart">
+                        <i class="bi bi-clock"></i>Show Strategy Performance
+                    </button>
                 </div>
             </div>
         </div>
@@ -129,6 +132,45 @@
         <!-- Portfolio Chart -->
         <div id="portfolioChartContainer" class="portfolio-chart-container d-none">
             <canvas id="portfolioChart"></canvas>
+        </div>
+        
+        <!-- Hour of Day Performance Chart -->
+        <div id="hourlyChartContainer" class="hourly-chart-container d-none">
+            <div class="hourly-chart-header">
+                <div class="hourly-chart-title">
+                    <i class="bi bi-clock"></i>
+                    <span>Strategy Performance by Hour of Day</span>
+                </div>
+                <div class="hourly-chart-controls">
+                    <div class="hourly-chart-toggle">
+                        <button type="button" class="active" data-metric="profit">Profit</button>
+                        <button type="button" data-metric="volume">Volume</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hourly-stats">
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Best Hour</div>
+                    <div class="hourly-stat-value positive" id="bestHour">--:00</div>
+                </div>
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Worst Hour</div>
+                    <div class="hourly-stat-value negative" id="worstHour">--:00</div>
+                </div>
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Most Active Hour</div>
+                    <div class="hourly-stat-value" id="mostActiveHour">--:00</div>
+                </div>
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Average Trades per Hour</div>
+                    <div class="hourly-stat-value" id="avgTradesPerHour">0</div>
+                </div>
+            </div>
+            
+            <div style="height: 400px; position: relative;">
+                <canvas id="hourlyChart"></canvas>
+            </div>
         </div>
         
         <!-- Trade History -->
