@@ -1,0 +1,114 @@
+/* Table Styling */
+.results-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 1.5rem;
+  background-color: var(--background-white);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.results-table thead {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.results-table th {
+  padding: 1rem;
+  font-weight: 500;
+  text-align: left;
+  border-bottom: 2px solid var(--primary-dark);
+}
+
+.results-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.results-table tbody tr:hover {
+  background-color: rgba(26, 35, 126, 0.05);
+}
+
+.uptrend {
+  color: var(--bull-color);
+  font-weight: 600;
+}
+
+.downtrend {
+  color: var(--bear-color);
+  font-weight: 600;
+}
+
+/* Trade History Table Styling */
+.trade-history {
+  margin-top: 1.5rem;
+  background-color: var(--background-white);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.trade-history table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.trade-history table thead tr {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.trade-history table th {
+  padding: 0.75rem;
+  font-weight: 600;
+  text-align: left;
+  color: #495057;
+}
+
+.trade-history table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.trade-history table tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+.trade-history table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.profit-amount.positive {
+  color: var(--bull-color);
+  font-weight: 600;
+}
+
+.profit-amount.negative {
+  color: var(--bear-color);
+  font-weight: 600;
+}
+
+/* Trade History Table Sorting Styles */
+.trade-history table th.sortable {
+  position: relative;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.trade-history table th.sortable:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.trade-history table th.sortable.asc,
+.trade-history table th.sortable.desc {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.trade-history table th.sortable i {
+  margin-left: 5px;
+  font-size: 0.8em;
+} 

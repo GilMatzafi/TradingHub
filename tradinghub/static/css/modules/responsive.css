@@ -1,0 +1,82 @@
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .candlestick-container {
+    height: 200px;
+  }
+  
+  .range-container {
+    padding-top: 2.5rem;
+  }
+  
+  .range-labels .description {
+    font-size: 0.75rem;
+    max-width: 50%;
+  }
+  
+  .backtest-metrics {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .trade-history {
+    overflow-x: auto;
+  }
+  
+  .trade-history table {
+    min-width: 800px;
+  }
+  
+  .portfolio-chart-container {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .portfolio-chart-container canvas {
+    height: 300px !important;
+  }
+  
+  .chart-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .chart-period-selector {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  
+  .chart-value-indicator {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 1rem;
+  }
+  
+  .hourly-chart-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .hourly-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .hourly-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .hourly-chart-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+} 

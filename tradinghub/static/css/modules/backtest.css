@@ -1,0 +1,64 @@
+/* Backtest Results Styling */
+.backtest-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-group {
+  background-color: var(--background-white);
+  border-radius: 4px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--primary-color);
+}
+
+.metric-group h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.metric-row:last-child {
+  border-bottom: none;
+}
+
+.metric-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.metric-value.positive {
+  color: var(--bull-color);
+}
+
+.metric-value.negative {
+  color: var(--bear-color);
+} 

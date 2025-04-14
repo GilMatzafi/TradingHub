@@ -1,0 +1,31 @@
+/* Main CSS file that imports all modular CSS files */
+
+/* Import variables first */
+@import 'modules/variables.css';
+
+/* Import base styles */
+@import 'modules/base.css';
+
+/* Import components */
+@import 'modules/components.css';
+
+/* Import tables */
+@import 'modules/tables.css';
+
+/* Import candlestick visualization */
+@import 'modules/candlestick.css';
+
+/* Import range inputs */
+@import 'modules/range.css';
+
+/* Import backtest styles */
+@import 'modules/backtest.css';
+
+/* Import charts */
+@import 'modules/charts.css';
+
+/* Import trading-specific styles */
+@import 'modules/trading.css';
+
+/* Import responsive design */
+@import 'modules/responsive.css'; 

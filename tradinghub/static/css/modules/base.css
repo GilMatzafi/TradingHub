@@ -1,0 +1,56 @@
+body {
+  background-color: var(--background-light);
+  min-height: 100vh;
+  padding: 2rem 0;
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1400px;
+}
+
+/* Header Styling */
+header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+  position: relative;
+}
+
+header h1 {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+header h1::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+header .lead {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Loading Indicator */
+.loading {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+}
+
+.loading .spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: var(--primary-color);
+} 
