@@ -4,6 +4,63 @@ function initBacktestMetrics() {
     // Metrics will be updated when backtest results are received
 }
 
+// Calculate maximum drawdown from portfolio history
+function calculateMaxDrawdown(portfolioHistory) {
+    if (!portfolioHistory || portfolioHistory.length === 0) {
+        return 0;
+    }
+    
+    let maxDrawdown = 0;
+    let peak = portfolioHistory[0].value;
+    
+    for (let i = 1; i < portfolioHistory.length; i++) {
+        const currentValue = portfolioHistory[i].value;
+        
+        // Update peak if current value is higher
+        if (currentValue > peak) {
+            peak = currentValue;
+        }
+        
+        // Calculate drawdown
+        const drawdown = (peak - currentValue) / peak;
+        
+        // Update max drawdown if current drawdown is higher
+        if (drawdown > maxDrawdown) {
+            maxDrawdown = drawdown;
+        }
+    }
+    
+    return maxDrawdown;
+}
+
+// Calculate Sharpe ratio from portfolio history
+function calculateSharpeRatio(portfolioHistory) {
+    if (!portfolioHistory || portfolioHistory.length < 2) {
+        return 0;
+    }
+    
+    // Calculate daily returns
+    const returns = [];
+    for (let i = 1; i < portfolioHistory.length; i++) {
+        const dailyReturn = (portfolioHistory[i].value - portfolioHistory[i-1].value) / portfolioHistory[i-1].value;
+        returns.push(dailyReturn);
+    }
+    
+    // Calculate average return
+    const avgReturn = returns.reduce((sum, val) => sum + val, 0) / returns.length;
+    
+    // Calculate standard deviation
+    const variance = returns.reduce((sum, val) => sum + Math.pow(val - avgReturn, 2), 0) / returns.length;
+    const stdDev = Math.sqrt(variance);
+    
+    // Calculate Sharpe ratio (assuming risk-free rate of 0 for simplicity)
+    // Annualized Sharpe ratio = (daily Sharpe ratio) * sqrt(252) for daily data
+    const dailySharpeRatio = stdDev === 0 ? 0 : avgReturn / stdDev;
+    const annualizedSharpeRatio = dailySharpeRatio * Math.sqrt(252);
+    
+    return annualizedSharpeRatio;
+}
+
 // Update metrics display with the provided data
 function updateMetrics(data) {
     document.getElementById('totalTrades').textContent = data.total_trades || 0;
@@ -18,6 +75,14 @@ function updateMetrics(data) {
     totalProfitElement.textContent = totalProfitValue + '%';
     totalProfitElement.classList.remove('positive', 'negative');
     totalProfitElement.classList.add(parseFloat(totalProfitValue) >= 0 ? 'positive' : 'negative');
+    
+    // Calculate and display max drawdown
+    const maxDrawdown = calculateMaxDrawdown(data.portfolio_history);
+    document.getElementById('maxDrawdown').textContent = (maxDrawdown * 100).toFixed(2) + '%';
+    
+    // Calculate and display Sharpe ratio
+    const sharpeRatio = calculateSharpeRatio(data.portfolio_history);
+    document.getElementById('sharpeRatio').textContent = sharpeRatio.toFixed(2);
     
     // Update portfolio values
     if (data.initial_portfolio_value) {
