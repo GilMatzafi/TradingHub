@@ -66,10 +66,35 @@
         <h5 class="mb-0">Backtest Results</h5>
     </div>
     <div class="card-body">
-        <!-- Performance Metrics and Portfolio Summary -->
+        <!-- Performance Overview -->
         <div class="backtest-metrics">
             <div class="metric-group">
-                <h6>Performance Metrics</h6>
+                <h6>Performance Overview</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Initial Portfolio Value</span>
+                    <span class="metric-value" id="initialPortfolioValue">$0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Final Portfolio Value</span>
+                    <span class="metric-value" id="finalPortfolioValue">$0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Profit</span>
+                    <span class="metric-value" id="totalProfit">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Max Drawdown</span>
+                    <span class="metric-value negative" id="maxDrawdown">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Sharpe Ratio</span>
+                    <span class="metric-value" id="sharpeRatio">0.00</span>
+                </div>
+            </div>
+            
+            <!-- Trade Statistics -->
+            <div class="metric-group">
+                <h6>Trade Statistics</h6>
                 <div class="metric-row">
                     <span class="metric-label">Total Trades</span>
                     <span class="metric-value" id="totalTrades">0</span>
@@ -94,30 +119,11 @@
                     <span class="metric-label">Average Profit per Trade</span>
                     <span class="metric-value" id="averageProfit">0%</span>
                 </div>
-                <div class="metric-row">
-                    <span class="metric-label">Total Profit</span>
-                    <span class="metric-value" id="totalProfit">0%</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Max Drawdown</span>
-                    <span class="metric-value negative" id="maxDrawdown">0%</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Sharpe Ratio</span>
-                    <span class="metric-value" id="sharpeRatio">0.00</span>
-                </div>
             </div>
-            
+
+            <!-- Costs Breakdown -->
             <div class="metric-group">
-                <h6>Portfolio Summary</h6>
-                <div class="metric-row">
-                    <span class="metric-label">Initial Portfolio Value</span>
-                    <span class="metric-value" id="initialPortfolioValue">$0</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Final Portfolio Value</span>
-                    <span class="metric-value" id="finalPortfolioValue">$0</span>
-                </div>
+                <h6>Costs Breakdown</h6>
                 <div class="metric-row">
                     <span class="metric-label">Total Commission Paid</span>
                     <span class="metric-value negative" id="totalCommission">$0</span>
@@ -126,15 +132,17 @@
                     <span class="metric-label">Total Slippage Cost</span>
                     <span class="metric-value negative" id="totalSlippage">$0</span>
                 </div>
-                <div class="text-center mt-4">
-                    <button type="button" class="btn-chart" id="showPortfolioChart">
-                        <i class="bi bi-graph-up"></i>Show Portfolio Chart
-                    </button>
-                    <button type="button" class="btn-chart" id="showHourlyChart">
-                        <i class="bi bi-clock"></i>Show Strategy Performance
-                    </button>
-                </div>
             </div>
+        </div>
+
+        <!-- Chart Controls -->
+        <div class="d-flex justify-content-center gap-3 my-5">
+            <button type="button" class="btn btn-primary btn-lg" id="showPortfolioChart">
+                <i class="bi bi-graph-up me-2"></i>Show Portfolio Chart
+            </button>
+            <button type="button" class="btn btn-primary btn-lg" id="showHourlyChart">
+                <i class="bi bi-clock me-2"></i>Show Strategy Performance
+            </button>
         </div>
         
         <!-- Portfolio Chart -->
