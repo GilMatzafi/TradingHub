@@ -53,11 +53,89 @@
             </div>
             
             <div class="text-end mt-3">
+                <button type="button" class="btn btn-primary me-2" id="optimizeBacktest">
+                    <i class="bi bi-gear-fill me-2"></i>Optimize Parameters
+                </button>
                 <button type="button" class="btn btn-primary" id="runBacktest">
                     <i class="bi bi-play-fill me-2"></i>Run Backtest
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Optimization Modal -->
+<div class="modal fade" id="optimizationModal" tabindex="-1" aria-labelledby="optimizationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="optimizationModalLabel">Parameter Optimization Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Loading Spinner -->
+                <div id="optimizationLoader" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-3">Running optimization... This may take a few minutes.</div>
+                </div>
+                
+                <!-- Results Container -->
+                <div id="optimizationResults" class="d-none">
+                    <div class="mb-4">
+                        <h6 class="mb-3">Top 5 Most Profitable Combinations</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Stop Loss (%)</th>
+                                        <th>Take Profit (%)</th>
+                                        <th>Max Holding</th>
+                                        <th>Body Ratio</th>
+                                        <th>Lower Shadow</th>
+                                        <th>Upper Shadow</th>
+                                        <th>MA Period</th>
+                                        <th>Total Profit</th>
+                                        <th>Win Rate</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topProfitableResults">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h6 class="mb-3">5 Least Profitable Combinations</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Stop Loss (%)</th>
+                                        <th>Take Profit (%)</th>
+                                        <th>Max Holding</th>
+                                        <th>Body Ratio</th>
+                                        <th>Lower Shadow</th>
+                                        <th>Upper Shadow</th>
+                                        <th>MA Period</th>
+                                        <th>Total Profit</th>
+                                        <th>Win Rate</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leastProfitableResults">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
