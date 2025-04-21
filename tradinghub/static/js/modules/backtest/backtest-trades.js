@@ -3,8 +3,70 @@ let tradesData = [];
 
 // Trade history table functionality
 function initBacktestTrades() {
-    // No initialization needed for now
-    // The table will be populated when backtest results are received
+    // Initialize download CSV button
+    const downloadCSVButton = document.getElementById('downloadBacktestCSV');
+    if (downloadCSVButton) {
+        downloadCSVButton.addEventListener('click', downloadBacktestCSV);
+    }
+}
+
+// Convert trades to CSV format
+function convertTradesToCSV() {
+    if (!tradesData || tradesData.length === 0) return '';
+    
+    // CSV header
+    const headers = [
+        'Entry Date',
+        'Exit Date',
+        'Entry Price',
+        'Exit Price',
+        'Profit %',
+        'Profit Amount',
+        'Commission',
+        'Slippage Cost',
+        'Periods Held',
+        'Exit Reason'
+    ];
+    
+    // Convert trades to CSV rows
+    const rows = tradesData.map(trade => [
+        trade.entry_date,
+        trade.exit_date,
+        trade.entry_price.toFixed(2),
+        trade.exit_price.toFixed(2),
+        trade.profit_pct.toFixed(2),
+        trade.profit_amount.toFixed(2),
+        trade.commission.toFixed(2),
+        trade.slippage_cost.toFixed(2),
+        trade.periods_held,
+        trade.exit_reason
+    ]);
+    
+    // Combine headers and rows
+    return [headers, ...rows]
+        .map(row => row.join(','))
+        .join('\n');
+}
+
+// Download trades as CSV file
+function downloadBacktestCSV() {
+    // Create CSV content
+    const csv = convertTradesToCSV();
+    
+    // Create blob and download link
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    // Create download URL
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, 'backtest_trades.csv');
+    } else {
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'backtest_trades.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 }
 
 // Update the trades table with the provided data
@@ -153,6 +215,12 @@ function setTradesData(trades) {
     tradesData = trades || [];
     updateTradesTable(tradesData);
     setupTradeTableSorting();
+    
+    // Show/hide download button based on whether there are trades
+    const downloadCSVButton = document.getElementById('downloadBacktestCSV');
+    if (downloadCSVButton) {
+        downloadCSVButton.style.display = tradesData.length > 0 ? 'block' : 'none';
+    }
 }
 
 // Export functions
