@@ -1,34 +1,44 @@
-from dataclasses import dataclass
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Tuple, NamedTuple
 import pandas as pd
 from ..patterns.hammer_pattern import HammerPattern
+from .trade import Trade
+from .params import BacktestParams
 
-@dataclass
-class BacktestParams:
-    """Parameters for backtesting the hammer pattern strategy"""
-    stop_loss_pct: float = 0.02  # Stop loss as percentage of entry price
-    take_profit_pct: float = 0.04  # Take profit as percentage of entry price
-    entry_delay: int = 1  # Number of candles to wait before entering
-    max_holding_periods: int = 20  # Maximum number of periods to hold a trade
-    initial_portfolio_size: float = 10000.0  # Initial portfolio size in dollars
-    commission: float = 0.65  # Commission per trade in dollars
-    slippage: float = 0.1  # Slippage per trade in dollars (fixed dollar amount)
-
-@dataclass
-class Trade:
-    """Represents a single trade in the backtest"""
-    entry_date: pd.Timestamp
-    exit_date: pd.Timestamp
-    entry_price: float
-    exit_price: float
-    profit_pct: float
-    profit_amount: float  # Added to track actual dollar profit/loss
-    commission: float  # Commission paid for this trade
-    slippage_cost: float  # Cost of slippage for this trade
-    periods_held: int
-    exit_reason: str  # 'stop_loss', 'take_profit', or 'max_periods'
+class BacktestState:
+    """Tracks the state of a backtest run including costs and portfolio value."""
+    def __init__(self, initial_portfolio_value: float):
+        self.trades: List[Trade] = []
+        self.portfolio_history: List[Dict] = [{'date': None, 'value': initial_portfolio_value}]
+        self.total_commission: float = 0.0
+        self.total_slippage: float = 0.0
+    
+    def add_commission(self, commission: float) -> None:
+        """Add commission cost to total."""
+        self.total_commission += commission
+    
+    def add_slippage(self, slippage: float) -> None:
+        """Add slippage cost to total."""
+        self.total_slippage += slippage
+    
+    def update_portfolio_value(self, date: pd.Timestamp, value: float) -> None:
+        """Update portfolio value history."""
+        if self.portfolio_history[0]['date'] is None:
+            self.portfolio_history[0]['date'] = date
+        else:
+            self.portfolio_history.append({'date': date, 'value': value})
+    
+    def add_trade(self, trade: Trade) -> None:
+        """Add a completed trade to history."""
+        self.trades.append(trade)
+    
+    @property
+    def current_portfolio_value(self) -> float:
+        """Get current portfolio value."""
+        return self.portfolio_history[-1]['value']
 
 class HammerBacktest:
+    """Backtesting engine for hammer pattern trading strategy."""
+    
     def __init__(self):
         self.hammer_detector = HammerPattern()
     
@@ -48,161 +58,179 @@ class HammerBacktest:
         if 'is_hammer' not in df.columns:
             df = self.hammer_detector.detect(df, pattern_params)
         
-        # Initialize backtest results
-        trades: List[Trade] = []
+        # Initialize backtest state
+        state = BacktestState(backtest_params.initial_portfolio_size)
+        state.update_portfolio_value(df.index[0], backtest_params.initial_portfolio_size)
         current_position = None
-        portfolio_value = backtest_params.initial_portfolio_size
-        portfolio_history = [{'date': df.index[0], 'value': portfolio_value}]
-        total_commission = 0
-        total_slippage = 0
         
         # Iterate through data
         for i in range(len(df) - backtest_params.entry_delay):
-            # Check if this is a hammer pattern and we don't have an open position
-            if df.iloc[i]['is_hammer'] and current_position is None:
-                # Enter position after entry_delay
-                if i + backtest_params.entry_delay < len(df):
-                    # Get base entry price
-                    base_entry_price = df.iloc[i + backtest_params.entry_delay]['Open']
-                    
-                    # Calculate position size and shares (use 100% of portfolio for each trade)
-                    position_size = portfolio_value
-                    shares = position_size / base_entry_price
-                    
-                    # Apply fixed dollar slippage to entry price
-                    slippage_cost = backtest_params.slippage
-                    entry_price = base_entry_price + (slippage_cost / shares)
-                    
-                    # Calculate stop loss and take profit levels
-                    stop_loss = entry_price * (1 - backtest_params.stop_loss_pct)
-                    take_profit = entry_price * (1 + backtest_params.take_profit_pct)
-                    
-                    # Pay commission for entry
-                    commission = backtest_params.commission
-                    total_commission += commission
-                    portfolio_value -= commission
-                    
-                    # Pay slippage for entry
-                    total_slippage += slippage_cost
-                    portfolio_value -= slippage_cost
-                    
-                    current_position = {
-                        'entry_date': df.index[i + backtest_params.entry_delay],
-                        'entry_price': entry_price,
-                        'stop_loss': stop_loss,
-                        'take_profit': take_profit,
-                        'periods_held': 0,
-                        'shares': shares,
-                        'commission': commission,
-                        'slippage_cost': slippage_cost
-                    }
-            
-            # Manage open position
-            if current_position is not None:
-                # Make sure we don't go out of bounds
-                if i + backtest_params.entry_delay < len(df):
-                    current_bar = df.iloc[i + backtest_params.entry_delay]
-                    current_position['periods_held'] += 1
-                    
-                    # Check for exit conditions
-                    exit_reason = None
-                    if current_bar['Low'] <= current_position['stop_loss']:
-                        exit_reason = 'stop_loss'
-                        exit_price = current_position['stop_loss']
-                    elif current_bar['High'] >= current_position['take_profit']:
-                        exit_reason = 'take_profit'
-                        exit_price = current_position['take_profit']
-                    elif current_position['periods_held'] >= backtest_params.max_holding_periods:
-                        exit_reason = 'max_periods'
-                        exit_price = current_bar['Close']
-                    
-                    if exit_reason:
-                        # Close the position
-                        self._close_position(
-                            current_position, 
-                            df.index[i + backtest_params.entry_delay], 
-                            exit_price, 
-                            exit_reason, 
-                            trades, 
-                            portfolio_history,
-                            backtest_params,
-                            total_commission,
-                            total_slippage
-                        )
-                        portfolio_value = portfolio_history[-1]['value']
-                        current_position = None
-                else:
-                    # We've reached the end of the data, close the position
-                    exit_price = df.iloc[-1]['Close']
-                    self._close_position(
-                        current_position, 
-                        df.index[-1], 
-                        exit_price, 
-                        'end_of_data', 
-                        trades, 
-                        portfolio_history,
-                        backtest_params,
-                        total_commission,
-                        total_slippage
-                    )
-                    portfolio_value = portfolio_history[-1]['value']
-                    current_position = None
+            current_position = self._process_bar(
+                df, i, current_position, state, backtest_params
+            )
         
-        # Calculate performance metrics
-        results = self._calculate_performance_metrics(trades)
-        
-        # Add portfolio tracking information
-        results['initial_portfolio_value'] = backtest_params.initial_portfolio_size
-        results['final_portfolio_value'] = portfolio_value
-        results['portfolio_history'] = portfolio_history
-        results['total_commission'] = total_commission
-        results['total_slippage'] = total_slippage
-        
-        return results
+        # Calculate and return results
+        return self._compile_results(state, backtest_params)
     
-    def _close_position(self, position, exit_date, exit_price, exit_reason, trades, portfolio_history, backtest_params, total_commission, total_slippage):
-        """
-        Close a position and record the trade
+    def _process_bar(
+        self, 
+        df: pd.DataFrame, 
+        i: int, 
+        current_position: Optional[Dict], 
+        state: BacktestState,
+        backtest_params: BacktestParams,
+    ) -> Optional[Dict]:
+        """Process a single bar of data, managing positions and executing trades."""
+        # Check for entry conditions
+        if self._should_enter_position(df, i, current_position):
+            return self._enter_position(df, i, backtest_params, state)
         
-        Args:
-            position: The current position to close
-            exit_date: The date when the position is closed
-            exit_price: The price at which the position is closed
-            exit_reason: The reason for closing the position
-            trades: List to append the trade to
-            portfolio_history: List to append the portfolio value to
-            backtest_params: Backtest parameters
-            total_commission: Running total of commission paid
-            total_slippage: Running total of slippage cost
-        """
-        # Apply fixed dollar slippage to exit price
+        # Manage existing position
+        if current_position is not None:
+            return self._manage_position(
+                df, i, current_position, state,
+                backtest_params
+            )
+        
+        return current_position
+    
+    def _should_enter_position(self, df: pd.DataFrame, i: int, current_position: Optional[Dict]) -> bool:
+        """Determine if we should enter a new position."""
+        return df.iloc[i]['is_hammer'] and current_position is None
+    
+    def _enter_position(
+        self,
+        df: pd.DataFrame,
+        i: int,
+        backtest_params: BacktestParams,
+        state: BacktestState,
+    ) -> Dict:
+        """Enter a new position based on hammer pattern."""
+        entry_date = df.index[i + backtest_params.entry_delay]
+        base_entry_price = df.iloc[i + backtest_params.entry_delay]['Open']
+        
+        # Calculate position size and shares
+        position_size = state.current_portfolio_value
+        shares = position_size / base_entry_price
+        
+        # Apply slippage to entry price
+        slippage_cost = backtest_params.slippage
+        entry_price = base_entry_price + (slippage_cost / shares)
+        
+        # Calculate stop loss and take profit levels
+        stop_loss = entry_price * (1 - backtest_params.stop_loss_pct)
+        take_profit = entry_price * (1 + backtest_params.take_profit_pct)
+        
+        # Update costs
+        commission = backtest_params.commission
+        state.add_commission(commission)
+        state.add_slippage(slippage_cost)
+        
+        # Update portfolio value
+        new_portfolio_value = state.current_portfolio_value - commission - slippage_cost
+        state.update_portfolio_value(entry_date, new_portfolio_value)
+        
+        return {
+            'entry_date': entry_date,
+            'entry_price': entry_price,
+            'stop_loss': stop_loss,
+            'take_profit': take_profit,
+            'periods_held': 0,
+            'shares': shares,
+            'commission': commission,
+            'slippage_cost': slippage_cost
+        }
+    
+    def _manage_position(
+        self,
+        df: pd.DataFrame,
+        i: int,
+        current_position: Dict,
+        state: BacktestState,
+        backtest_params: BacktestParams,
+    ) -> Optional[Dict]:
+        """Manage an existing position, checking for exit conditions."""
+        if i + backtest_params.entry_delay >= len(df):
+            return self._close_position_at_end(
+                df, current_position, state,
+                backtest_params
+            )
+        
+        current_bar = df.iloc[i + backtest_params.entry_delay]
+        current_position['periods_held'] += 1
+        
+        # Check exit conditions
+        exit_conditions = self._check_exit_conditions(current_bar, current_position, backtest_params)
+        if exit_conditions:
+            exit_price, exit_reason = exit_conditions
+            self._close_position(
+                current_position, df.index[i + backtest_params.entry_delay],
+                exit_price, exit_reason, state,
+                backtest_params
+            )
+            return None
+        
+        return current_position
+    
+    def _check_exit_conditions(
+        self,
+        current_bar: pd.Series,
+        position: Dict,
+        backtest_params: BacktestParams
+    ) -> Optional[Tuple[float, str]]:
+        """Check if any exit conditions are met."""
+        if current_bar['Low'] <= position['stop_loss']:
+            return position['stop_loss'], 'stop_loss'
+        elif current_bar['High'] >= position['take_profit']:
+            return position['take_profit'], 'take_profit'
+        elif position['periods_held'] >= backtest_params.max_holding_periods:
+            return current_bar['Close'], 'max_periods'
+        return None
+    
+    def _close_position_at_end(
+        self,
+        df: pd.DataFrame,
+        position: Dict,
+        state: BacktestState,
+        backtest_params: BacktestParams,
+    ) -> None:
+        """Close position at the end of the data."""
+        exit_price = df.iloc[-1]['Close']
+        self._close_position(
+            position, df.index[-1], exit_price, 'end_of_data',
+            state, backtest_params
+        )
+    
+    def _close_position(
+        self,
+        position: Dict,
+        exit_date: pd.Timestamp,
+        exit_price: float,
+        exit_reason: str,
+        state: BacktestState,
+        backtest_params: BacktestParams,
+    ) -> None:
+        """Close a position and record the trade."""
+        # Apply slippage to exit price
         base_exit_price = exit_price
         slippage_cost = backtest_params.slippage
-        exit_price = base_exit_price - (slippage_cost / position['shares'])  # Adjust price by slippage per share
+        exit_price = base_exit_price - (slippage_cost / position['shares'])
         
         # Calculate profit/loss
         profit_pct = (exit_price - position['entry_price']) / position['entry_price']
         profit_amount = position['shares'] * (exit_price - position['entry_price'])
         
-        # Calculate commission
+        # Update costs
         commission = backtest_params.commission
+        state.add_commission(commission)
+        state.add_slippage(slippage_cost)
         
-        # Update totals
-        total_commission += commission
-        total_slippage += slippage_cost
+        # Update portfolio value
+        new_portfolio_value = state.current_portfolio_value + profit_amount - commission - slippage_cost
+        state.update_portfolio_value(exit_date, new_portfolio_value)
         
-        # Get the current portfolio value
-        current_portfolio_value = portfolio_history[-1]['value']
-        new_portfolio_value = current_portfolio_value + profit_amount - commission - slippage_cost
-        
-        # Record portfolio value
-        portfolio_history.append({
-            'date': exit_date,
-            'value': new_portfolio_value
-        })
-        
-        # Create and add the trade
-        trade = Trade(
+        # Record trade
+        state.add_trade(Trade(
             entry_date=position['entry_date'],
             exit_date=exit_date,
             entry_price=position['entry_price'],
@@ -213,23 +241,29 @@ class HammerBacktest:
             slippage_cost=slippage_cost,
             periods_held=position['periods_held'],
             exit_reason=exit_reason
-        )
-        trades.append(trade)
+        ))
+    
+    def _compile_results(
+        self,
+        state: BacktestState,
+        backtest_params: BacktestParams,
+    ) -> Dict[str, Any]:
+        """Compile all backtest results into a single dictionary."""
+        performance_metrics = self._calculate_performance_metrics(state.trades)
+        
+        return {
+            **performance_metrics,
+            'initial_portfolio_value': backtest_params.initial_portfolio_size,
+            'final_portfolio_value': state.current_portfolio_value,
+            'portfolio_history': state.portfolio_history,
+            'total_commission': state.total_commission,
+            'total_slippage': state.total_slippage
+        }
     
     def _calculate_performance_metrics(self, trades: List[Trade]) -> Dict[str, Any]:
-        """Calculate performance metrics from trades"""
+        """Calculate performance metrics from trades."""
         if not trades:
-            return {
-                'total_trades': 0,
-                'winning_trades': 0,
-                'losing_trades': 0,
-                'win_rate': 0,
-                'profit_factor': 0,
-                'average_profit': 0,
-                'total_profit_pct': 0,
-                'trades': [],
-                'hourly_performance': self._calculate_hourly_performance(trades)
-            }
+            return self._empty_performance_metrics()
         
         winning_trades = [t for t in trades if t.profit_pct > 0]
         losing_trades = [t for t in trades if t.profit_pct < 0]
@@ -238,10 +272,9 @@ class HammerBacktest:
         total_win = sum(t.profit_pct for t in winning_trades)
         total_loss = abs(sum(t.profit_pct for t in losing_trades))
         
-        # Ensure we don't divide by zero
-        win_rate = len(winning_trades) / len(trades) if trades else 0
+        win_rate = len(winning_trades) / len(trades)
         profit_factor = total_win / total_loss if total_loss > 0 else 0
-        average_profit = total_profit / len(trades) if trades else 0
+        average_profit = total_profit / len(trades)
         
         return {
             'total_trades': len(trades),
@@ -251,75 +284,76 @@ class HammerBacktest:
             'profit_factor': profit_factor,
             'average_profit': average_profit,
             'total_profit_pct': total_profit * 100,
-            'trades': [
-                {
-                    'entry_date': t.entry_date.strftime('%Y-%m-%d %H:%M'),
-                    'exit_date': t.exit_date.strftime('%Y-%m-%d %H:%M'),
-                    'entry_price': t.entry_price,
-                    'exit_price': t.exit_price,
-                    'profit_pct': t.profit_pct * 100,
-                    'profit_amount': t.profit_amount,
-                    'commission': t.commission,
-                    'slippage_cost': t.slippage_cost,
-                    'periods_held': t.periods_held,
-                    'exit_reason': t.exit_reason
-                }
-                for t in trades
-            ],
+            'trades': self._format_trades(trades),
             'hourly_performance': self._calculate_hourly_performance(trades)
         }
-        
-    def _calculate_hourly_performance(self, trades: List[Trade]) -> Dict[str, Any]:
-        """
-        Calculate performance metrics by hour of day
-        
-        Args:
-            trades: List of trades to analyze
-            
-        Returns:
-            Dictionary containing hourly performance metrics
-        """
-        if not trades:
-            return {
-                'hourly_trades': [0] * 24,
-                'hourly_profits': [0] * 24,
-                'hourly_win_rates': [0] * 24,
-                'hourly_avg_profits': [0] * 24
+    
+    def _empty_performance_metrics(self) -> Dict[str, Any]:
+        """Return empty performance metrics when there are no trades."""
+        return {
+            'total_trades': 0,
+            'winning_trades': 0,
+            'losing_trades': 0,
+            'win_rate': 0,
+            'profit_factor': 0,
+            'average_profit': 0,
+            'total_profit_pct': 0,
+            'trades': [],
+            'hourly_performance': self._calculate_hourly_performance([])
+        }
+    
+    def _format_trades(self, trades: List[Trade]) -> List[Dict]:
+        """Format trades for output."""
+        return [
+            {
+                'entry_date': t.entry_date.strftime('%Y-%m-%d %H:%M'),
+                'exit_date': t.exit_date.strftime('%Y-%m-%d %H:%M'),
+                'entry_price': t.entry_price,
+                'exit_price': t.exit_price,
+                'profit_pct': t.profit_pct * 100,
+                'profit_amount': t.profit_amount,
+                'commission': t.commission,
+                'slippage_cost': t.slippage_cost,
+                'periods_held': t.periods_held,
+                'exit_reason': t.exit_reason
             }
+            for t in trades
+        ]
+    
+    def _calculate_hourly_performance(self, trades: List[Trade]) -> Dict[str, Any]:
+        """Calculate performance metrics by hour of day."""
+        if not trades:
+            return self._empty_hourly_performance()
         
-        # Initialize arrays for each hour (0-23)
         hourly_trades = [0] * 24
         hourly_profits = [0] * 24
         hourly_wins = [0] * 24
         
-        # Calculate metrics for each hour
         for trade in trades:
-            # Extract hour from entry date
             hour = trade.entry_date.hour
-            
-            # Update counts and profits
             hourly_trades[hour] += 1
             hourly_profits[hour] += trade.profit_pct
-            
             if trade.profit_pct > 0:
                 hourly_wins[hour] += 1
-        
-        # Calculate win rates and average profits
-        hourly_win_rates = []
-        hourly_avg_profits = []
-        
-        for hour in range(24):
-            # Calculate win rate
-            win_rate = hourly_wins[hour] / hourly_trades[hour] if hourly_trades[hour] > 0 else 0
-            hourly_win_rates.append(win_rate)
-            
-            # Calculate average profit
-            avg_profit = hourly_profits[hour] / hourly_trades[hour] if hourly_trades[hour] > 0 else 0
-            hourly_avg_profits.append(avg_profit)
         
         return {
             'hourly_trades': hourly_trades,
             'hourly_profits': hourly_profits,
-            'hourly_win_rates': hourly_win_rates,
-            'hourly_avg_profits': hourly_avg_profits
+            'hourly_win_rates': [
+                hourly_wins[hour] / hourly_trades[hour] if hourly_trades[hour] > 0 else 0
+                for hour in range(24)
+            ],
+            'hourly_avg_profits': [
+                hourly_profits[hour] / hourly_trades[hour] if hourly_trades[hour] > 0 else 0
+                for hour in range(24)
+            ]
+        }
+    
+    def _empty_hourly_performance(self) -> Dict[str, Any]:
+        """Return empty hourly performance metrics."""
+        return {
+            'hourly_trades': [0] * 24,
+            'hourly_profits': [0] * 24,
+            'hourly_win_rates': [0] * 24,
+            'hourly_avg_profits': [0] * 24
         } 
