@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from tradinghub.services.stock_service import StockService
 from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
+from tradinghub.models.dto.elephant_bar_params import ElephantBarParams, ElephantBarAnalysisRequest
 from tradinghub.models.backtest.hammer_backtest import BacktestParams, HammerBacktest
 import pandas as pd
 
@@ -15,10 +16,15 @@ def index():
     """Redirect to hammer pattern analyzer page"""
     return redirect(url_for('main.hammer_analyzer'))
 
-@main_bp.route('/hammer')
+@main_bp.route('/hammer', strict_slashes=False)
 def hammer_analyzer():
     """Render the hammer pattern analyzer page"""
     return render_template('hammer_analyzer/index.html')
+
+@main_bp.route('/elephant-bar', strict_slashes=False)
+def elephant_bar_analyzer():
+    """Render the elephant bar pattern analyzer page"""
+    return render_template('elephant_bar_analyzer/index.html')
 
 @main_bp.route('/analyze', methods=['POST'])
 def analyze():
@@ -183,6 +189,41 @@ def backtest():
             }
         
         return jsonify(results)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@main_bp.route('/analyze-elephant-bar', methods=['POST'])
+def analyze_elephant_bar():
+    """Analyze stock data for elephant bar patterns"""
+    try:
+        data = request.json
+        
+        # Create pattern parameters
+        pattern_params = ElephantBarParams(
+            body_size_ratio=float(data.get('body_size_ratio', 0.7)),
+            shadow_ratio=float(data.get('shadow_ratio', 0.1)),
+            ma_period=int(data.get('ma_period', 20)),
+            require_green=data.get('require_green', True)
+        )
+        
+        # Add volume parameters if they exist in the request
+        if 'min_relative_volume' in data:
+            pattern_params.min_relative_volume = float(data.get('min_relative_volume', 1.0))
+            pattern_params.volume_lookback = int(data.get('volume_lookback', 20))
+        
+        # Create analysis request
+        request_obj = ElephantBarAnalysisRequest(
+            symbol=data.get('symbol', 'AAPL'),
+            days=int(data.get('days', 50)),
+            interval=data.get('interval', '5m'),
+            pattern_params=pattern_params
+        )
+        
+        # Perform analysis
+        result = stock_service.analyze_elephant_bar(request_obj)
+        
+        return jsonify(result.to_dict())
         
     except Exception as e:
         return jsonify({'error': str(e)}), 400 

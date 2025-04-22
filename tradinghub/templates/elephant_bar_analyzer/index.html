@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Elephant Bar Pattern Analyzer{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Elephant Bar Pattern Analyzer</h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Analysis Parameters</h5>
+                </div>
+                <div class="card-body">
+                    <form id="analysisForm">
+                        <div class="mb-3">
+                            <label for="symbol" class="form-label">Stock Symbol</label>
+                            <input type="text" class="form-control" id="symbol" name="symbol" value="AAPL" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="days" class="form-label">Days to Analyze</label>
+                            <input type="number" class="form-control" id="days" name="days" value="50" min="1" max="365" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="interval" class="form-label">Time Interval</label>
+                            <select class="form-select" id="interval" name="interval" required>
+                                <option value="1m">1 Minute</option>
+                                <option value="5m">5 Minutes</option>
+                                <option value="15m">15 Minutes</option>
+                                <option value="30m">30 Minutes</option>
+                                <option value="1h">1 Hour</option>
+                                <option value="1d">1 Day</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="body_size_ratio" class="form-label">Body Size Ratio</label>
+                            <input type="number" class="form-control" id="body_size_ratio" name="body_size_ratio" value="0.7" step="0.1" min="0" max="1" required>
+                            <small class="form-text text-muted">Ratio of body size to total candle size</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="shadow_ratio" class="form-label">Shadow Ratio</label>
+                            <input type="number" class="form-control" id="shadow_ratio" name="shadow_ratio" value="0.1" step="0.1" min="0" max="1" required>
+                            <small class="form-text text-muted">Maximum ratio of shadow to total candle size</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ma_period" class="form-label">Moving Average Period</label>
+                            <input type="number" class="form-control" id="ma_period" name="ma_period" value="20" min="1" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="require_green" name="require_green" checked>
+                            <label class="form-check-label" for="require_green">Require Green Candle</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Analyze</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Results</h5>
+                </div>
+                <div class="card-body">
+                    <div id="chartContainer" style="height: 400px;"></div>
+                    <div id="resultsTable" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    document.getElementById('analysisForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            symbol: document.getElementById('symbol').value,
+            days: parseInt(document.getElementById('days').value),
+            interval: document.getElementById('interval').value,
+            body_size_ratio: parseFloat(document.getElementById('body_size_ratio').value),
+            shadow_ratio: parseFloat(document.getElementById('shadow_ratio').value),
+            ma_period: parseInt(document.getElementById('ma_period').value),
+            require_green: document.getElementById('require_green').checked
+        };
+        
+        try {
+            const response = await fetch('/analyze-elephant-bar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Update chart
+                Plotly.newPlot('chartContainer', data.chart_data);
+                
+                // Update results table
+                const tableHtml = `
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Open</th>
+                                <th>High</th>
+                                <th>Low</th>
+                                <th>Close</th>
+                                <th>Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.patterns.map(pattern => `
+                                <tr>
+                                    <td>${pattern.date}</td>
+                                    <td>${pattern.open}</td>
+                                    <td>${pattern.high}</td>
+                                    <td>${pattern.low}</td>
+                                    <td>${pattern.close}</td>
+                                    <td>${pattern.volume}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('resultsTable').innerHTML = tableHtml;
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 
