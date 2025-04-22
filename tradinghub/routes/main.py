@@ -15,7 +15,7 @@ def index():
     """Redirect to hammer pattern analyzer page"""
     return redirect(url_for('main.hammer_analyzer'))
 
-@main_bp.route('/hammer')
+@main_bp.route('/hammer', strict_slashes=False)
 def hammer_analyzer():
     """Render the hammer pattern analyzer page"""
     return render_template('hammer_analyzer/index.html')
