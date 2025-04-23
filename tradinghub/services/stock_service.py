@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 from typing import Dict, Any
-from tradinghub.models.patterns.hammer_pattern import HammerPattern
+from tradinghub.patterns.hammer_pattern import HammerPattern
 from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
 from tradinghub.models.dto.analysis_results import PatternResult, AnalysisResult
 from tradinghub.utils.time_utils import convert_to_israel_time
