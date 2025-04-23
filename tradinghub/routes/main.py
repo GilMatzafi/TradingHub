@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from tradinghub.services.stock_service import StockService
 from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.models.backtest.hammer_backtest import BacktestParams, HammerBacktest
+from tradinghub.backtest.hammer_backtest import BacktestParams, HammerBacktest
 import pandas as pd
 
 # Create blueprint
