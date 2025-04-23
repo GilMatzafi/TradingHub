@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Any, List
 import pandas as pd
-from .performance_analyzer import Trade
+from tradinghub.models.dto.trade_results import Trade
 
 @dataclass
 class TradeParams:
