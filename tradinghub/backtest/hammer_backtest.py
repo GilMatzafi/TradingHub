@@ -3,7 +3,8 @@ import pandas as pd
 from ..patterns.hammer_pattern import HammerPattern
 from ..models.dto.backtest_params import BacktestParams
 from .performance_analyzer import PerformanceAnalyzer
-from .trade_executor import TradeExecutor, TradeParams
+from .trade_executor import TradeExecutor
+from ..models.dto.trade_params import TradeParams
 
 class HammerBacktest:
     def __init__(self):
