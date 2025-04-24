@@ -7,6 +7,15 @@ from tradinghub.utils.candlestick_utils import CandlestickUtils
 class HammerPattern(BasePattern):
     """Detector for hammer candlestick patterns"""
     
+    def get_pattern_column_name(self) -> str:
+        """
+        Get the name of the column that indicates hammer pattern presence
+        
+        Returns:
+            str: Name of the hammer pattern column
+        """
+        return 'is_hammer'
+    
     def detect(self, df: pd.DataFrame, params: Dict[str, Any]) -> pd.DataFrame:
         """
         Detect hammer patterns in the given dataframe

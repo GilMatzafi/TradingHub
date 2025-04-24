@@ -5,6 +5,8 @@ from ..models.dto.pattern_params import PatternParams
 from ..services.backtest_service import BacktestService
 
 class BacktestController:
+    """Controller for handling backtest requests"""
+    
     def __init__(self):
         self.backtest_service = BacktestService()
 
@@ -44,8 +46,9 @@ class BacktestController:
                 slippage=float(data.get('slippage', 0.1))
             )
             
-            # Get patterns from request
+            # Get patterns and pattern type from request
             patterns = data.get('patterns', [])
+            pattern_type = data.get('pattern_type', 'hammer')
             
             # Run backtest
             results = self.backtest_service.run_backtest(
@@ -54,7 +57,8 @@ class BacktestController:
                 interval=data.get('interval', '5m'),
                 pattern_params=pattern_params,
                 backtest_params=backtest_params,
-                patterns=patterns
+                patterns=patterns,
+                pattern_type=pattern_type
             )
             
             return jsonify(results), 200

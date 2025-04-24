@@ -1,14 +1,37 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Type
 import pandas as pd
 from ..models.dto.backtest_params import BacktestParams
 from ..models.dto.pattern_params import PatternParams
+from ..backtest.base_backtest import BaseBacktest
 from ..backtest.hammer_backtest import HammerBacktest
 from ..services.stock_service import StockService
 
 class BacktestService:
+    """Service for running backtests on different pattern strategies"""
+    
     def __init__(self):
         self.stock_service = StockService()
-        self.backtester = HammerBacktest()
+        self.backtesters = {
+            'hammer': HammerBacktest()
+            # Add more pattern backtesters here as they are implemented
+        }
+    
+    def get_backtester(self, pattern_type: str) -> BaseBacktest:
+        """
+        Get the appropriate backtester for the given pattern type
+        
+        Args:
+            pattern_type: Type of pattern to backtest
+            
+        Returns:
+            BaseBacktest instance for the given pattern type
+            
+        Raises:
+            ValueError: If pattern type is not supported
+        """
+        if pattern_type not in self.backtesters:
+            raise ValueError(f'Unsupported pattern type: {pattern_type}')
+        return self.backtesters[pattern_type]
 
     def run_backtest(self, 
                     symbol: str, 
@@ -16,7 +39,8 @@ class BacktestService:
                     interval: str,
                     pattern_params: PatternParams,
                     backtest_params: BacktestParams,
-                    patterns: List[Dict[str, Any]]) -> Dict[str, Any]:
+                    patterns: List[Dict[str, Any]],
+                    pattern_type: str = 'hammer') -> Dict[str, Any]:
         """
         Run a backtest for the given parameters
         
@@ -27,6 +51,7 @@ class BacktestService:
             pattern_params: Parameters for pattern detection
             backtest_params: Parameters for backtesting
             patterns: List of pattern data to backtest
+            pattern_type: Type of pattern to backtest (default: 'hammer')
             
         Returns:
             Dictionary containing backtest results
@@ -69,17 +94,21 @@ class BacktestService:
         # Create a list of pattern dates for matching
         pattern_dates = patterns_df['date'].tolist()
         
-        # Mark hammer patterns in the main dataframe
-        df['is_hammer'] = False
+        # Get the appropriate backtester
+        backtester = self.get_backtester(pattern_type)
+        
+        # Mark patterns in the main dataframe
+        pattern_column = backtester.pattern_detector.get_pattern_column_name()
+        df[pattern_column] = False
         for date in pattern_dates:
             # Find the closest date in the dataframe
             closest_idx = df.index[df.index.get_indexer([date], method='nearest')[0]]
-            df.loc[closest_idx, 'is_hammer'] = True
+            df.loc[closest_idx, pattern_column] = True
         
         # Filter df to only include data around pattern dates
         # Include data before and after each pattern for backtesting
         lookback = max(backtest_params.entry_delay, backtest_params.max_holding_periods)
-        pattern_indices = df[df['is_hammer']].index
+        pattern_indices = df[df[pattern_column]].index
         
         # Create a mask for rows to include
         include_mask = pd.Series(False, index=df.index)
@@ -98,7 +127,7 @@ class BacktestService:
             raise ValueError('No matching data found for the provided patterns')
         
         # Run backtest
-        results = self.backtester.run_backtest(df, pattern_params.__dict__, backtest_params)
+        results = backtester.run_backtest(df, pattern_params.__dict__, backtest_params)
         
         # Ensure all required fields are present in the results
         if not results:

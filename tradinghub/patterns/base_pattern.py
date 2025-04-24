@@ -17,4 +17,14 @@ class BasePattern(ABC):
         Returns:
             pd.DataFrame: DataFrame with pattern detection results
         """
+        pass
+    
+    @abstractmethod
+    def get_pattern_column_name(self) -> str:
+        """
+        Get the name of the column that indicates pattern presence
+        
+        Returns:
+            str: Name of the pattern column
+        """
         pass 
