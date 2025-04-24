@@ -1,18 +1,22 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 import pandas as pd
-from ..patterns.hammer_pattern import HammerPattern
+from ..patterns.base_pattern import BasePattern
 from ..models.dto.backtest_params import BacktestParams
 from .performance_analyzer import PerformanceAnalyzer
 from .trade_executor import TradeExecutor
 from ..models.dto.trade_params import TradeParams
-from .base_backtest import BaseBacktest
 
-class HammerBacktest(BaseBacktest):
-    """Backtester for hammer pattern strategy"""
+class BaseBacktest:
+    """Base class for all pattern backtesters"""
     
-    def __init__(self):
-        """Initialize the hammer backtester"""
-        super().__init__(HammerPattern())
+    def __init__(self, pattern_detector: BasePattern):
+        """
+        Initialize the backtester
+        
+        Args:
+            pattern_detector: Pattern detector instance that implements BasePattern
+        """
+        self.pattern_detector = pattern_detector
         self.performance_analyzer = PerformanceAnalyzer()
     
     def run_backtest(self, df: pd.DataFrame, pattern_params: Dict[str, Any], backtest_params: BacktestParams) -> Dict[str, Any]:
@@ -21,15 +25,16 @@ class HammerBacktest(BaseBacktest):
         
         Args:
             df: DataFrame with OHLC data
-            pattern_params: Parameters for hammer pattern detection
+            pattern_params: Parameters for pattern detection
             backtest_params: Parameters for backtesting
             
         Returns:
             Dictionary containing backtest results
         """
-        # Detect hammer patterns if not already detected
-        if 'is_hammer' not in df.columns:
-            df = self.hammer_detector.detect(df, pattern_params)
+        # Detect patterns if not already detected
+        pattern_column = self.pattern_detector.get_pattern_column_name()
+        if pattern_column not in df.columns:
+            df = self.pattern_detector.detect(df, pattern_params)
         
         # Initialize trade executor
         trade_params = TradeParams(
@@ -49,8 +54,8 @@ class HammerBacktest(BaseBacktest):
         
         # Iterate through data
         for i in range(len(df) - backtest_params.entry_delay):
-            # Check if this is a hammer pattern and we don't have an open position
-            if df.iloc[i]['is_hammer']:
+            # Check if this is a pattern and we don't have an open position
+            if df.iloc[i][pattern_column]:
                 # Enter position after entry_delay
                 if i + backtest_params.entry_delay < len(df):
                     entry_date = df.index[i + backtest_params.entry_delay]
