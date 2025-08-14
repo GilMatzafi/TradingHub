@@ -1,7 +1,7 @@
 from typing import Dict, Any, Tuple
 from flask import jsonify
 from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.services.stock_service import StockService
+from tradinghub.services.stock_service import StockService, RateLimitError
 
 class AnalyzeController:
     def __init__(self):
@@ -44,5 +44,8 @@ class AnalyzeController:
             result = self.stock_service.analyze_stock(request_obj)
             return jsonify(result.to_dict()), 200
 
+        except RateLimitError as e:
+            # Return 429 (Too Many Requests) for rate limiting errors
+            return jsonify({'error': str(e)}), 429
         except Exception as e:
             return jsonify({'error': str(e)}), 400
