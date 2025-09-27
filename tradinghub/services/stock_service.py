@@ -13,22 +13,15 @@ from tradinghub.config.config import Config
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class RateLimitError(Exception):
-    """Custom exception for rate limiting errors"""
-    pass
 
 class StockService:
     """Service for handling stock data operations"""
     
     def __init__(self, config: Config = None):
         self.hammer_detector = HammerPattern()
-        self._last_request_time = 0
         self.config = config or Config()
-        self._min_request_interval = self.config.MIN_REQUEST_INTERVAL
         self._cache = {}  # Simple in-memory cache
         self._cache_ttl = self.config.CACHE_TTL  # Cache TTL in seconds
-        self._request_count = 0
-        self._last_reset_time = time.time()
     
     def _get_cache_key(self, symbol: str, start_date: str, end_date: str, interval: str) -> str:
         """Generate a cache key for the request"""
@@ -58,59 +51,10 @@ class StockService:
         self._cache.clear()
         logger.info("Cache cleared")
     
-    def reset_rate_limiting(self):
-        """Reset rate limiting counters - useful for troubleshooting"""
-        self._request_count = 0
-        self._last_reset_time = time.time()
-        self._last_request_time = 0
-        logger.info("Rate limiting counters reset")
     
-    def get_rate_limit_status(self):
-        """Get current rate limiting status for debugging"""
-        current_time = time.time()
-        time_since_last_request = current_time - self._last_request_time
-        time_since_reset = current_time - self._last_reset_time
-        
-        return {
-            'request_count': self._request_count,
-            'time_since_last_request': time_since_last_request,
-            'time_since_reset': time_since_reset,
-            'cache_size': len(self._cache)
-        }
-    
-    def _rate_limit(self):
-        """Implement rate limiting to avoid hitting Yahoo Finance API limits"""
-        current_time = time.time()
-        
-        # Reset request count every hour
-        if current_time - self._last_reset_time > 3600:
-            self._request_count = 0
-            self._last_reset_time = current_time
-        
-        # More aggressive rate limiting for intraday data
-        if self._request_count > 100:  # Limit to 100 requests per hour
-            wait_time = 60  # Wait 1 minute
-            logger.warning(f"Rate limit exceeded. Waiting {wait_time} seconds...")
-            time.sleep(wait_time)
-            self._request_count = 0
-            self._last_reset_time = current_time
-        
-        time_since_last_request = current_time - self._last_request_time
-        
-        # Increase minimum interval for intraday data
-        min_interval = 2.0 if self._request_count > 50 else self._min_request_interval
-        
-        if time_since_last_request < min_interval:
-            sleep_time = min_interval - time_since_last_request
-            logger.info(f"Rate limiting: waiting {sleep_time:.2f} seconds")
-            time.sleep(sleep_time)
-        
-        self._last_request_time = time.time()
-        self._request_count += 1
-    
-    def _download_with_retry(self, symbol: str, start_date: str, end_date: str, interval: str) -> pd.DataFrame:
+    def _download_stock_data(self, symbol: str, start_date: str, end_date: str, interval: str) -> pd.DataFrame:
         """
-        Download stock data with retry logic for rate limiting
+        Download stock data from Yahoo Finance
         
         Args:
             symbol: Stock symbol
@@ -121,61 +65,26 @@ class StockService:
         Returns:
             DataFrame with stock data
         """
-        last_exception = None
-        
-        for attempt in range(self.config.MAX_RETRY_ATTEMPTS):
-            try:
-                logger.info(f"Attempt {attempt + 1}/{self.config.MAX_RETRY_ATTEMPTS} to download {symbol} data")
-                self._rate_limit()
-                
-                stock = yf.Ticker(symbol)
-                logger.info(f"Downloading {symbol} data from {start_date} to {end_date} with interval {interval}")
-                
-                df = stock.history(
-                    start=start_date,
-                    end=end_date,
-                    interval=interval
-                )
-                
-                logger.info(f"Downloaded {len(df)} rows of data for {symbol}")
-                
-                # Check if we got rate limited
-                if df.empty:
-                    if interval in ['1m', '2m', '5m', '15m', '30m']:
-                        logger.warning(f"Empty data for intraday interval {interval} - possible rate limiting")
-                        raise RateLimitError("Rate limited by Yahoo Finance API")
-                    else:
-                        logger.warning(f"Empty data for {symbol} - symbol may not exist or no data available")
-                
-                return df
-                
-            except Exception as e:
-                last_exception = e
-                error_msg = str(e).lower()
-                logger.error(f"Error downloading {symbol} data (attempt {attempt + 1}): {e}")
-                
-                # Check if this is a retryable error
-                is_retryable = False
-                if any(keyword in error_msg for keyword in ['rate limit', 'too many requests', '429']):
-                    logger.error(f"Rate limit detected for {symbol}")
-                    raise RateLimitError(f"Rate limited by Yahoo Finance API: {e}")
-                elif any(keyword in error_msg for keyword in ['timeout', 'connection', 'network']):
-                    is_retryable = True
-                    logger.info(f"Network error for {symbol} - will retry")
-                
-                # If not the last attempt and error is retryable, wait and retry
-                if attempt < self.config.MAX_RETRY_ATTEMPTS - 1 and is_retryable:
-                    wait_time = min(self.config.RETRY_WAIT_MAX, 
-                                  self.config.RETRY_WAIT_MIN * (2 ** attempt))
-                    logger.info(f"Waiting {wait_time} seconds before retry...")
-                    time.sleep(wait_time)
-                    continue
-                else:
-                    logger.error(f"All retry attempts failed for {symbol}")
-                    break
-        
-        # If we get here, all retries failed
-        raise last_exception
+        try:
+            stock = yf.Ticker(symbol)
+            logger.info(f"Downloading {symbol} data from {start_date} to {end_date} with interval {interval}")
+            
+            df = stock.history(
+                start=start_date,
+                end=end_date,
+                interval=interval
+            )
+            
+            logger.info(f"Downloaded {len(df)} rows of data for {symbol}")
+            
+            if df.empty:
+                logger.warning(f"Empty data for {symbol} - symbol may not exist or no data available")
+            
+            return df
+            
+        except Exception as e:
+            logger.error(f"Error downloading {symbol} data: {e}")
+            raise e
 
     def analyze_stock(self, request: AnalysisRequest) -> AnalysisResult:
         """
@@ -221,7 +130,7 @@ class StockService:
     
     def download_stock_data(self, symbol: str, days: int, interval: str) -> pd.DataFrame:
         """
-        Download stock data from Yahoo Finance with rate limiting
+        Download stock data from Yahoo Finance
         
         Args:
             symbol (str): Stock symbol
@@ -243,7 +152,7 @@ class StockService:
             return cached_data
         
         try:
-            df = self._download_with_retry(
+            df = self._download_stock_data(
                 symbol,
                 start_date.strftime('%Y-%m-%d'),
                 end_date.strftime('%Y-%m-%d'),
@@ -251,9 +160,6 @@ class StockService:
             )
             self._set_cached_data(cache_key, df)
             return df
-        except RateLimitError as e:
-            # Re-raise with a more user-friendly message
-            raise RateLimitError("Too Many Requests. Rate limited. Try after a while.")
         except Exception as e:
-            # Re-raise other exceptions
+            # Re-raise exceptions
             raise e 

@@ -32,22 +32,6 @@ def backtest():
     """Run backtest for hammer pattern strategy"""
     return backtest_controller.run_backtest(request.json)
 
-@main_bp.route('/debug/rate-limit', methods=['GET'])
-def debug_rate_limit():
-    """Debug endpoint to check rate limiting status"""
-    try:
-        status = stock_service.get_rate_limit_status()
-        return jsonify({
-            'status': 'success',
-            'rate_limit_status': status,
-            'message': 'Rate limiting status retrieved successfully'
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'error': str(e)
-        }), 500
-
 @main_bp.route('/debug/clear-cache', methods=['POST'])
 def debug_clear_cache():
     """Debug endpoint to clear cache"""
@@ -56,21 +40,6 @@ def debug_clear_cache():
         return jsonify({
             'status': 'success',
             'message': 'Cache cleared successfully'
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'error': str(e)
-        }), 500
-
-@main_bp.route('/debug/reset-rate-limit', methods=['POST'])
-def debug_reset_rate_limit():
-    """Debug endpoint to reset rate limiting"""
-    try:
-        stock_service.reset_rate_limiting()
-        return jsonify({
-            'status': 'success',
-            'message': 'Rate limiting reset successfully'
         })
     except Exception as e:
         return jsonify({

@@ -21,12 +21,8 @@ class Config:
     DEFAULT_MA_PERIOD = 5
     DEFAULT_REQUIRE_GREEN = True
     
-    # Rate limiting configuration
-    MIN_REQUEST_INTERVAL = float(os.environ.get('MIN_REQUEST_INTERVAL', 1.0))  # seconds between requests
+    # Cache configuration
     CACHE_TTL = int(os.environ.get('CACHE_TTL', 300))  # cache TTL in seconds (5 minutes)
-    MAX_RETRY_ATTEMPTS = int(os.environ.get('MAX_RETRY_ATTEMPTS', 3))  # max retry attempts
-    RETRY_WAIT_MIN = int(os.environ.get('RETRY_WAIT_MIN', 4))  # min wait time between retries
-    RETRY_WAIT_MAX = int(os.environ.get('RETRY_WAIT_MAX', 10))  # max wait time between retries
 
 
 class DevelopmentConfig(Config):
