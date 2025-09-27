@@ -1,5 +1,5 @@
 /**
- * FormHandler - Handles form submission and API interactions for the hammer strategy
+ * FormHandler - Handles form submission and API interactions for the elephant bar strategy
  */
 export class FormHandler {
     /**
@@ -52,9 +52,8 @@ export class FormHandler {
             symbol: document.getElementById('symbol').value.toUpperCase(),
             days: document.getElementById('days').value,
             interval: document.getElementById('interval').value,
-            body_size_ratio: document.getElementById('body_size_ratio').value,
-            lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
-            upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
+            elephant_body_ratio: document.getElementById('elephant_body_ratio').value,
+            shadow_ratio: document.getElementById('shadow_ratio').value,
             ma_period: document.getElementById('ma_period').value,
             require_green: document.getElementById('require_green').checked
         };

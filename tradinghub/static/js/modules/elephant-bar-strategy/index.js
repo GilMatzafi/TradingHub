@@ -1,6 +1,6 @@
 /**
- * Main Hammer Strategy Module
- * Orchestrates all components of the hammer strategy functionality
+ * Main Elephant Bar Strategy Module
+ * Orchestrates all components of the elephant bar strategy functionality
  */
 import { CandlestickVisualizer } from './candlestick-visualizer.js';
 import { PatternDataManager } from './pattern-data-manager.js';
@@ -8,9 +8,9 @@ import { ResultsRenderer } from './results-renderer.js';
 import { FormHandler } from './form-handler.js';
 
 /**
- * HammerStrategy - Main class that orchestrates all components
+ * ElephantBarStrategy - Main class that orchestrates all components
  */
-export class HammerStrategy {
+export class ElephantBarStrategy {
     constructor() {
         // Initialize components
         this.visualizer = new CandlestickVisualizer();
@@ -23,7 +23,7 @@ export class HammerStrategy {
     }
 
     /**
-     * Initialize the hammer strategy
+     * Initialize the elephant bar strategy
      */
     initialize() {
         // Initialize visualization
@@ -31,20 +31,3 @@ export class HammerStrategy {
         this.visualizer.initializeEventListeners();
     }
 } 
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize components
-    const patternDataManager = new PatternDataManager();
-    const resultsRenderer = new ResultsRenderer();
-    const formHandler = new FormHandler(patternDataManager, resultsRenderer);
-    const candlestickVisualizer = new CandlestickVisualizer();
-    
-    // Make components globally available for debugging
-    window.hammerStrategy = {
-        formHandler,
-        patternDataManager,
-        resultsRenderer,
-        candlestickVisualizer
-    };
-}); 
