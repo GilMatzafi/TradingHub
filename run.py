@@ -1,5 +1,5 @@
 from tradinghub import create_app
-from tradinghub.config.config import DevelopmentConfig
+from tradinghub.backend.config.config import DevelopmentConfig
 
 app = create_app(DevelopmentConfig)
 

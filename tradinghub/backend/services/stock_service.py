@@ -3,12 +3,12 @@ import pandas as pd
 from typing import Dict, Any
 import time
 import logging
-from tradinghub.patterns.hammer_pattern import HammerPattern
-from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.models.dto.analysis_results import PatternResult, AnalysisResult
-from tradinghub.utils.time_utils import convert_to_israel_time
-from tradinghub.config.config import Config
-from tradinghub.config.pattern_registry import PatternRegistry
+from tradinghub.backend.patterns.hammer_pattern import HammerPattern
+from tradinghub.backend.models.dto.pattern_params import PatternParams, AnalysisRequest
+from tradinghub.backend.models.dto.analysis_results import PatternResult, AnalysisResult
+from tradinghub.backend.utils.time_utils import convert_to_israel_time
+from tradinghub.backend.config.config import Config
+from tradinghub.backend.config.pattern_registry import PatternRegistry
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

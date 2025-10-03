@@ -1,7 +1,7 @@
 from flask import request, jsonify
 import pandas as pd
-from tradinghub.models.dto.backtest_params import BacktestParams
-from tradinghub.backtest.hammer_backtest import HammerBacktest
+from tradinghub.backend.models.dto.backtest_params import BacktestParams
+from tradinghub.backend.backtest.hammer_backtest import HammerBacktest
 
 @app.route('/backtest', methods=['POST'])
 def backtest():

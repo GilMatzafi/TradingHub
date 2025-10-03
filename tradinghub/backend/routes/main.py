@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
-from tradinghub.services.stock_service import StockService
-from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.controllers.backtest_controller import BacktestController
-from tradinghub.controllers.analyze_controller import AnalyzeController
-from tradinghub.config.pattern_registry import PatternRegistry
+from tradinghub.backend.services.stock_service import StockService
+from tradinghub.backend.models.dto.pattern_params import PatternParams, AnalysisRequest
+from tradinghub.backend.controllers.backtest_controller import BacktestController
+from tradinghub.backend.controllers.analyze_controller import AnalyzeController
+from tradinghub.backend.config.pattern_registry import PatternRegistry
 
 
 # Create blueprint

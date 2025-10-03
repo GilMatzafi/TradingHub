@@ -1,7 +1,7 @@
 from typing import Dict, Any, Tuple
 from flask import jsonify
-from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.services.stock_service import StockService
+from tradinghub.backend.models.dto.pattern_params import PatternParams, AnalysisRequest
+from tradinghub.backend.services.stock_service import StockService
 
 class AnalyzeController:
     def __init__(self):
