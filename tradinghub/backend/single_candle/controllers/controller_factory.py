@@ -6,6 +6,7 @@ from typing import Dict, Any, Tuple
 from .hammer_controller import HammerController
 from .doji_controller import DojiController
 from .elephant_bar_controller import ElephantBarController
+from .marubozu_controller import MarubozuController
 
 class ControllerFactory:
     """Factory for creating pattern-specific controllers"""
@@ -15,6 +16,7 @@ class ControllerFactory:
             'hammer': HammerController(),
             'doji': DojiController(),
             'elephant_bar': ElephantBarController(),
+            'marubozu': MarubozuController(),
         }
     
     def get_controller(self, pattern_type: str):

@@ -1,0 +1,68 @@
+{% macro pattern_params() %}
+<div class="pattern-params">
+    <h6 class="mb-3">
+        <i class="bi bi-gear me-2"></i>Marubozu Pattern Parameters
+    </h6>
+    
+    <!-- Minimum Body Ratio -->
+    <div class="mb-3">
+        <label for="min_body_ratio" class="form-label">
+            Minimum Body Ratio: <span id="min_body_ratio_value">0.90</span>
+        </label>
+        <input type="range" class="form-range" id="min_body_ratio" 
+               min="0.70" max="0.95" step="0.01" value="0.90">
+        <div class="form-text">Body must be at least this fraction of total range (0.90 = 90%)</div>
+    </div>
+    
+    <!-- Maximum Shadow Ratio -->
+    <div class="mb-3">
+        <label for="max_shadow_ratio" class="form-label">
+            Maximum Shadow Ratio: <span id="max_shadow_ratio_value">0.05</span>
+        </label>
+        <input type="range" class="form-range" id="max_shadow_ratio" 
+               min="0.01" max="0.10" step="0.01" value="0.05">
+        <div class="form-text">Shadows must be at most this fraction of total range (0.05 = 5%)</div>
+    </div>
+    
+    <!-- Moving Average Period -->
+    <div class="mb-3">
+        <label for="ma_period" class="form-label">
+            Moving Average Period: <span id="ma_period_value">5</span>
+        </label>
+        <input type="range" class="form-range" id="ma_period" 
+               min="3" max="20" step="1" value="5">
+        <div class="form-text">Period for moving average calculation</div>
+    </div>
+    
+    <!-- Require High Volume -->
+    <div class="mb-3">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_high_volume" value="false">
+            <label class="form-check-label" for="require_high_volume">
+                Require High Volume
+            </label>
+        </div>
+        <div class="form-text">Only detect patterns with above-average volume</div>
+    </div>
+    
+    <!-- Minimum Relative Volume -->
+    <div class="mb-3" id="volume_threshold_section" style="display: none;">
+        <label for="min_relative_volume" class="form-label">
+            Minimum Relative Volume: <span id="min_relative_volume_value">1.0</span>
+        </label>
+        <input type="range" class="form-range" id="min_relative_volume" 
+               min="0.5" max="3.0" step="0.1" value="1.0">
+        <div class="form-text">Minimum volume relative to average (1.0 = average volume)</div>
+    </div>
+    
+    <!-- Volume Lookback Period -->
+    <div class="mb-3" id="volume_lookback_section" style="display: none;">
+        <label for="volume_lookback" class="form-label">
+            Volume Lookback Period: <span id="volume_lookback_value">20</span>
+        </label>
+        <input type="range" class="form-range" id="volume_lookback" 
+               min="10" max="50" step="5" value="20">
+        <div class="form-text">Number of periods to calculate volume average</div>
+    </div>
+</div>
+{% endmacro %}

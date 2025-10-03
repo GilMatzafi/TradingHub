@@ -1,0 +1,26 @@
+{% extends "shared/base_analyzer.html" %}
+{% from "marubozu_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "marubozu_analyzer/components/pattern_params.html" import pattern_params %}
+{% from "shared/components/volume_params.html" import volume_params %}
+
+{% block title %}TradingHub - Marubozu Pattern Detector{% endblock %}
+
+{% set pattern_name = "Marubozu" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+    {{ volume_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Marubozu-specific form fields can be added here if needed -->
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Marubozu-specific JavaScript -->
+    <script type="module" src="{{ url_for('static', filename='js/modules/marubozu-strategy/index.js') }}"></script>
+{% endblock %}
