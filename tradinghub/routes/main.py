@@ -3,6 +3,7 @@ from tradinghub.services.stock_service import StockService
 from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
 from tradinghub.controllers.backtest_controller import BacktestController
 from tradinghub.controllers.analyze_controller import AnalyzeController
+from tradinghub.config.pattern_registry import PatternRegistry
 
 
 # Create blueprint
@@ -18,10 +19,27 @@ def index():
     """Redirect to hammer pattern analyzer page"""
     return redirect(url_for('main.hammer_analyzer'))
 
-@main_bp.route('/hammer', strict_slashes=False)
-def hammer_analyzer():
-    """Render the hammer pattern analyzer page"""
-    return render_template('hammer_analyzer/index.html')
+# Dynamically register routes for all available patterns
+def register_pattern_routes():
+    """Register routes for all available patterns"""
+    for pattern_type in PatternRegistry.get_available_patterns():
+        config = PatternRegistry.get_pattern_config(pattern_type)
+        template = config.get('template')
+        
+        if template:
+            # Create route function dynamically
+            def create_route_func(pattern_name, template_name):
+                def route_func():
+                    return render_template(f'{template_name}/index.html')
+                route_func.__name__ = f'{pattern_name}_analyzer'
+                return route_func
+            
+            # Register the route
+            route_func = create_route_func(pattern_type, template)
+            main_bp.add_url_rule(f'/{pattern_type}', f'{pattern_type}_analyzer', route_func, strict_slashes=False)
+
+# Register all pattern routes (including hammer)
+register_pattern_routes()
 
 @main_bp.route('/analyze', methods=['POST'])
 def analyze():
@@ -31,6 +49,34 @@ def analyze():
 def backtest():
     """Run backtest for hammer pattern strategy"""
     return backtest_controller.run_backtest(request.json)
+
+@main_bp.route('/patterns', methods=['GET'])
+def get_patterns():
+    """Get list of available patterns"""
+    try:
+        patterns = []
+        for pattern_type in PatternRegistry.get_available_patterns():
+            config = PatternRegistry.get_pattern_config(pattern_type)
+            patterns.append({
+                'type': pattern_type,
+                'name': config['name'],
+                'description': config['description'],
+                'implemented': config['pattern_class'] is not None and config['backtest_class'] is not None
+            })
+        return jsonify({'patterns': patterns})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@main_bp.route('/patterns/<pattern_type>', methods=['GET'])
+def get_pattern_metadata(pattern_type):
+    """Get metadata for a specific pattern"""
+    try:
+        metadata = PatternRegistry.get_pattern_metadata(pattern_type)
+        return jsonify(metadata)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @main_bp.route('/debug/clear-cache', methods=['POST'])
 def debug_clear_cache():

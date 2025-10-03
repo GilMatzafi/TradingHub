@@ -8,6 +8,7 @@ from tradinghub.models.dto.pattern_params import PatternParams, AnalysisRequest
 from tradinghub.models.dto.analysis_results import PatternResult, AnalysisResult
 from tradinghub.utils.time_utils import convert_to_israel_time
 from tradinghub.config.config import Config
+from tradinghub.config.pattern_registry import PatternRegistry
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -18,10 +19,10 @@ class StockService:
     """Service for handling stock data operations"""
     
     def __init__(self, config: Config = None):
-        self.hammer_detector = HammerPattern()
         self.config = config or Config()
         self._cache = {}  # Simple in-memory cache
         self._cache_ttl = self.config.CACHE_TTL  # Cache TTL in seconds
+        self._pattern_detectors = {}  # Cache for pattern detectors
     
     def _get_cache_key(self, symbol: str, start_date: str, end_date: str, interval: str) -> str:
         """Generate a cache key for the request"""
@@ -50,6 +51,27 @@ class StockService:
         """Clear the cache - useful for troubleshooting"""
         self._cache.clear()
         logger.info("Cache cleared")
+    
+    def _get_pattern_detector(self, pattern_type: str):
+        """
+        Get or create a pattern detector for the given pattern type
+        
+        Args:
+            pattern_type: Type of pattern (e.g., 'hammer', 'doji')
+            
+        Returns:
+            Pattern detector instance
+        """
+        if pattern_type not in self._pattern_detectors:
+            try:
+                pattern_class = PatternRegistry.get_pattern_class(pattern_type)
+                self._pattern_detectors[pattern_type] = pattern_class()
+                logger.info(f"Created pattern detector for {pattern_type}")
+            except ValueError as e:
+                logger.error(f"Failed to create pattern detector for {pattern_type}: {e}")
+                raise e
+        
+        return self._pattern_detectors[pattern_type]
     
     
     def _download_stock_data(self, symbol: str, start_date: str, end_date: str, interval: str) -> pd.DataFrame:
@@ -106,15 +128,19 @@ class StockService:
         if df.empty:
             return AnalysisResult(count=0, patterns=[])
         
-        # Detect patterns
-        df = self.hammer_detector.detect(df, request.pattern_params.__dict__)
+        # Get pattern detector from registry
+        pattern_detector = self._get_pattern_detector(request.pattern_type)
         
-        # Find patterns
-        hammers = df[df['is_hammer']]
+        # Detect patterns
+        df = pattern_detector.detect(df, request.pattern_params.__dict__)
+        
+        # Find patterns using the pattern column name
+        pattern_column = pattern_detector.get_pattern_column_name()
+        patterns_found = df[df[pattern_column]]
         
         # Convert to result objects
         patterns = []
-        for date, row in hammers.iterrows():
+        for date, row in patterns_found.iterrows():
             israel_time = convert_to_israel_time(date)
             pattern = PatternResult(
                 date=israel_time,

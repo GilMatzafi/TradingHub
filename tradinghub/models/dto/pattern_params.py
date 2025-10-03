@@ -18,6 +18,7 @@ class AnalysisRequest:
     symbol: str
     days: int
     interval: str
+    pattern_type: str = 'hammer'
     pattern_params: Optional[PatternParams] = None
     
     def __post_init__(self):

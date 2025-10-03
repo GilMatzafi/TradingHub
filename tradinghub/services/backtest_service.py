@@ -5,16 +5,14 @@ from ..models.dto.pattern_params import PatternParams
 from ..backtest.base_backtest import BaseBacktest
 from ..backtest.hammer_backtest import HammerBacktest
 from ..services.stock_service import StockService
+from ..config.pattern_registry import PatternRegistry
 
 class BacktestService:
     """Service for running backtests on different pattern strategies"""
     
     def __init__(self):
         self.stock_service = StockService()
-        self.backtesters = {
-            'hammer': HammerBacktest()
-            # Add more pattern backtesters here as they are implemented
-        }
+        self._backtesters = {}  # Cache for backtesters
     
     def get_backtester(self, pattern_type: str) -> BaseBacktest:
         """
@@ -29,9 +27,15 @@ class BacktestService:
         Raises:
             ValueError: If pattern type is not supported
         """
-        if pattern_type not in self.backtesters:
-            raise ValueError(f'Unsupported pattern type: {pattern_type}')
-        return self.backtesters[pattern_type]
+        if pattern_type not in self._backtesters:
+            try:
+                backtest_class = PatternRegistry.get_backtest_class(pattern_type)
+                # Create backtester instance (it will create its own pattern detector)
+                self._backtesters[pattern_type] = backtest_class()
+            except ValueError as e:
+                raise ValueError(f'Unsupported pattern type: {pattern_type}. {e}')
+        
+        return self._backtesters[pattern_type]
 
     def run_backtest(self, 
                     symbol: str, 

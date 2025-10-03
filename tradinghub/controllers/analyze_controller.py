@@ -37,6 +37,7 @@ class AnalyzeController:
                 symbol=data.get('symbol', 'AAPL'),
                 days=int(data.get('days', 50)),
                 interval=data.get('interval', '5m'),
+                pattern_type=data.get('pattern_type', 'hammer'),
                 pattern_params=pattern_params
             )
 
