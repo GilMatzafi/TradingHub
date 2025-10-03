@@ -1,23 +1,22 @@
-// Import HammerStrategy from hammer-strategy module
-import { HammerStrategy } from '../hammer-strategy.js';
+// Import shared backtest components
 import { resetCharts } from './backtest-charts.js';
 import { setTradesData } from './backtest-trades.js';
 import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 
-// API functionality
+// API functionality - Works for ANY pattern (hammer, doji, shooting star, etc.)
 function initBacktestApi() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
-        // Get the hammer strategy instance from the global window object
-        const hammerStrategy = window.hammerStrategy;
+        // Get the current strategy instance (works for any pattern)
+        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.shootingStarStrategy;
         
-        if (!hammerStrategy) {
-            console.error('HammerStrategy not initialized');
-            alert('Error: HammerStrategy not initialized');
+        if (!currentStrategy) {
+            console.error('Strategy not initialized');
+            alert('Error: Strategy not initialized');
             return;
         }
         
         // Get the filtered patterns from the pattern data manager
-        const filteredPatterns = hammerStrategy.dataManager.getFilteredPatterns();
+        const filteredPatterns = currentStrategy.dataManager.getFilteredPatterns();
         
         if (filteredPatterns.length === 0) {
             alert('Please run pattern analysis first before running backtest');
@@ -38,32 +37,52 @@ function initBacktestApi() {
     });
 }
 
-// Collect form data for the backtest request
+// Collect form data for the backtest request - Works for ANY pattern
 function collectFormData(filteredPatterns) {
+    // Base form data (same for all patterns)
     const formData = {
         symbol: document.getElementById('symbol').value.toUpperCase(),
         days: document.getElementById('days').value,
         interval: document.getElementById('interval').value,
-        body_size_ratio: document.getElementById('body_size_ratio').value,
-        lower_shadow_ratio: document.getElementById('lower_shadow_ratio').value,
-        upper_shadow_ratio: document.getElementById('upper_shadow_ratio').value,
-        ma_period: document.getElementById('ma_period').value,
-        require_green: document.getElementById('require_green').checked,
+        patterns: filteredPatterns,
+        
+        // Backtest parameters (same for all patterns)
         stop_loss_pct: document.getElementById('stop_loss_pct').value / 100,
         take_profit_pct: document.getElementById('take_profit_pct').value / 100,
         entry_delay: document.getElementById('entry_delay').value,
         max_holding_periods: document.getElementById('max_holding_periods').value,
         initial_portfolio_size: parseFloat(document.getElementById('initial_portfolio_size').value),
         commission: parseFloat(document.getElementById('commission').value),
-        slippage: parseFloat(document.getElementById('slippage').value),
-        patterns: filteredPatterns
+        slippage: parseFloat(document.getElementById('slippage').value)
     };
+
+    // Add pattern-specific parameters (only if they exist)
+    const patternParams = [
+        'body_size_ratio', 'lower_shadow_ratio', 'upper_shadow_ratio',
+        'ma_period', 'require_green', 'require_high_volume'
+    ];
+
+    patternParams.forEach(param => {
+        const element = document.getElementById(param);
+        if (element) {
+            if (element.type === 'checkbox') {
+                formData[param] = element.checked;
+            } else {
+                formData[param] = element.value;
+            }
+        }
+    });
     
     // Add volume parameters if volume filter is enabled
-    const useVolumeFilter = document.getElementById('use_volume_filter').checked;
-    if (useVolumeFilter) {
-        formData.min_relative_volume = document.getElementById('min_relative_volume').value;
-        formData.volume_lookback = document.getElementById('volume_lookback').value;
+    const useVolumeFilter = document.getElementById('use_volume_filter');
+    const requireHighVolume = document.getElementById('require_high_volume');
+    
+    if ((useVolumeFilter && useVolumeFilter.checked) || (requireHighVolume && requireHighVolume.checked)) {
+        const minRelativeVolume = document.getElementById('min_relative_volume');
+        const volumeLookback = document.getElementById('volume_lookback');
+        
+        if (minRelativeVolume) formData.min_relative_volume = minRelativeVolume.value;
+        if (volumeLookback) formData.volume_lookback = volumeLookback.value;
     }
     
     return formData;

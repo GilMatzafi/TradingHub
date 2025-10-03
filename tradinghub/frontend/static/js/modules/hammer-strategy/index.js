@@ -1,25 +1,20 @@
 /**
- * Main Hammer Strategy Module
- * Orchestrates all components of the hammer strategy functionality
+ * Hammer Strategy Module - Uses Universal Components
+ * Only the candlestick visualizer is pattern-specific
  */
-import { CandlestickVisualizer } from './candlestick-visualizer.js';
-import { PatternDataManager } from './pattern-data-manager.js';
-import { ResultsRenderer } from './results-renderer.js';
-import { FormHandler } from './form-handler.js';
+import { BaseStrategy } from '../shared/base-strategy.js';
+import { HammerCandlestickVisualizer } from './candlestick-visualizer.js';
 
 /**
- * HammerStrategy - Main class that orchestrates all components
+ * HammerStrategy - Extends BaseStrategy with hammer-specific visualizer only
  */
-export class HammerStrategy {
+export class HammerStrategy extends BaseStrategy {
     constructor() {
-        // Initialize components
-        this.visualizer = new CandlestickVisualizer();
-        this.dataManager = new PatternDataManager();
-        this.resultsRenderer = new ResultsRenderer();
-        this.formHandler = new FormHandler(this.dataManager, this.resultsRenderer);
+        // Create hammer-specific visualizer
+        const visualizer = new HammerCandlestickVisualizer();
         
-        // Initialize the strategy
-        this.initialize();
+        // Initialize with universal components
+        super('hammer', visualizer);
     }
 
     /**
@@ -31,20 +26,3 @@ export class HammerStrategy {
         this.visualizer.initializeEventListeners();
     }
 } 
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize components
-    const patternDataManager = new PatternDataManager();
-    const resultsRenderer = new ResultsRenderer();
-    const formHandler = new FormHandler(patternDataManager, resultsRenderer);
-    const candlestickVisualizer = new CandlestickVisualizer();
-    
-    // Make components globally available for debugging
-    window.hammerStrategy = {
-        formHandler,
-        patternDataManager,
-        resultsRenderer,
-        candlestickVisualizer
-    };
-}); 
