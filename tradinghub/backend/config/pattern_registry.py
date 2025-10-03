@@ -4,8 +4,10 @@ Pattern Registry - Central configuration for all candlestick patterns
 from typing import Dict, Any, Type
 from ..patterns.base_pattern import BasePattern
 from ..patterns.hammer_pattern import HammerPattern
+from ..patterns.doji_pattern import DojiPattern
 from ..backtest.base_backtest import BaseBacktest
 from ..backtest.hammer_backtest import HammerBacktest
+from ..backtest.doji_backtest import DojiBacktest
 
 
 class PatternRegistry:
@@ -48,8 +50,8 @@ class PatternRegistry:
         'doji': {
             'name': 'Standard Doji',
             'description': 'Indecision pattern with very small body and equal shadows',
-            'pattern_class': None,  # Will be set when doji pattern is implemented
-            'backtest_class': None,  # Will be set when doji backtest is implemented
+            'pattern_class': DojiPattern,
+            'backtest_class': DojiBacktest,
             'template': 'doji_analyzer',
             'js_module': 'doji-strategy',
             'default_params': {
