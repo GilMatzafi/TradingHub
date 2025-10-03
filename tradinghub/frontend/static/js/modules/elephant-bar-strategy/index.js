@@ -26,3 +26,26 @@ export class ElephantBarStrategy extends BaseStrategy {
         this.visualizer.initializeEventListeners();
     }
 }
+
+// Initialize the elephant bar strategy when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🐘 Elephant Bar strategy: DOM loaded, initializing...');
+    
+    try {
+        // Create and initialize the elephant bar strategy
+        const elephantBarStrategy = new ElephantBarStrategy();
+        
+        // Export for global access if needed
+        window.elephantBarStrategy = elephantBarStrategy;
+        
+        console.log('🐘 Elephant Bar strategy: Initialization complete', {
+            strategy: !!elephantBarStrategy,
+            globalAccess: !!window.elephantBarStrategy,
+            strategyType: typeof elephantBarStrategy,
+            hasDataManager: !!elephantBarStrategy.dataManager
+        });
+        
+    } catch (error) {
+        console.error('🐘 Elephant Bar strategy initialization error:', error);
+    }
+});

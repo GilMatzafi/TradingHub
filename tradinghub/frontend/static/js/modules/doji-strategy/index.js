@@ -26,3 +26,26 @@ export class DojiStrategy extends BaseStrategy {
         this.visualizer.initializeEventListeners();
     }
 }
+
+// Initialize the doji strategy when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🕯️ Doji strategy: DOM loaded, initializing...');
+    
+    try {
+        // Create and initialize the doji strategy
+        const dojiStrategy = new DojiStrategy();
+        
+        // Export for global access if needed
+        window.dojiStrategy = dojiStrategy;
+        
+        console.log('🕯️ Doji strategy: Initialization complete', {
+            strategy: !!dojiStrategy,
+            globalAccess: !!window.dojiStrategy,
+            strategyType: typeof dojiStrategy,
+            hasDataManager: !!dojiStrategy.dataManager
+        });
+        
+    } catch (error) {
+        console.error('🕯️ Doji strategy initialization error:', error);
+    }
+});
