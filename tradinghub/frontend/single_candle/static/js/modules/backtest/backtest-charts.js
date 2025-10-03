@@ -1,6 +1,6 @@
-// Import chart classes
-import { PortfolioChart } from '../charts/portfolioChart.js';
-import { StrategyPerformanceChart } from '../charts/strategyPerformanceChart.js';
+// Import chart classes from shared directory
+import { PortfolioChart } from '/shared/js/modules/charts/portfolioChart.js';
+import { StrategyPerformanceChart } from '/shared/js/modules/charts/strategyPerformanceChart.js';
 
 // Initialize chart instances
 let portfolioChart = null;
