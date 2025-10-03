@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (path === '/doji' || path.endsWith('/doji')) {
         // Doji strategy is already loaded by the template
         console.log('Doji strategy already loaded by template');
+    } else if (path === '/elephant_bar' || path.endsWith('/elephant_bar')) {
+        // Elephant Bar strategy is already loaded by the template
+        console.log('Elephant Bar strategy already loaded by template');
     } else if (path === '/shooting_star' || path.endsWith('/shooting_star')) {
         // Load shooting star strategy (when implemented)
         console.log('Shooting star strategy not yet implemented');

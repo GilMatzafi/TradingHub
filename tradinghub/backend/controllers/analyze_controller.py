@@ -41,6 +41,16 @@ class AnalyzeController:
                     shadow_balance_ratio=shadow_balance_ratio,  # Use user's shadow balance setting
                     require_high_volume=False  # Not relevant for doji
                 )
+            elif pattern_type == 'elephant_bar':
+                # Elephant Bar-specific parameters
+                pattern_params = PatternParams(
+                    body_size_ratio=float(data.get('min_body_ratio', 0.8)),  # Use min_body_ratio for elephant bar
+                    lower_shadow_ratio=float(data.get('max_shadow_ratio', 0.1)),  # Use max_shadow_ratio for elephant bar
+                    upper_shadow_ratio=float(data.get('max_shadow_ratio', 0.1)),  # Use max_shadow_ratio for elephant bar
+                    ma_period=int(data.get('ma_period', 5)),
+                    require_green=False,  # Not relevant for elephant bar
+                    require_high_volume=self._parse_boolean(data.get('require_high_volume', False))
+                )
             else:
                 # Hammer-specific parameters (default)
                 pattern_params = PatternParams(

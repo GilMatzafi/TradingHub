@@ -1,0 +1,24 @@
+{% extends "shared/base_analyzer.html" %}
+{% from "elephant_bar_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "elephant_bar_analyzer/components/pattern_params.html" import pattern_params %}
+
+{% block title %}TradingHub - Elephant Bar Pattern Detector{% endblock %}
+
+{% set pattern_name = "Elephant Bar" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Elephant Bar-specific form fields can be added here if needed -->
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Elephant Bar-specific JavaScript -->
+    <script type="module" src="{{ url_for('static', filename='js/modules/elephant-bar-strategy.js') }}"></script>
+{% endblock %}

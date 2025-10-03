@@ -1,0 +1,33 @@
+{% macro candlestick_visualization() %}
+<div class="candlestick-visualization-container">
+    <div class="candlestick-wrapper">
+        <div class="candlestick-container">
+            <!-- Upper shadow -->
+            <div class="candlestick-shadow upper-shadow" id="upper-shadow"></div>
+            
+            <!-- Body -->
+            <div class="candlestick-body" id="candlestick-body"></div>
+            
+            <!-- Lower shadow -->
+            <div class="candlestick-shadow lower-shadow" id="lower-shadow"></div>
+        </div>
+        
+        <!-- Labels -->
+        <div class="candlestick-labels">
+            <div class="shadow-label upper-label">Upper Shadow</div>
+            <div class="body-label">Body</div>
+            <div class="shadow-label lower-label">Lower Shadow</div>
+        </div>
+    </div>
+    
+    <!-- Pattern description -->
+    <div class="pattern-description">
+        <h6 class="mb-2">Elephant Bar Pattern</h6>
+        <p class="small text-muted mb-0">
+            Strong directional momentum with very large body and small shadows.
+            The body should be at least <span id="body-ratio-display">80%</span> of the total range,
+            while shadows should be no more than <span id="shadow-ratio-display">10%</span> of the range.
+        </p>
+    </div>
+</div>
+{% endmacro %}

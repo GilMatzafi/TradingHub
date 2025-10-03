@@ -201,7 +201,7 @@ export class FormHandler {
      * @returns {Array} Array of parameter IDs
      */
     getAllPatternParams() {
-        const commonParams = ['body_size_ratio', 'ma_period', 'shadow_balance_ratio'];
+        const commonParams = ['body_size_ratio', 'ma_period', 'shadow_balance_ratio', 'min_body_ratio', 'max_shadow_ratio'];
         const patternSpecificParams = this.getPatternSpecificParams();
         return [...commonParams, ...patternSpecificParams];
     }

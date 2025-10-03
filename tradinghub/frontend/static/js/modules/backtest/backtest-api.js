@@ -7,10 +7,25 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 function initBacktestApi() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the current strategy instance (works for any pattern)
-        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.shootingStarStrategy;
+        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.shootingStarStrategy;
+        
+        // Debug: Log what strategies are available
+        console.log('🔍 Backtest API Debug:', {
+            hammerStrategy: !!window.hammerStrategy,
+            dojiStrategy: !!window.dojiStrategy,
+            elephantBarStrategy: !!window.elephantBarStrategy,
+            shootingStarStrategy: !!window.shootingStarStrategy,
+            currentStrategy: !!currentStrategy
+        });
         
         if (!currentStrategy) {
             console.error('Strategy not initialized');
+            console.error('Available strategies:', {
+                hammer: !!window.hammerStrategy,
+                doji: !!window.dojiStrategy,
+                elephantBar: !!window.elephantBarStrategy,
+                shootingStar: !!window.shootingStarStrategy
+            });
             alert('Error: Strategy not initialized');
             return;
         }
