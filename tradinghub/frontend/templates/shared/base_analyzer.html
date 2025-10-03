@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pattern_name }} Pattern Detector{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">TradingHub</h1>
+        <p class="lead text-muted">Advanced {{ pattern_name }} Pattern Detection for Smart Trading</p>
+    </header>
+    
+    <!-- Strategy Parameters Section -->
+    <div class="card strategy-card mb-4">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-gear-fill me-2"></i>
+            <h5 class="mb-0">Strategy Parameters</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Basic Parameters (Left Side) -->
+                <div class="col-md-5 border-end">
+                    <!-- Universal analysis form -->
+                    {% from 'shared/components/analysis_form.html' import analysis_form %}
+                    {{ analysis_form() }}
+                    
+                    <!-- Pattern-specific additional form fields -->
+                    {% block additional_form_fields %}{% endblock %}
+                </div>
+                
+                <!-- Pattern Parameters (Right Side) -->
+                <div class="col-md-7">
+                    <!-- Pattern-specific candlestick visualization -->
+                    {% block candlestick_visualization %}{% endblock %}
+                    
+                    <!-- Pattern-specific parameters -->
+                    {% block pattern_params %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Results Section -->
+    <div class="card results-card mb-4 d-none" id="analysisResults">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-table me-2"></i>
+            <h5 class="mb-0">Analysis Results</h5>
+        </div>
+        <div class="card-body">
+            <div class="loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Analyzing market data...</p>
+            </div>
+            
+            <div id="results">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="pattern-count"></div>
+                    <button id="downloadCSV" class="btn btn-success" style="display: none;">
+                        <i class="bi bi-download me-2"></i>Download CSV
+                    </button>
+                </div>
+                <!-- Universal results table -->
+                {% from 'shared/components/results_table.html' import results_table %}
+                {{ results_table() }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Backtest Parameters Section -->
+    <div id="backtestSection" class="d-none">
+        <!-- Universal backtest parameters -->
+        {% from 'shared/components/backtest_params.html' import backtest_params %}
+        {{ backtest_params() }}
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay d-none">
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Analyzing patterns...</p>
+    </div>
+</div>
+
+<!-- Pattern-specific JavaScript -->
+{% block pattern_scripts %}{% endblock %}
+{% endblock %}

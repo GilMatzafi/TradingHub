@@ -56,6 +56,7 @@ class PatternRegistry:
             'js_module': 'doji-strategy',
             'default_params': {
                 'body_size_ratio': 0.1,
+                'shadow_balance_ratio': 0.3,
                 'ma_period': 20,
                 'require_high_volume': False,
                 'min_relative_volume': 1.5,
@@ -63,6 +64,7 @@ class PatternRegistry:
             },
             'param_fields': [
                 {'name': 'body_size_ratio', 'type': 'range', 'min': 0.01, 'max': 0.3, 'step': 0.01, 'default': 0.1, 'label': 'Body Size Ratio'},
+                {'name': 'shadow_balance_ratio', 'type': 'range', 'min': 0.1, 'max': 0.5, 'step': 0.05, 'default': 0.3, 'label': 'Shadow Balance Ratio'},
                 {'name': 'ma_period', 'type': 'range', 'min': 5, 'max': 50, 'step': 1, 'default': 20, 'label': 'MA Period'},
                 {'name': 'require_high_volume', 'type': 'checkbox', 'default': False, 'label': 'Require High Volume'},
                 {'name': 'min_relative_volume', 'type': 'number', 'min': 1.0, 'max': 5.0, 'step': 0.1, 'default': 1.5, 'label': 'Min Relative Volume'},

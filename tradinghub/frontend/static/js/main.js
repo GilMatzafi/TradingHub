@@ -8,18 +8,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize pattern-specific strategies based on current page
     const path = window.location.pathname;
+    console.log('Current path:', path);
     
-    if (path.includes('/hammer')) {
+    if (path === '/hammer' || path.endsWith('/hammer')) {
         // Load hammer strategy
         import('./modules/hammer-strategy.js').then(module => {
             console.log('Hammer strategy loaded successfully');
         }).catch(error => {
             console.error('Error loading hammer strategy:', error);
         });
-    } else if (path.includes('/doji')) {
-        // Load doji strategy (when implemented)
-        console.log('Doji strategy not yet implemented');
-    } else if (path.includes('/shooting_star')) {
+    } else if (path === '/doji' || path.endsWith('/doji')) {
+        // Doji strategy is already loaded by the template
+        console.log('Doji strategy already loaded by template');
+    } else if (path === '/shooting_star' || path.endsWith('/shooting_star')) {
         // Load shooting star strategy (when implemented)
         console.log('Shooting star strategy not yet implemented');
     }

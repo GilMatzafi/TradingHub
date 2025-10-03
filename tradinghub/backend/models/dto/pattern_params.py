@@ -11,6 +11,9 @@ class PatternParams:
     require_green: bool = True
     min_relative_volume: float = 1.0
     volume_lookback: int = 20
+    # Doji-specific parameters
+    shadow_balance_ratio: float = 0.3
+    require_high_volume: bool = False
 
 @dataclass
 class AnalysisRequest:

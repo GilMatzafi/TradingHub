@@ -102,8 +102,13 @@ export class FormHandler {
      * @returns {Array} Array of parameter IDs
      */
     getPatternSpecificParams() {
-        // Default implementation - can be overridden
-        // For now, include common pattern parameters
+        // Try to get pattern-specific parameters from the visualizer
+        const strategy = window[`${this.patternType}Strategy`];
+        if (strategy && strategy.visualizer && strategy.visualizer.getPatternSpecificParameters) {
+            return strategy.visualizer.getPatternSpecificParameters();
+        }
+        
+        // Fallback to default implementation for hammer patterns
         const commonPatternParams = ['lower_shadow_ratio', 'upper_shadow_ratio', 'require_green'];
         return commonPatternParams.filter(param => this.parameterExists(param));
     }
@@ -196,7 +201,7 @@ export class FormHandler {
      * @returns {Array} Array of parameter IDs
      */
     getAllPatternParams() {
-        const commonParams = ['body_size_ratio', 'ma_period'];
+        const commonParams = ['body_size_ratio', 'ma_period', 'shadow_balance_ratio'];
         const patternSpecificParams = this.getPatternSpecificParams();
         return [...commonParams, ...patternSpecificParams];
     }

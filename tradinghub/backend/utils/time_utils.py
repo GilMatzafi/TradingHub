@@ -11,9 +11,9 @@ def convert_to_israel_time(date):
     Returns:
         datetime: Date in Israel timezone
     """
-    # Get timezone from config or use defaults
+    # Use default timezones (don't rely on Flask config to avoid context issues)
     et_tz = pytz.timezone('US/Eastern')
-    israel_tz = pytz.timezone(current_app.config.get('DEFAULT_TIMEZONE', 'Asia/Jerusalem'))
+    israel_tz = pytz.timezone('Asia/Jerusalem')
     
     # If the date is naive (no timezone), assume it's in ET
     if date.tzinfo is None:

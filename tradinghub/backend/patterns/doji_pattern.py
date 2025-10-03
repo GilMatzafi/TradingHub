@@ -39,19 +39,49 @@ class DojiPattern(BasePattern):
 
     def _detect_doji_conditions(self, df: pd.DataFrame, params: Dict[str, Any]) -> pd.DataFrame:
         """
-        Detect doji pattern conditions
+        Detect Standard Doji pattern conditions
         
-        Doji pattern criteria:
+        Standard Doji criteria:
         - Very small real body (body_size < threshold)
+        - Body positioned in the middle of the candle (not at top or bottom)
         - Equal or similar upper and lower shadows
         - Optional: High volume confirmation
         """
         body_size_ratio = params.get('body_size_ratio', 0.1)  # Default to 10% of total range
+        shadow_balance_ratio = params.get('shadow_balance_ratio', 0.3)  # How balanced shadows should be
         
         # Primary doji condition: very small real body
-        doji_condition = (
+        small_body_condition = (
             (df['body_size'] < body_size_ratio * df['total_range']) &  # Small real body
             (df['total_range'] > 0)  # Avoid division by zero
+        )
+        
+        # Standard Doji condition: body should be in the middle (not at top or bottom)
+        # Calculate body position relative to total range
+        body_top = df[['Open', 'Close']].max(axis=1)  # Top of body
+        body_bottom = df[['Open', 'Close']].min(axis=1)  # Bottom of body
+        body_center = (body_top + body_bottom) / 2  # Center of body
+        range_center = (df['High'] + df['Low']) / 2  # Center of total range
+        
+        # Body should be close to the center of the total range
+        body_center_offset = abs(body_center - range_center) / df['total_range']
+        centered_body_condition = body_center_offset < shadow_balance_ratio
+        
+        # Shadow balance condition: upper and lower shadows should be similar in size
+        upper_shadow = df['High'] - body_top
+        lower_shadow = body_bottom - df['Low']
+        
+        # Shadow balance condition: shadows should be similar in size
+        # Allow for cases where one shadow might be very small (but not zero)
+        shadow_balance_condition = (
+            (abs(upper_shadow - lower_shadow) / df['total_range'] < shadow_balance_ratio)  # Shadows are balanced
+        )
+        
+        # Combine all conditions for Standard Doji
+        doji_condition = (
+            small_body_condition &
+            centered_body_condition &
+            shadow_balance_condition
         )
         
         # Optional: Volume confirmation

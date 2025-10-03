@@ -1,5 +1,4 @@
-// Import HammerStrategy from hammer-strategy module
-import { HammerStrategy } from './hammer-strategy.js';
+// Import backtest components
 import { initBacktestCharts } from './backtest/backtest-charts.js';
 import { initBacktestTrades } from './backtest/backtest-trades.js';
 import { initBacktestMetrics } from './backtest/backtest-metrics.js';
