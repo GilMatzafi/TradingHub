@@ -1,7 +1,6 @@
 {% extends "shared/base_analyzer.html" %}
 {% from "doji_analyzer/components/candlestick.html" import candlestick_visualization %}
 {% from "doji_analyzer/components/pattern_params.html" import pattern_params %}
-{% from "shared/components/volume_params.html" import volume_params %}
 
 {% block title %}TradingHub - Doji Pattern Detector{% endblock %}
 
@@ -9,7 +8,6 @@
 
 {% block pattern_params %}
     {{ pattern_params() }}
-    {{ volume_params() }}
 {% endblock %}
 
 {% block candlestick_visualization %}

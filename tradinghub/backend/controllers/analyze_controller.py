@@ -30,15 +30,16 @@ class AnalyzeController:
             
             # Build pattern parameters from request based on pattern type
             if pattern_type == 'doji':
-                # Doji-specific parameters
+                # Doji-specific parameters (user can control both body size and shadow balance)
+                shadow_balance_ratio = float(data.get('shadow_balance_ratio', 0.4))
                 pattern_params = PatternParams(
                     body_size_ratio=float(data.get('body_size_ratio', 0.1)),
-                    lower_shadow_ratio=float(data.get('shadow_balance_ratio', 0.3)),  # Use shadow_balance_ratio for doji
-                    upper_shadow_ratio=float(data.get('shadow_balance_ratio', 0.3)),  # Use shadow_balance_ratio for doji
-                    ma_period=int(data.get('ma_period', 20)),
-                    require_green=not data.get('require_high_volume', False),  # Convert require_high_volume to require_green
-                    shadow_balance_ratio=float(data.get('shadow_balance_ratio', 0.3)),  # Doji-specific parameter
-                    require_high_volume=self._parse_boolean(data.get('require_high_volume', False))  # Doji-specific parameter
+                    lower_shadow_ratio=shadow_balance_ratio,  # Use user's shadow balance setting
+                    upper_shadow_ratio=shadow_balance_ratio,  # Use user's shadow balance setting
+                    ma_period=20,  # Fixed value for doji
+                    require_green=False,  # Not relevant for doji
+                    shadow_balance_ratio=shadow_balance_ratio,  # Use user's shadow balance setting
+                    require_high_volume=False  # Not relevant for doji
                 )
             else:
                 # Hammer-specific parameters (default)

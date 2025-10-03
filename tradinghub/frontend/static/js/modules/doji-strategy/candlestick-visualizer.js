@@ -13,7 +13,7 @@ export class DojiCandlestickVisualizer extends CandlestickVisualizer {
      * @returns {Array} Array of doji-specific parameter IDs
      */
     getPatternSpecificParameters() {
-        return ['body_size_ratio', 'shadow_balance_ratio', 'ma_period', 'require_high_volume'];
+        return ['body_size_ratio', 'shadow_balance_ratio'];
     }
 
     /**
@@ -21,8 +21,7 @@ export class DojiCandlestickVisualizer extends CandlestickVisualizer {
      */
     updateVisualization() {
         const bodySizeRatio = this.getParameterValue('body_size_ratio', 0.1);
-        const shadowBalanceRatio = this.getParameterValue('shadow_balance_ratio', 0.3);
-        const requireHighVolume = this.getParameterValue('require_high_volume', false);
+        const shadowBalanceRatio = this.getParameterValue('shadow_balance_ratio', 0.4);
         
         // Calculate the total height of the candlestick (120px)
         const totalHeight = 120;
@@ -30,9 +29,31 @@ export class DojiCandlestickVisualizer extends CandlestickVisualizer {
         // Calculate the body height based on the body size ratio
         const bodyHeight = this.calculateHeight(bodySizeRatio, totalHeight);
         
-        // For Standard Doji, shadows should be equal and balanced
-        // Calculate shadow height to be equal on both sides
-        const shadowHeight = (totalHeight - bodyHeight) / 2;
+        // Calculate total shadow space available
+        const totalShadowSpace = totalHeight - bodyHeight;
+        
+        // Use shadow balance ratio to determine shadow distribution
+        // shadowBalanceRatio: 0.1 = very unbalanced, 0.5 = perfectly balanced
+        // For doji, we want to show how balanced the shadows should be
+        const balanceFactor = shadowBalanceRatio; // 0.1 to 0.5
+        
+        // Calculate shadow heights based on balance ratio
+        // When balanceFactor is high (0.5), shadows are exactly equal
+        // When balanceFactor is low (0.3), shadows are very different
+        let upperShadowHeight, lowerShadowHeight;
+        
+        if (balanceFactor >= 0.5) {
+            // Perfect balance: shadows are exactly equal
+            upperShadowHeight = totalShadowSpace / 2;
+            lowerShadowHeight = totalShadowSpace / 2;
+        } else {
+            // Unbalanced: shadows are different based on the ratio
+            // Lower ratio = more imbalanced shadows
+            const imbalanceFactor = (0.5 - balanceFactor) * 2; // 0.0 to 1.0
+            const shadowDifference = totalShadowSpace * imbalanceFactor;
+            upperShadowHeight = (totalShadowSpace + shadowDifference) / 2;
+            lowerShadowHeight = (totalShadowSpace - shadowDifference) / 2;
+        }
         
         // Position the body in the middle of the candlestick
         const bodyTop = (totalHeight - bodyHeight) / 2;
@@ -46,11 +67,11 @@ export class DojiCandlestickVisualizer extends CandlestickVisualizer {
         this.setElementStyle(this.candlestickBody, 'height', `${bodyHeight}px`);
         this.setElementStyle(this.candlestickBody, 'top', `${bodyTop}px`);
         
-        // Update the shadows (equal shadows for Standard Doji)
-        this.setElementStyle(this.upperShadow, 'height', `${shadowHeight}px`);
-        this.setElementStyle(this.upperShadow, 'top', `${bodyTop - shadowHeight}px`);
+        // Update the shadows (balance based on shadow balance ratio)
+        this.setElementStyle(this.upperShadow, 'height', `${upperShadowHeight}px`);
+        this.setElementStyle(this.upperShadow, 'top', `${bodyTop - upperShadowHeight}px`);
         
-        this.setElementStyle(this.lowerShadow, 'height', `${shadowHeight}px`);
+        this.setElementStyle(this.lowerShadow, 'height', `${lowerShadowHeight}px`);
         this.setElementStyle(this.lowerShadow, 'top', `${bodyTop + bodyHeight}px`);
         
         // Set the color based on whether it's a green or red candle
@@ -78,7 +99,9 @@ export class DojiCandlestickVisualizer extends CandlestickVisualizer {
         this.logVisualizationUpdate({
             bodySizeRatio,
             shadowBalanceRatio,
-            requireHighVolume
+            upperShadowHeight: upperShadowHeight.toFixed(1),
+            lowerShadowHeight: lowerShadowHeight.toFixed(1),
+            balanceFactor: balanceFactor.toFixed(2)
         });
     }
 
@@ -129,10 +152,5 @@ export class DojiCandlestickVisualizer extends CandlestickVisualizer {
             });
         });
         
-        // Add event listener for the require high volume checkbox
-        const requireHighVolumeCheckbox = document.getElementById('require_high_volume');
-        if (requireHighVolumeCheckbox) {
-            requireHighVolumeCheckbox.addEventListener('change', () => this.updateVisualization());
-        }
     }
 }

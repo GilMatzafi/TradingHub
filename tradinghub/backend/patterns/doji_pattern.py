@@ -73,8 +73,10 @@ class DojiPattern(BasePattern):
         
         # Shadow balance condition: shadows should be similar in size
         # Allow for cases where one shadow might be very small (but not zero)
+        # Stricter logic: 0.5 = perfect balance (0% difference), 0.3 = very imbalanced (8% difference)
+        max_allowed_difference = (0.5 - shadow_balance_ratio) * 0.4  # 0.5→0%, 0.4→4%, 0.3→8%
         shadow_balance_condition = (
-            (abs(upper_shadow - lower_shadow) / df['total_range'] < shadow_balance_ratio)  # Shadows are balanced
+            (abs(upper_shadow - lower_shadow) / df['total_range'] <= max_allowed_difference)  # Shadows are balanced (<= for perfect balance)
         )
         
         # Combine all conditions for Standard Doji
