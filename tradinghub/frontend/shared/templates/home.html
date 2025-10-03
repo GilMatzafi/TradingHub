@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}TradingHub - Advanced Candlestick Pattern Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <header class="text-center mb-5">
+        <h1 class="display-3 fw-bold mb-3">TradingHub</h1>
+        <p class="lead text-muted mb-4">Advanced Candlestick Pattern Detection for Smart Trading</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <p class="text-muted">Discover powerful candlestick patterns that can help you identify potential market reversals and continuations. Each strategy is backed by advanced pattern recognition and comprehensive backtesting.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Single Candlestick Patterns Section -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4">Single Candlestick Patterns</h2>
+        <p class="text-center text-muted mb-4">Powerful one-candle patterns that can signal market reversals and continuations</p>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <!-- Hammer Pattern Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card strategy-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <div class="strategy-icon hammer-icon">
+                            <i class="bi bi-hammer"></i>
+                        </div>
+                        <h4 class="card-title mt-3">Hammer Pattern</h4>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        A bullish reversal pattern with a small body and long lower shadow. Indicates potential buying pressure after a downtrend.
+                    </p>
+                    <div class="strategy-features mb-3">
+                        <span class="badge bg-success me-2">Bullish Reversal</span>
+                        <span class="badge bg-primary me-2">Single Candle</span>
+                        <span class="badge bg-info">High Reliability</span>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="/hammer" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>Analyze Hammer Patterns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doji Pattern Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card strategy-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <div class="strategy-icon doji-icon">
+                            <i class="bi bi-circle"></i>
+                        </div>
+                        <h4 class="card-title mt-3">Standard Doji</h4>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        An indecision pattern with a very small body and equal shadows. Signals market uncertainty and potential trend reversal.
+                    </p>
+                    <div class="strategy-features mb-3">
+                        <span class="badge bg-warning me-2">Indecision</span>
+                        <span class="badge bg-primary me-2">Single Candle</span>
+                        <span class="badge bg-info">Reversal Signal</span>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="/doji" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>Analyze Doji Patterns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elephant Bar Pattern Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card strategy-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <div class="strategy-icon elephant-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <h4 class="card-title mt-3">Elephant Bar</h4>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        A strong directional momentum pattern with a very large body and small shadows. Indicates powerful buying or selling pressure.
+                    </p>
+                    <div class="strategy-features mb-3">
+                        <span class="badge bg-danger me-2">Strong Momentum</span>
+                        <span class="badge bg-primary me-2">Single Candle</span>
+                        <span class="badge bg-info">Continuation</span>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="/elephant_bar" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>Analyze Elephant Bar Patterns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Future Patterns Section (Coming Soon) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4">More Patterns Coming Soon</h2>
+        <p class="text-center text-muted mb-4">We're expanding our pattern library with multi-candle patterns</p>
+        
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="card coming-soon-card">
+                    <div class="card-body text-center">
+                        <div class="coming-soon-icon mb-3">
+                            <i class="bi bi-calendar2-plus"></i>
+                        </div>
+                        <h5>Two-Candle Patterns</h5>
+                        <p class="text-muted">Engulfing, Harami, and more complex reversal patterns</p>
+                        <span class="badge bg-secondary">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card coming-soon-card">
+                    <div class="card-body text-center">
+                        <div class="coming-soon-icon mb-3">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <h5>Three-Candle Patterns</h5>
+                        <p class="text-muted">Morning Star, Evening Star, and advanced formations</p>
+                        <span class="badge bg-secondary">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Why Choose TradingHub?</h2>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-graph-up-arrow text-primary"></i>
+                </div>
+                <h5>Advanced Pattern Recognition</h5>
+                <p class="text-muted">Our algorithms use sophisticated pattern detection to identify high-probability trading opportunities.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-cpu text-success"></i>
+                </div>
+                <h5>Comprehensive Backtesting</h5>
+                <p class="text-muted">Test your strategies with historical data to validate performance before risking real capital.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-speedometer2 text-info"></i>
+                </div>
+                <h5>Real-time Analysis</h5>
+                <p class="text-muted">Get instant pattern detection and analysis with live market data integration.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Start Section -->
+    <div class="card quick-start-card">
+        <div class="card-body text-center">
+            <h3 class="card-title mb-3">Ready to Start Trading?</h3>
+            <p class="card-text text-muted mb-4">Choose a pattern strategy above to begin analyzing market data and discovering trading opportunities.</p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="/hammer" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-hammer me-2"></i>Hammer
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="/doji" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-circle me-2"></i>Doji
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="/elephant_bar" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-bar-chart me-2"></i>Elephant Bar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.strategy-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.strategy-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.strategy-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 2rem;
+    color: white;
+}
+
+.hammer-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.doji-icon {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.elephant-icon {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+}
+
+.feature-icon {
+    font-size: 3rem;
+}
+
+.quick-start-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.strategy-features .badge {
+    font-size: 0.75rem;
+}
+
+.card-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.lead {
+    color: #6c757d;
+    font-size: 1.25rem;
+}
+
+.display-3 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.coming-soon-card {
+    border: 2px dashed #dee2e6;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.coming-soon-card:hover {
+    border-color: #6c757d;
+    background: #e9ecef;
+}
+
+.coming-soon-icon {
+    font-size: 3rem;
+    color: #6c757d;
+}
+</style>
+{% endblock %}
