@@ -1,5 +1,5 @@
 from flask import Flask
-from tradinghub.backend.config.config import Config
+from tradinghub.backend.shared.config import Config
 
 def create_app(config_class=Config):
     """

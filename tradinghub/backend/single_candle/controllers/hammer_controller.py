@@ -4,8 +4,8 @@ Handles hammer-specific analysis requests
 """
 from typing import Dict, Any, Tuple
 from flask import jsonify
-from tradinghub.backend.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.backend.services.stock_service import StockService
+from tradinghub.backend.shared.models.dto.pattern_params import PatternParams, AnalysisRequest
+from tradinghub.backend.shared.services.stock_service import StockService
 
 class HammerController:
     def __init__(self):

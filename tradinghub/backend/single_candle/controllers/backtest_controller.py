@@ -1,8 +1,8 @@
 from typing import Dict, Any
 from flask import jsonify
-from ..models.dto.backtest_params import BacktestParams
-from ..models.dto.pattern_params import PatternParams
-from ..services.backtest_service import BacktestService
+from tradinghub.backend.shared.models.dto.backtest_params import BacktestParams
+from tradinghub.backend.shared.models.dto.pattern_params import PatternParams
+from tradinghub.backend.shared.services.backtest_service import BacktestService
 
 class BacktestController:
     """Controller for handling backtest requests"""

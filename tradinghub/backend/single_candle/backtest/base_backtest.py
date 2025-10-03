@@ -1,10 +1,10 @@
 from typing import Dict, Any
 import pandas as pd
 from ..patterns.base_pattern import BasePattern
-from ..models.dto.backtest_params import BacktestParams
+from tradinghub.backend.shared.models.dto.backtest_params import BacktestParams
 from .performance_analyzer import PerformanceAnalyzer
 from .trade_executor import TradeExecutor
-from ..models.dto.trade_params import TradeParams
+from tradinghub.backend.shared.models.dto.trade_params import TradeParams
 
 class BaseBacktest:
     """Base class for all pattern backtesters"""

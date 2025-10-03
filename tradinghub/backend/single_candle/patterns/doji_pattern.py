@@ -6,7 +6,7 @@ Detects Standard Doji candlestick patterns - market indecision signals
 import pandas as pd
 from typing import Dict, Any
 from .base_pattern import BasePattern
-from tradinghub.backend.utils.candlestick_utils import CandlestickUtils
+from tradinghub.backend.shared.utils.candlestick_utils import CandlestickUtils
 
 class DojiPattern(BasePattern):
     """Detector for Standard Doji candlestick patterns"""

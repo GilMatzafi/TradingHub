@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-from tradinghub.backend.models.dto.trade_results import Trade
+from tradinghub.backend.shared.models.dto.trade_results import Trade
 
 class PerformanceAnalyzer:
     def __init__(self):

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any
 from .base_pattern import BasePattern
-from tradinghub.backend.utils.candlestick_utils import CandlestickUtils
+from tradinghub.backend.shared.utils.candlestick_utils import CandlestickUtils
 
 class HammerPattern(BasePattern):
     """Detector for hammer candlestick patterns"""

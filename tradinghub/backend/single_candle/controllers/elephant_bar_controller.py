@@ -1,13 +1,13 @@
 """
-Doji Pattern Controller
-Handles doji-specific analysis requests
+Elephant Bar Pattern Controller
+Handles elephant bar-specific analysis requests
 """
 from typing import Dict, Any, Tuple
 from flask import jsonify
-from tradinghub.backend.models.dto.pattern_params import PatternParams, AnalysisRequest
-from tradinghub.backend.services.stock_service import StockService
+from tradinghub.backend.shared.models.dto.pattern_params import PatternParams, AnalysisRequest
+from tradinghub.backend.shared.services.stock_service import StockService
 
-class DojiController:
+class ElephantBarController:
     def __init__(self):
         self.stock_service = StockService()
     
@@ -21,7 +21,7 @@ class DojiController:
 
     def analyze(self, data: Dict[str, Any]) -> Tuple[Any, int]:
         """
-        Handle doji pattern analysis request
+        Handle elephant bar pattern analysis request
 
         Args:
             data: Request JSON payload from the client
@@ -30,16 +30,14 @@ class DojiController:
             Tuple of (JSON response, HTTP status code)
         """
         try:
-            # Build doji-specific parameters
-            shadow_balance_ratio = float(data.get('shadow_balance_ratio', 0.4))
+            # Build elephant bar-specific parameters
             pattern_params = PatternParams(
-                body_size_ratio=float(data.get('body_size_ratio', 0.1)),
-                lower_shadow_ratio=shadow_balance_ratio,
-                upper_shadow_ratio=shadow_balance_ratio,
-                ma_period=20,  # Fixed value for doji
-                require_green=False,  # Not relevant for doji
-                shadow_balance_ratio=shadow_balance_ratio,
-                require_high_volume=False  # Not relevant for doji
+                body_size_ratio=float(data.get('min_body_ratio', 0.8)),
+                lower_shadow_ratio=float(data.get('max_shadow_ratio', 0.1)),
+                upper_shadow_ratio=float(data.get('max_shadow_ratio', 0.1)),
+                ma_period=int(data.get('ma_period', 5)),
+                require_green=False,  # Not relevant for elephant bar
+                require_high_volume=self._parse_boolean(data.get('require_high_volume', False))
             )
 
             # Add common parameters
@@ -51,7 +49,7 @@ class DojiController:
                 symbol=data.get('symbol', 'AAPL'),
                 days=int(data.get('days', 50)),
                 interval=data.get('interval', '5m'),
-                pattern_type='doji',
+                pattern_type='elephant_bar',
                 pattern_params=pattern_params
             )
 
