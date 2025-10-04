@@ -8,6 +8,7 @@ from tradinghub.backend.single_candle.controllers.doji_controller import DojiCon
 from tradinghub.backend.single_candle.controllers.elephant_bar_controller import ElephantBarController
 from tradinghub.backend.single_candle.controllers.marubozu_controller import MarubozuController
 from tradinghub.backend.two_candle.controllers.engulfing_controller import EngulfingController
+from tradinghub.backend.two_candle.controllers.harami_controller import HaramiController
 
 class ControllerFactory:
     """Factory for creating pattern-specific controllers"""
@@ -19,6 +20,7 @@ class ControllerFactory:
             'elephant_bar': ElephantBarController(),
             'marubozu': MarubozuController(),
             'engulfing': EngulfingController(),
+            'harami': HaramiController(),
         }
     
     def get_controller(self, pattern_type: str):

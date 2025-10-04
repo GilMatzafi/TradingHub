@@ -1,0 +1,43 @@
+{% extends "base_analyzer.html" %}
+{% from "harami_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "harami_analyzer/components/pattern_params.html" import pattern_params %}
+{% from "components/volume_params.html" import volume_params %}
+
+{% block title %}TradingHub - Harami Pattern Detector{% endblock %}
+
+{% set pattern_name = "Harami" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+    {{ volume_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Harami-specific form fields -->
+    <div class="col-md-6">
+        <label for="harami_type" class="form-label">Harami Type</label>
+        <select class="form-select" id="harami_type" name="harami_type">
+            <option value="both">Both Bullish & Bearish</option>
+            <option value="bullish">Bullish Only</option>
+            <option value="bearish">Bearish Only</option>
+        </select>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_trend" name="require_trend">
+            <label class="form-check-label" for="require_trend">
+                Require Trend Context
+            </label>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Harami-specific JavaScript -->
+    <script type="module" src="/two_candle/js/modules/harami-strategy/index.js"></script>
+{% endblock %}
