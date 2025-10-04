@@ -12,6 +12,7 @@ from tradinghub.backend.single_candle.config.patterns.doji_config import DOJI_CO
 from tradinghub.backend.single_candle.config.patterns.elephant_bar_config import ELEPHANT_BAR_CONFIG
 from tradinghub.backend.single_candle.config.patterns.marubozu_config import MARUBOZU_CONFIG
 from tradinghub.backend.single_candle.config.patterns.shooting_star_config import SHOOTING_STAR_CONFIG
+from tradinghub.backend.two_candle.config.patterns.engulfing_config import ENGULFING_CONFIG
 
 
 class PatternRegistry:
@@ -24,6 +25,7 @@ class PatternRegistry:
         'elephant_bar': ELEPHANT_BAR_CONFIG,
         'marubozu': MARUBOZU_CONFIG,
         'shooting_star': SHOOTING_STAR_CONFIG,
+        'engulfing': ENGULFING_CONFIG,
     }
     
     @classmethod

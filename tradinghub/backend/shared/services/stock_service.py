@@ -7,7 +7,7 @@ from tradinghub.backend.shared.models.dto.pattern_params import PatternParams, A
 from tradinghub.backend.shared.models.dto.analysis_results import PatternResult, AnalysisResult
 from tradinghub.backend.shared.utils.time_utils import convert_to_israel_time
 from tradinghub.backend.shared.config import Config
-from tradinghub.backend.single_candle.config.pattern_registry import PatternRegistry
+from tradinghub.backend.shared.pattern_config.pattern_registry import PatternRegistry
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

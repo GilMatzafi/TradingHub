@@ -2,10 +2,10 @@ from typing import Dict, Any, List, Type
 import pandas as pd
 from ..models.dto.backtest_params import BacktestParams
 from ..models.dto.pattern_params import PatternParams
-from tradinghub.backend.single_candle.backtest.base_backtest import BaseBacktest
+from tradinghub.backend.shared.backtest.base_backtest import BaseBacktest
 from tradinghub.backend.single_candle.backtest.hammer_backtest import HammerBacktest
 from .stock_service import StockService
-from tradinghub.backend.single_candle.config.pattern_registry import PatternRegistry
+from tradinghub.backend.shared.pattern_config.pattern_registry import PatternRegistry
 
 class BacktestService:
     """Service for running backtests on different pattern strategies"""
