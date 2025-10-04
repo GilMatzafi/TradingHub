@@ -143,7 +143,7 @@ class StockService:
             israel_time = convert_to_israel_time(date)
             pattern = PatternResult(
                 date=israel_time,
-                trend=row['trend'],
+                trend=row.get('trend', 'unknown'),
                 open_price=float(row['Open']),
                 high_price=float(row['High']),
                 low_price=float(row['Low']),

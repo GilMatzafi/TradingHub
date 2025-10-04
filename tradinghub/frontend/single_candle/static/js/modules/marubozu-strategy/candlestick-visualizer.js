@@ -17,15 +17,6 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
     }
 
     initializeEventListeners() {
-        // Body ratio slider
-        const bodyRatioSlider = document.getElementById('min_body_ratio');
-        if (bodyRatioSlider) {
-            bodyRatioSlider.addEventListener('input', (e) => {
-                this.updateRangeValue('min_body_ratio_value', e.target.value);
-                this.updateVisualization();
-            });
-        }
-
         // Shadow ratio slider
         const shadowRatioSlider = document.getElementById('max_shadow_ratio');
         if (shadowRatioSlider) {
@@ -35,87 +26,69 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
             });
         }
 
-        // MA period slider
-        const maPeriodSlider = document.getElementById('ma_period');
-        if (maPeriodSlider) {
-            maPeriodSlider.addEventListener('input', (e) => {
-                this.updateRangeValue('ma_period_value', e.target.value);
-            });
-        }
-
-        // Volume checkbox
-        const volumeCheckbox = document.getElementById('require_high_volume');
-        if (volumeCheckbox) {
-            volumeCheckbox.addEventListener('change', (e) => {
-                this.toggleVolumeControls(e.target.checked);
-            });
-        }
-
-        // Volume threshold slider
-        const volumeThresholdSlider = document.getElementById('min_relative_volume');
-        if (volumeThresholdSlider) {
-            volumeThresholdSlider.addEventListener('input', (e) => {
-                this.updateRangeValue('min_relative_volume_value', e.target.value);
-            });
-        }
-
-        // Volume lookback slider
-        const volumeLookbackSlider = document.getElementById('volume_lookback');
-        if (volumeLookbackSlider) {
-            volumeLookbackSlider.addEventListener('input', (e) => {
-                this.updateRangeValue('volume_lookback_value', e.target.value);
+        // Candle color selector
+        const candleColorSelect = document.getElementById('candle_color');
+        if (candleColorSelect) {
+            candleColorSelect.addEventListener('change', (e) => {
+                this.updateCandlestickColor(e.target.value);
+                this.updateVisualization();
             });
         }
     }
 
     updateVisualization() {
-        const bodyRatio = parseFloat(document.getElementById('min_body_ratio')?.value || 0.9);
         const shadowRatio = parseFloat(document.getElementById('max_shadow_ratio')?.value || 0.05);
+        const candleColor = document.getElementById('candle_color')?.value || 'both';
         
-        this.updateMarubozuCandlestick(bodyRatio, shadowRatio);
-        this.updatePatternInfo(bodyRatio, shadowRatio);
-        this.logVisualizationUpdate(bodyRatio, shadowRatio);
+        this.updateMarubozuCandlestick(shadowRatio, candleColor);
+        this.updatePatternInfo(shadowRatio, candleColor);
+        this.logVisualizationUpdate(shadowRatio, candleColor);
     }
 
-    updateMarubozuCandlestick(bodyRatio, shadowRatio) {
+    updateMarubozuCandlestick(shadowRatio, candleColor) {
         const upperShadow = document.getElementById('upperShadow');
         const lowerShadow = document.getElementById('lowerShadow');
         const body = document.getElementById('candlestickBody');
         const bodyFill = document.getElementById('bodyFill');
 
         if (upperShadow && lowerShadow && body && bodyFill) {
-            // Calculate heights based on ratios
-            const totalHeight = 150; // Total candlestick height
-            const bodyHeight = totalHeight * bodyRatio;
-            const shadowHeight = totalHeight * shadowRatio;
+            const totalHeight = 200; // Total candlestick height
+            const shadowHeight = Math.max(totalHeight * shadowRatio, 4); // Minimum 4px for visibility
+            const bodyHeight = totalHeight - (shadowHeight * 2); // Body is what's left
             
-            // Update body height (should be very large for Marubozu)
             body.style.height = `${bodyHeight}px`;
-            
-            // Update shadow heights (should be very small for Marubozu)
             upperShadow.style.height = `${shadowHeight}px`;
             lowerShadow.style.height = `${shadowHeight}px`;
             
-            // Update body color based on strength
-            const strength = bodyRatio;
-            if (strength >= 0.95) {
-                bodyFill.style.background = 'linear-gradient(135deg, #dc3545, #e83e8c)'; // Very strong - red
-            } else if (strength >= 0.9) {
-                bodyFill.style.background = 'linear-gradient(135deg, #fd7e14, #ffc107)'; // Strong - orange
-            } else {
-                bodyFill.style.background = 'linear-gradient(135deg, #28a745, #20c997)'; // Good - green
-            }
+            this.updateCandlestickColor(candleColor, bodyFill);
         }
     }
 
-    updatePatternInfo(bodyRatio, shadowRatio) {
+    updateCandlestickColor(candleColor, bodyFill) {
+        if (!bodyFill) {
+            bodyFill = document.getElementById('bodyFill');
+        }
+        if (!bodyFill) return;
+        
+        if (candleColor === 'red') {
+            bodyFill.style.background = 'linear-gradient(135deg, #dc3545, #e83e8c)';
+        } else if (candleColor === 'green') {
+            bodyFill.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+        } else {
+            bodyFill.style.background = 'linear-gradient(135deg, #6f42c1, #e83e8c)';
+        }
+    }
+
+    updatePatternInfo(shadowRatio, candleColor) {
+        const bodySize = (1.0 - (shadowRatio * 2)) * 100; // Body is 100% - (2 * shadow)
         const bodySizeDisplay = document.getElementById('bodySizeDisplay');
         const upperShadowDisplay = document.getElementById('upperShadowDisplay');
         const lowerShadowDisplay = document.getElementById('lowerShadowDisplay');
         const patternTypeDisplay = document.getElementById('patternTypeDisplay');
+        const strengthIndicator = document.getElementById('strengthIndicator');
 
         if (bodySizeDisplay) {
-            bodySizeDisplay.textContent = `${(bodyRatio * 100).toFixed(0)}%`;
+            bodySizeDisplay.textContent = `${bodySize.toFixed(0)}%`;
         }
         
         if (upperShadowDisplay) {
@@ -126,27 +99,27 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
             lowerShadowDisplay.textContent = `${(shadowRatio * 100).toFixed(0)}%`;
         }
         
+        let momentumText = '';
+        if (shadowRatio <= 0.02) {
+            momentumText = 'Very Strong Momentum';
+        } else if (shadowRatio <= 0.05) {
+            momentumText = 'Strong Momentum';
+        } else {
+            momentumText = 'Good Momentum';
+        }
+        
+        if (strengthIndicator) {
+            strengthIndicator.textContent = momentumText;
+        }
+        
         if (patternTypeDisplay) {
-            if (bodyRatio >= 0.95) {
-                patternTypeDisplay.textContent = 'Very Strong Momentum';
-            } else if (bodyRatio >= 0.9) {
-                patternTypeDisplay.textContent = 'Strong Momentum';
+            if (candleColor === 'red') {
+                patternTypeDisplay.textContent = `${momentumText} (Bearish)`;
+            } else if (candleColor === 'green') {
+                patternTypeDisplay.textContent = `${momentumText} (Bullish)`;
             } else {
-                patternTypeDisplay.textContent = 'Good Momentum';
+                patternTypeDisplay.textContent = `${momentumText} (Both)`;
             }
-        }
-    }
-
-    toggleVolumeControls(show) {
-        const volumeThresholdSection = document.getElementById('volume_threshold_section');
-        const volumeLookbackSection = document.getElementById('volume_lookback_section');
-        
-        if (volumeThresholdSection) {
-            volumeThresholdSection.style.display = show ? 'block' : 'none';
-        }
-        
-        if (volumeLookbackSection) {
-            volumeLookbackSection.style.display = show ? 'block' : 'none';
         }
     }
 
@@ -157,24 +130,22 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
         }
     }
 
-    logVisualizationUpdate(bodyRatio, shadowRatio) {
+    logVisualizationUpdate(shadowRatio, candleColor) {
+        const bodySize = (1.0 - (shadowRatio * 2)) * 100;
         console.log('🔴 Marubozu visualization updated with params:', {
-            bodyRatio: bodyRatio,
             shadowRatio: shadowRatio,
-            bodyHeight: `${(bodyRatio * 100).toFixed(0)}%`,
+            candleColor: candleColor,
+            bodySize: `${bodySize.toFixed(0)}%`,
             shadowHeight: `${(shadowRatio * 100).toFixed(0)}%`,
-            patternStrength: bodyRatio >= 0.95 ? 'Very Strong' : bodyRatio >= 0.9 ? 'Strong' : 'Good'
+            patternStrength: shadowRatio <= 0.02 ? 'Very Strong' : shadowRatio <= 0.05 ? 'Strong' : 'Good',
+            colorFilter: candleColor === 'red' ? 'Bearish Only' : candleColor === 'green' ? 'Bullish Only' : 'Both'
         });
     }
 
     getPatternSpecificParameters() {
         return [
-            'min_body_ratio',
             'max_shadow_ratio',
-            'ma_period',
-            'require_high_volume',
-            'min_relative_volume',
-            'volume_lookback'
+            'candle_color'
         ];
     }
 }

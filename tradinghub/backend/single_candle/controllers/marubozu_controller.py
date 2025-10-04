@@ -32,17 +32,17 @@ class MarubozuController:
         try:
             # Build Marubozu-specific parameters
             pattern_params = PatternParams(
-                body_size_ratio=float(data.get('min_body_ratio', 0.9)),  # Map min_body_ratio to body_size_ratio
+                body_size_ratio=0.0,  # Not used for Marubozu detection
                 lower_shadow_ratio=float(data.get('max_shadow_ratio', 0.05)),  # Map max_shadow_ratio to lower_shadow_ratio
                 upper_shadow_ratio=float(data.get('max_shadow_ratio', 0.05)),  # Map max_shadow_ratio to upper_shadow_ratio
-                ma_period=int(data.get('ma_period', 5)),
+                ma_period=5,  # Default value, not used in Marubozu detection
                 require_green=False,  # Not relevant for Marubozu (can be bullish or bearish)
-                require_high_volume=self._parse_boolean(data.get('require_high_volume', False))
+                require_high_volume=False  # Not relevant for Marubozu
             )
 
-            # Add common parameters
-            pattern_params.min_relative_volume = float(data.get('min_relative_volume', 1.0))
-            pattern_params.volume_lookback = int(data.get('volume_lookback', 20))
+            # Add Marubozu-specific parameters
+            candle_color = data.get('candle_color', 'both')
+            pattern_params.candle_color = candle_color  # Add as custom attribute
 
             # Create analysis request object
             request_obj = AnalysisRequest(

@@ -27,12 +27,9 @@ class MarubozuPattern(BasePattern):
         Args:
             df (pd.DataFrame): Stock data with OHLC columns
             params (Dict[str, Any]): Pattern detection parameters
-                - min_body_ratio (float): Minimum body size as fraction of total range
-                - max_shadow_ratio (float): Maximum shadow size as fraction of total range
-                - ma_period (int): Period for moving average calculation
-                - require_high_volume (bool): Whether to require high volume
-                - min_relative_volume (float, optional): Minimum relative volume compared to average
-                - volume_lookback (int, optional): Number of candles to look back for volume comparison
+                - upper_shadow_ratio (float): Maximum upper shadow size as fraction of total range
+                - lower_shadow_ratio (float): Maximum lower shadow size as fraction of total range
+                - candle_color (str): Candle color filter ('red', 'green', or 'both')
                 
         Returns:
             pd.DataFrame: DataFrame with Marubozu pattern detection results
@@ -40,10 +37,7 @@ class MarubozuPattern(BasePattern):
         # Calculate candle properties
         df = CandlestickUtils.calculate_properties(df)
         
-        # Add trend context
-        df = CandlestickUtils.add_trend_context(df, params['ma_period'])
-        
-        # Detect Marubozu patterns
+        # Detect Marubozu patterns (no trend context needed)
         df = self._detect_marubozu_conditions(df, params)
         
         return df
@@ -52,22 +46,23 @@ class MarubozuPattern(BasePattern):
         """Apply Marubozu pattern conditions"""
         
         # Marubozu conditions:
-        # 1. Large body (body should be most of the total range)
-        # 2. No shadows (or very small shadows)
-        # 3. Strong directional movement
+        # 1. No shadows (or very small shadows) - this automatically means large body
+        # 2. Strong directional movement
         
         marubozu_condition = (
-            (df['body_size'] >= params['body_size_ratio'] * df['total_range']) &  # Large body
             (df['upper_shadow'] <= params['upper_shadow_ratio'] * df['total_range']) &  # No upper shadow
             (df['lower_shadow'] <= params['lower_shadow_ratio'] * df['total_range'])  # No lower shadow
         )
         
-        # Add volume condition if Volume column exists and parameters are provided
-        if 'Volume' in df.columns and 'min_relative_volume' in params and params.get('min_relative_volume') is not None:
-            lookback = params.get('volume_lookback', 20)
-            volume_ma = df['Volume'].rolling(window=lookback).mean()
-            relative_volume = df['Volume'] / volume_ma
-            marubozu_condition = marubozu_condition & (relative_volume >= params['min_relative_volume'])
-            
+        # Add candle color filtering
+        candle_color = params.get('candle_color', 'both')  # 'red', 'green', or 'both'
+        if candle_color == 'red':
+            # Only bearish (red) Marubozu candles
+            marubozu_condition = marubozu_condition & (~df['is_green'])  # Not green = red
+        elif candle_color == 'green':
+            # Only bullish (green) Marubozu candles
+            marubozu_condition = marubozu_condition & df['is_green']  # Green candles
+        # If 'both', no additional filtering needed
+        
         df['is_marubozu'] = marubozu_condition
         return df
