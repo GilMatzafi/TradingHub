@@ -4,7 +4,7 @@ Backtests the hammer pattern strategy - NO CODE DUPLICATION!
 """
 
 from ..patterns.hammer_pattern import HammerPattern
-from .base_backtest import BaseBacktest
+from tradinghub.backend.shared.backtest.base_backtest import BaseBacktest
 
 class HammerBacktest(BaseBacktest):
     """Backtester for hammer pattern strategy"""

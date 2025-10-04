@@ -4,7 +4,7 @@ Backtests the elephant bar pattern strategy - NO CODE DUPLICATION!
 """
 
 from ..patterns.elephant_bar_pattern import ElephantBarPattern
-from .base_backtest import BaseBacktest
+from tradinghub.backend.shared.backtest.base_backtest import BaseBacktest
 
 class ElephantBarBacktest(BaseBacktest):
     """Backtester for elephant bar pattern strategy"""

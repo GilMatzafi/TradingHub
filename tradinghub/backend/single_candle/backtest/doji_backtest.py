@@ -4,7 +4,7 @@ Backtests the doji pattern strategy - NO CODE DUPLICATION!
 """
 
 from ..patterns.doji_pattern import DojiPattern
-from .base_backtest import BaseBacktest
+from tradinghub.backend.shared.backtest.base_backtest import BaseBacktest
 
 class DojiBacktest(BaseBacktest):
     """Backtester for doji pattern strategy"""

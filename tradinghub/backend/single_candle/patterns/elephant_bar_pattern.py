@@ -5,7 +5,7 @@ Detects Elephant Bar candlestick patterns - strong directional momentum signals
 
 import pandas as pd
 from typing import Dict, Any
-from .base_pattern import BasePattern
+from tradinghub.backend.shared.patterns.base_pattern import BasePattern
 from tradinghub.backend.shared.utils.candlestick_utils import CandlestickUtils
 
 class ElephantBarPattern(BasePattern):

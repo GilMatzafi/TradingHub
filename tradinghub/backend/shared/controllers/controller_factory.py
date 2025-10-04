@@ -3,10 +3,10 @@ Controller Factory
 Manages pattern-specific controllers
 """
 from typing import Dict, Any, Tuple
-from .hammer_controller import HammerController
-from .doji_controller import DojiController
-from .elephant_bar_controller import ElephantBarController
-from .marubozu_controller import MarubozuController
+from tradinghub.backend.single_candle.controllers.hammer_controller import HammerController
+from tradinghub.backend.single_candle.controllers.doji_controller import DojiController
+from tradinghub.backend.single_candle.controllers.elephant_bar_controller import ElephantBarController
+from tradinghub.backend.single_candle.controllers.marubozu_controller import MarubozuController
 
 class ControllerFactory:
     """Factory for creating pattern-specific controllers"""

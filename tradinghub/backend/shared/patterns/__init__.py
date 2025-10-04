@@ -1,0 +1,3 @@
+"""
+Shared patterns module
+"""

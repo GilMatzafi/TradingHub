@@ -7,11 +7,11 @@ from ..patterns.base_pattern import BasePattern
 from ..backtest.base_backtest import BaseBacktest
 
 # Import pattern configurations
-from .patterns.hammer_config import HAMMER_CONFIG
-from .patterns.doji_config import DOJI_CONFIG
-from .patterns.elephant_bar_config import ELEPHANT_BAR_CONFIG
-from .patterns.marubozu_config import MARUBOZU_CONFIG
-from .patterns.shooting_star_config import SHOOTING_STAR_CONFIG
+from tradinghub.backend.single_candle.config.patterns.hammer_config import HAMMER_CONFIG
+from tradinghub.backend.single_candle.config.patterns.doji_config import DOJI_CONFIG
+from tradinghub.backend.single_candle.config.patterns.elephant_bar_config import ELEPHANT_BAR_CONFIG
+from tradinghub.backend.single_candle.config.patterns.marubozu_config import MARUBOZU_CONFIG
+from tradinghub.backend.single_candle.config.patterns.shooting_star_config import SHOOTING_STAR_CONFIG
 
 
 class PatternRegistry:
