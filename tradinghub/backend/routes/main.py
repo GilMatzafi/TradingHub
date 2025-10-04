@@ -35,7 +35,11 @@ def register_pattern_routes():
             # Create route function dynamically
             def create_route_func(pattern_name, template_name):
                 def route_func():
-                    return render_template(f'{template_name}/index.html')
+                    # Handle both single-candle (hammer_analyzer) and two-candle (engulfing_analyzer/index.html) formats
+                    if template_name.endswith('.html'):
+                        return render_template(template_name)
+                    else:
+                        return render_template(f'{template_name}/index.html')
                 route_func.__name__ = f'{pattern_name}_analyzer'
                 return route_func
             

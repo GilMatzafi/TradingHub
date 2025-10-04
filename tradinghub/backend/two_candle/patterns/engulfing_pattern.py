@@ -41,7 +41,7 @@ class EngulfingPattern(BasePattern):
         
         # Add moving average for trend context
         if params.get('require_trend', True):
-            df = CandlestickUtils.add_moving_average(df, params.get('ma_period', 20))
+            df = CandlestickUtils.add_trend_context(df, params.get('ma_period', 20))
         
         # Detect Engulfing patterns
         df = self._detect_engulfing_conditions(df, params)

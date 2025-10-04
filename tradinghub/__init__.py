@@ -17,10 +17,20 @@ def create_app(config_class=Config):
     if os.path.exists(shared_template_path):
         app.jinja_loader.searchpath.insert(0, shared_template_path)
     
+    # Add two_candle templates to the template search path
+    two_candle_template_path = os.path.join(app.root_path, 'frontend/two_candle/templates')
+    if os.path.exists(two_candle_template_path):
+        app.jinja_loader.searchpath.insert(0, two_candle_template_path)
+    
     # Custom static file handler for shared files
     @app.route('/shared/<path:filename>')
     def shared_static(filename):
         return send_from_directory(os.path.join(app.root_path, 'frontend/shared/static'), filename)
+    
+    # Custom static file handler for two_candle files
+    @app.route('/two_candle/<path:filename>')
+    def two_candle_static(filename):
+        return send_from_directory(os.path.join(app.root_path, 'frontend/two_candle/static'), filename)
     
     # Load configuration
     app.config.from_object(config_class)

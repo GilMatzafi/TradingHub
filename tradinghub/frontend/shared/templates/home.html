@@ -131,10 +131,45 @@
         </div>
     </div>
 
+    <!-- Two-Candle Patterns Section -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4">Two-Candle Patterns</h2>
+        <p class="text-center text-muted mb-4">Powerful two-candle patterns that can signal strong market reversals</p>
+    </div>
+    
+    <div class="row g-4 mb-5 justify-content-center">
+        <!-- Engulfing Pattern Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card strategy-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <div class="strategy-icon engulfing-icon">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <h4 class="card-title mt-3">Engulfing Pattern</h4>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        A powerful reversal pattern where the second candle completely engulfs the first candle. Indicates strong momentum shift and potential trend reversal.
+                    </p>
+                    <div class="strategy-features mb-3">
+                        <span class="badge bg-success me-2">Bullish/Bearish</span>
+                        <span class="badge bg-primary me-2">Two Candle</span>
+                        <span class="badge bg-info">Strong Reversal</span>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="/engulfing" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>Analyze Engulfing Patterns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Future Patterns Section (Coming Soon) -->
     <div class="mb-5">
         <h2 class="text-center mb-4">More Patterns Coming Soon</h2>
-        <p class="text-center text-muted mb-4">We're expanding our pattern library with multi-candle patterns</p>
+        <p class="text-center text-muted mb-4">We're expanding our pattern library with additional multi-candle patterns</p>
         
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
@@ -143,8 +178,8 @@
                         <div class="coming-soon-icon mb-3">
                             <i class="bi bi-calendar2-plus"></i>
                         </div>
-                        <h5>Two-Candle Patterns</h5>
-                        <p class="text-muted">Engulfing, Harami, and more complex reversal patterns</p>
+                        <h5>More Two-Candle Patterns</h5>
+                        <p class="text-muted">Harami, Piercing Line, and more complex reversal patterns</p>
                         <span class="badge bg-secondary">Coming Soon</span>
                     </div>
                 </div>
@@ -226,6 +261,11 @@
                                 <i class="bi bi-arrow-up-right me-2"></i>Marubozu
                             </a>
                         </div>
+                        <div class="col-md-3 col-6">
+                            <a href="/engulfing" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-arrow-repeat me-2"></i>Engulfing
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -273,6 +313,10 @@
 
 .marubozu-icon {
     background: linear-gradient(135deg, #6f42c1, #e83e8c);
+}
+
+.engulfing-icon {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
 }
 
 .feature-icon {

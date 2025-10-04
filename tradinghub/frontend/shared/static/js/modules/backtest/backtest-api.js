@@ -7,7 +7,7 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 function initBacktestApi() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the current strategy instance (works for any pattern)
-        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy;
+        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy;
         
         // Debug: Log what strategies are available
         console.log('🔍 Backtest API Debug:', {
@@ -16,6 +16,7 @@ function initBacktestApi() {
             elephantBarStrategy: !!window.elephantBarStrategy,
             marubozuStrategy: !!window.marubozuStrategy,
             shootingStarStrategy: !!window.shootingStarStrategy,
+            engulfingStrategy: !!window.engulfingStrategy,
             currentStrategy: !!currentStrategy
         });
         
@@ -26,7 +27,8 @@ function initBacktestApi() {
                 doji: !!window.dojiStrategy,
                 elephantBar: !!window.elephantBarStrategy,
                 marubozu: !!window.marubozuStrategy,
-                shootingStar: !!window.shootingStarStrategy
+                shootingStar: !!window.shootingStarStrategy,
+                engulfing: !!window.engulfingStrategy
             });
             alert('Error: Strategy not initialized');
             return;
