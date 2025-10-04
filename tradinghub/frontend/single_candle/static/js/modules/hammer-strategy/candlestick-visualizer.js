@@ -1,7 +1,7 @@
 /**
  * HammerCandlestickVisualizer - Handles hammer-specific visualization logic
  */
-import { CandlestickVisualizer } from '../shared/candlestick-visualizer.js';
+import { CandlestickVisualizer } from '/shared/js/modules/shared/candlestick-visualizer.js';
 
 export class HammerCandlestickVisualizer extends CandlestickVisualizer {
     constructor() {

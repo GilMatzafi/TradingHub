@@ -2,7 +2,7 @@
  * Elephant Bar Strategy Module - Uses Universal Components
  * Only the candlestick visualizer is pattern-specific
  */
-import { BaseStrategy } from '../shared/base-strategy.js';
+import { BaseStrategy } from '/shared/js/modules/shared/base-strategy.js';
 import { ElephantBarCandlestickVisualizer } from './candlestick-visualizer.js';
 
 /**

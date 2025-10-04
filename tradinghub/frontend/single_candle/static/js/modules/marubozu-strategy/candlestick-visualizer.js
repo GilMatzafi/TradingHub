@@ -3,7 +3,7 @@
  * Handles Marubozu-specific candlestick visualization and parameter updates
  */
 
-import { CandlestickVisualizer } from '../shared/candlestick-visualizer.js';
+import { CandlestickVisualizer } from '/shared/js/modules/shared/candlestick-visualizer.js';
 
 export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
     constructor() {

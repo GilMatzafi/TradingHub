@@ -3,7 +3,7 @@
  * Handles Marubozu pattern analysis and visualization
  */
 
-import { BaseStrategy } from '../shared/base-strategy.js';
+import { BaseStrategy } from '/shared/js/modules/shared/base-strategy.js';
 import { MarubozuCandlestickVisualizer } from './candlestick-visualizer.js';
 
 class MarubozuStrategy extends BaseStrategy {

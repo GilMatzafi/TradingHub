@@ -20,7 +20,7 @@
                 <!-- Basic Parameters (Left Side) -->
                 <div class="col-md-5 border-end">
                     <!-- Universal analysis form -->
-                    {% from 'shared/components/analysis_form.html' import analysis_form %}
+                    {% from 'components/analysis_form.html' import analysis_form %}
                     {{ analysis_form() }}
                     
                     <!-- Pattern-specific additional form fields -->
@@ -61,7 +61,7 @@
                     </button>
                 </div>
                 <!-- Universal results table -->
-                {% from 'shared/components/results_table.html' import results_table %}
+                {% from 'components/results_table.html' import results_table %}
                 {{ results_table() }}
             </div>
         </div>
@@ -70,7 +70,7 @@
     <!-- Backtest Parameters Section -->
     <div id="backtestSection" class="d-none">
         <!-- Universal backtest parameters -->
-        {% from 'shared/components/backtest_params.html' import backtest_params %}
+        {% from 'components/backtest_params.html' import backtest_params %}
         {{ backtest_params() }}
     </div>
 </div>
