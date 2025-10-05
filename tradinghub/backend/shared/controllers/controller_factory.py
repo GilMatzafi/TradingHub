@@ -10,6 +10,7 @@ from tradinghub.backend.single_candle.controllers.marubozu_controller import Mar
 from tradinghub.backend.two_candle.controllers.engulfing_controller import EngulfingController
 from tradinghub.backend.two_candle.controllers.harami_controller import HaramiController
 from tradinghub.backend.two_candle.controllers.piercing_line_controller import PiercingLineController
+from tradinghub.backend.two_candle.controllers.counter_attack_controller import CounterAttackController
 
 class ControllerFactory:
     """Factory for creating pattern-specific controllers"""
@@ -23,6 +24,7 @@ class ControllerFactory:
             'engulfing': EngulfingController(),
             'harami': HaramiController(),
             'piercing_line': PiercingLineController(),
+            'counter_attack': CounterAttackController(),
         }
     
     def get_controller(self, pattern_type: str):

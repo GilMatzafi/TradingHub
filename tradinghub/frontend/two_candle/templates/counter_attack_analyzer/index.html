@@ -1,0 +1,43 @@
+{% extends "base_analyzer.html" %}
+{% from "counter_attack_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "counter_attack_analyzer/components/pattern_params.html" import pattern_params %}
+{% from "components/volume_params.html" import volume_params %}
+
+{% block title %}TradingHub - Counter Attack Candle Pattern Detector{% endblock %}
+
+{% set pattern_name = "Counter Attack Candle" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+    {{ volume_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Counter Attack-specific form fields -->
+    <div class="col-md-6">
+        <label for="counter_attack_type" class="form-label">Counter Attack Type</label>
+        <select class="form-select" id="counter_attack_type" name="counter_attack_type">
+            <option value="both">Both Bullish & Bearish</option>
+            <option value="bullish">Bullish Only</option>
+            <option value="bearish">Bearish Only</option>
+        </select>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_trend" name="require_trend" checked>
+            <label class="form-check-label" for="require_trend">
+                Require Trend Context
+            </label>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Counter Attack-specific JavaScript -->
+    <script type="module" src="/two_candle/js/modules/counter-attack-strategy/index.js"></script>
+{% endblock %}

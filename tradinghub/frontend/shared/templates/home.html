@@ -191,35 +191,101 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Piercing Line Pattern Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card strategy-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <div class="strategy-icon piercing-icon">
+                            <i class="bi bi-arrow-up-circle"></i>
+                        </div>
+                        <h4 class="card-title mt-3">Piercing Line Pattern</h4>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        A bullish reversal pattern where the second candle opens below the first candle's low but closes above the midpoint of the first candle's body.
+                    </p>
+                    <div class="strategy-features mb-3">
+                        <span class="badge bg-success me-2">Bullish Reversal</span>
+                        <span class="badge bg-primary me-2">Two Candle</span>
+                        <span class="badge bg-info">Strong Signal</span>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="/piercing_line" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>Analyze Piercing Line Patterns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Counter Attack Pattern Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card strategy-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="text-center mb-3">
+                        <div class="strategy-icon counter-attack-icon">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </div>
+                        <h4 class="card-title mt-3">Counter Attack Pattern</h4>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        A reversal pattern where the second candle opens with a gap but closes almost at the same level as the previous candle, indicating a counter-attack.
+                    </p>
+                    <div class="strategy-features mb-3">
+                        <span class="badge bg-danger me-2">Bullish/Bearish</span>
+                        <span class="badge bg-primary me-2">Two Candle</span>
+                        <span class="badge bg-warning">Counter-Attack</span>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="/counter_attack" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>Analyze Counter Attack Patterns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Future Patterns Section (Coming Soon) -->
+    <!-- Advanced Patterns Section -->
     <div class="mb-5">
-        <h2 class="text-center mb-4">More Patterns Coming Soon</h2>
-        <p class="text-center text-muted mb-4">We're expanding our pattern library with additional multi-candle patterns</p>
+        <h2 class="text-center mb-4">Advanced Pattern Features</h2>
+        <p class="text-center text-muted mb-4">All patterns include advanced filtering, trend analysis, and comprehensive backtesting</p>
         
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
-                <div class="card coming-soon-card">
+                <div class="card feature-highlight-card">
                     <div class="card-body text-center">
-                        <div class="coming-soon-icon mb-3">
-                            <i class="bi bi-calendar2-plus"></i>
+                        <div class="feature-highlight-icon mb-3">
+                            <i class="bi bi-funnel"></i>
                         </div>
-                        <h5>More Two-Candle Patterns</h5>
-                        <p class="text-muted">Harami, Piercing Line, and more complex reversal patterns</p>
-                        <span class="badge bg-secondary">Coming Soon</span>
+                        <h5>Smart Filtering</h5>
+                        <p class="text-muted">Filter by bullish/bearish patterns, trend context, and volume confirmation</p>
+                        <span class="badge bg-success">Available</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card coming-soon-card">
+                <div class="card feature-highlight-card">
                     <div class="card-body text-center">
-                        <div class="coming-soon-icon mb-3">
-                            <i class="bi bi-calendar3"></i>
+                        <div class="feature-highlight-icon mb-3">
+                            <i class="bi bi-graph-up"></i>
                         </div>
-                        <h5>Three-Candle Patterns</h5>
-                        <p class="text-muted">Morning Star, Evening Star, and advanced formations</p>
-                        <span class="badge bg-secondary">Coming Soon</span>
+                        <h5>Backtesting Engine</h5>
+                        <p class="text-muted">Test your strategies with historical data and performance metrics</p>
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-highlight-card">
+                    <div class="card-body text-center">
+                        <div class="feature-highlight-icon mb-3">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <h5>Real-time Analysis</h5>
+                        <p class="text-muted">Analyze live market data with 5-minute intervals</p>
+                        <span class="badge bg-success">Available</span>
                     </div>
                 </div>
             </div>
@@ -298,6 +364,16 @@
                                 <i class="bi bi-arrow-down-up me-2"></i>Harami
                             </a>
                         </div>
+                        <div class="col-md-3 col-6">
+                            <a href="/piercing_line" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-arrow-up-circle me-2"></i>Piercing Line
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <a href="/counter_attack" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-arrow-left-right me-2"></i>Counter Attack
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -355,6 +431,14 @@
     background: linear-gradient(135deg, #ffc107, #fd7e14);
 }
 
+.piercing-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.counter-attack-icon {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
 .feature-icon {
     font-size: 3rem;
 }
@@ -401,6 +485,72 @@
 .coming-soon-icon {
     font-size: 3rem;
     color: #6c757d;
+}
+
+.feature-highlight-card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+}
+
+.feature-highlight-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.feature-highlight-icon {
+    font-size: 3rem;
+    color: #007bff;
+}
+
+/* Enhanced button styles */
+.btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Improved card animations */
+.strategy-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.strategy-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced gradient backgrounds */
+.strategy-icon {
+    transition: all 0.3s ease;
+}
+
+.strategy-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Improved text styling */
+.card-text {
+    line-height: 1.6;
+}
+
+.strategy-features .badge {
+    transition: all 0.3s ease;
+}
+
+.strategy-features .badge:hover {
+    transform: scale(1.05);
 }
 </style>
 {% endblock %}

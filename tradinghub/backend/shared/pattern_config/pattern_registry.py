@@ -15,6 +15,7 @@ from tradinghub.backend.single_candle.config.patterns.shooting_star_config impor
 from tradinghub.backend.two_candle.config.patterns.engulfing_config import ENGULFING_CONFIG
 from tradinghub.backend.two_candle.config.patterns.harami_config import HARAMI_CONFIG
 from tradinghub.backend.two_candle.config.patterns.piercing_line_config import PIERCING_LINE_CONFIG
+from tradinghub.backend.two_candle.config.patterns.counter_attack_config import COUNTER_ATTACK_CONFIG
 
 
 class PatternRegistry:
@@ -30,6 +31,7 @@ class PatternRegistry:
         'engulfing': ENGULFING_CONFIG,
         'harami': HARAMI_CONFIG,
         'piercing_line': PIERCING_LINE_CONFIG,
+        'counter_attack': COUNTER_ATTACK_CONFIG,
     }
     
     @classmethod
