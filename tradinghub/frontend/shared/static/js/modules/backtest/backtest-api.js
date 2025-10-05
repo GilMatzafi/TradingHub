@@ -7,7 +7,7 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 function initBacktestApi() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the current strategy instance (works for any pattern)
-        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy;
+        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy;
         
         // Debug: Log what strategies are available
         console.log('🔍 Backtest API Debug:', {
@@ -18,6 +18,7 @@ function initBacktestApi() {
             shootingStarStrategy: !!window.shootingStarStrategy,
             engulfingStrategy: !!window.engulfingStrategy,
             haramiStrategy: !!window.haramiStrategy,
+            piercingLineStrategy: !!window.piercingLineStrategy,
             currentStrategy: !!currentStrategy
         });
         
@@ -30,7 +31,8 @@ function initBacktestApi() {
                 marubozu: !!window.marubozuStrategy,
                 shootingStar: !!window.shootingStarStrategy,
                 engulfing: !!window.engulfingStrategy,
-                harami: !!window.haramiStrategy
+                harami: !!window.haramiStrategy,
+                piercingLine: !!window.piercingLineStrategy
             });
             alert('Error: Strategy not initialized');
             return;
@@ -80,7 +82,7 @@ function collectFormData(filteredPatterns) {
     // Add pattern-specific parameters (only if they exist)
     const patternParams = [
         'body_size_ratio', 'lower_shadow_ratio', 'upper_shadow_ratio',
-        'ma_period', 'require_green', 'require_high_volume'
+        'ma_period', 'require_green', 'require_high_volume', 'piercing_ratio', 'require_trend'
     ];
 
     patternParams.forEach(param => {
