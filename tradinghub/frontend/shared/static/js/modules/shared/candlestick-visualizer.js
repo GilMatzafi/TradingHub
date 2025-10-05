@@ -1,13 +1,16 @@
 /**
  * Universal CandlestickVisualizer Base Class - Works for ANY pattern
- * Base class for pattern-specific candlestick visualizations
+ * Enhanced base class with all common functionality to eliminate code duplication
  */
 export class CandlestickVisualizer {
     /**
      * @param {string} patternType - The pattern type (hammer, doji, shooting_star, etc.)
+     * @param {string} canvasId - Optional canvas ID for chart rendering
      */
-    constructor(patternType) {
+    constructor(patternType, canvasId = null) {
         this.patternType = patternType;
+        this.canvasId = canvasId;
+        this.chartContainer = canvasId ? document.getElementById(canvasId) : null;
         this.initializeElements();
     }
 
@@ -125,5 +128,201 @@ export class CandlestickVisualizer {
      */
     logVisualizationUpdate(params) {
         console.log(`${this.patternType} visualization updated with params:`, params);
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Update range value display
+     * @param {HTMLInputElement} input - The range input element
+     */
+    updateRangeValue(input) {
+        const container = input.closest('.range-container');
+        if (!container) return; // Exit if no container found
+        
+        const valueDisplay = container.querySelector('.range-value');
+        const value = input.value;
+        
+        // Update the value display
+        if (valueDisplay) {
+            valueDisplay.textContent = value;
+            
+            // Calculate the position
+            const percent = (value - input.min) / (input.max - input.min);
+            const leftOffset = percent * (input.offsetWidth - 20); // 20 is thumb width
+            
+            // Update value display position
+            valueDisplay.style.left = `${leftOffset + 10}px`; // 10 is half of thumb width
+            valueDisplay.style.transform = 'translateX(-50%)';
+        }
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Initialize event listeners for visualization elements
+     */
+    initializeEventListeners() {
+        // Add event listeners for range inputs
+        const rangeInputs = document.querySelectorAll('input[type="range"]');
+        rangeInputs.forEach(input => {
+            // Initialize range value displays
+            this.updateRangeValue(input);
+            
+            // Add event listeners for range input changes
+            input.addEventListener('input', () => {
+                this.updateRangeValue(input);
+                this.handleRangeInputChange(input);
+            });
+            
+            // Add event listener for when dragging ends
+            input.addEventListener('change', () => {
+                this.updateRangeValue(input);
+            });
+        });
+        
+        // Add event listeners for pattern-specific controls
+        this.initializePatternSpecificEventListeners();
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Handle range input changes
+     * @param {HTMLInputElement} input - The range input that changed
+     */
+    handleRangeInputChange(input) {
+        const commonParams = ['body_size_ratio', 'ma_period'];
+        const patternSpecificParams = this.getPatternSpecificParameters();
+        const allParams = [...commonParams, ...patternSpecificParams];
+        
+        if (allParams.includes(input.id)) {
+            this.updateVisualization();
+        }
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Initialize pattern-specific event listeners
+     * Override this method in pattern-specific classes for custom controls
+     */
+    initializePatternSpecificEventListeners() {
+        // Default implementation - can be overridden
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Render pattern markers on chart
+     * @param {Array} patterns - Array of pattern data
+     * @param {string} patternType - Type of pattern for marker styling
+     */
+    renderPatternMarkers(patterns, patternType) {
+        if (!patterns || patterns.length === 0) {
+            console.log(`No ${patternType} patterns to render`);
+            return;
+        }
+
+        console.log(`Rendering ${patterns.length} ${patternType} patterns`);
+        
+        // Clear existing markers
+        this.clearPatternMarkers(patternType);
+        
+        // Render each pattern
+        patterns.forEach((pattern, index) => {
+            this.renderSinglePatternMarker(pattern, index, patternType);
+        });
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Render a single pattern marker
+     * @param {Object} pattern - Pattern data
+     * @param {number} index - Pattern index
+     * @param {string} patternType - Type of pattern
+     */
+    renderSinglePatternMarker(pattern, index, patternType) {
+        const { date, open, high, low, close, pattern_type } = pattern;
+        
+        // Create pattern marker
+        const marker = document.createElement('div');
+        marker.className = `pattern-marker ${patternType}-marker`;
+        marker.style.position = 'absolute';
+        marker.style.left = `${index * 20}px`;
+        marker.style.top = '10px';
+        marker.style.width = '15px';
+        marker.style.height = '15px';
+        marker.style.borderRadius = '50%';
+        marker.style.backgroundColor = this.getMarkerColor(pattern_type);
+        marker.style.border = '2px solid white';
+        marker.style.zIndex = '10';
+        marker.title = `${patternType} Pattern: ${date}`;
+        
+        // Add to chart container
+        if (this.chartContainer) {
+            this.chartContainer.appendChild(marker);
+        }
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Get marker color based on pattern type
+     * @param {string} patternType - Pattern type
+     * @returns {string} Color for the marker
+     */
+    getMarkerColor(patternType) {
+        if (patternType && patternType.includes('bullish')) {
+            return '#28a745';
+        } else if (patternType && patternType.includes('bearish')) {
+            return '#dc3545';
+        } else {
+            return '#6c757d'; // Neutral color
+        }
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Clear all pattern markers
+     * @param {string} patternType - Type of pattern markers to clear
+     */
+    clearPatternMarkers(patternType) {
+        const markers = document.querySelectorAll(`.${patternType}-marker`);
+        markers.forEach(marker => marker.remove());
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Apply transition classes for smooth animation
+     */
+    addTransitionClasses() {
+        if (this.candlestickBody) this.candlestickBody.classList.add('transitioning');
+        if (this.upperShadow) this.upperShadow.classList.add('transitioning');
+        if (this.lowerShadow) this.lowerShadow.classList.add('transitioning');
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Remove transition classes after animation
+     */
+    removeTransitionClasses() {
+        setTimeout(() => {
+            if (this.candlestickBody) this.candlestickBody.classList.remove('transitioning');
+            if (this.upperShadow) this.upperShadow.classList.remove('transitioning');
+            if (this.lowerShadow) this.lowerShadow.classList.remove('transitioning');
+        }, 300);
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Update candlestick body and shadows
+     * @param {number} bodyHeight - Height of the body
+     * @param {number} bodyTop - Top position of the body
+     * @param {number} upperShadowHeight - Height of upper shadow
+     * @param {number} lowerShadowHeight - Height of lower shadow
+     */
+    updateCandlestickElements(bodyHeight, bodyTop, upperShadowHeight, lowerShadowHeight) {
+        // Update the body
+        this.setElementStyle(this.candlestickBody, 'height', `${bodyHeight}px`);
+        this.setElementStyle(this.candlestickBody, 'top', `${bodyTop}px`);
+        
+        // Update the shadows
+        this.setElementStyle(this.upperShadow, 'height', `${upperShadowHeight}px`);
+        this.setElementStyle(this.upperShadow, 'top', `${bodyTop - upperShadowHeight}px`);
+        
+        this.setElementStyle(this.lowerShadow, 'height', `${lowerShadowHeight}px`);
+        this.setElementStyle(this.lowerShadow, 'top', `${bodyTop + bodyHeight}px`);
+    }
+
+    /**
+     * COMMON FUNCTIONALITY - Set candlestick color
+     * @param {string} color - Color to set
+     */
+    setCandlestickColor(color) {
+        this.setElementStyle(this.candlestickBody, 'background-color', color);
     }
 }

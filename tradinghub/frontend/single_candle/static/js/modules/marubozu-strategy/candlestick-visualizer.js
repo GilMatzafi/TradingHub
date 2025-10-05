@@ -1,6 +1,6 @@
 /**
  * Marubozu Candlestick Visualizer
- * Handles Marubozu-specific candlestick visualization and parameter updates
+ * Refactored to use enhanced base class - only contains pattern-specific logic
  */
 
 import { CandlestickVisualizer } from '/shared/js/modules/shared/candlestick-visualizer.js';
@@ -16,35 +16,37 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
         console.log('🔴 Marubozu visualizer: Initialized');
     }
 
-    initializeEventListeners() {
-        // Shadow ratio slider
-        const shadowRatioSlider = document.getElementById('max_shadow_ratio');
-        if (shadowRatioSlider) {
-            shadowRatioSlider.addEventListener('input', (e) => {
-                this.updateRangeValue('max_shadow_ratio_value', e.target.value);
-                this.updateVisualization();
-            });
-        }
-
-        // Candle color selector
-        const candleColorSelect = document.getElementById('candle_color');
-        if (candleColorSelect) {
-            candleColorSelect.addEventListener('change', (e) => {
-                this.updateCandlestickColor(e.target.value);
-                this.updateVisualization();
-            });
-        }
+    /**
+     * Get pattern-specific parameters for marubozu
+     * @returns {Array} Array of marubozu-specific parameter IDs
+     */
+    getPatternSpecificParameters() {
+        return ['max_shadow_ratio', 'candle_color'];
     }
 
+    /**
+     * Update the candlestick visualization based on current parameters
+     * MARUBOZU-SPECIFIC LOGIC ONLY
+     */
     updateVisualization() {
-        const shadowRatio = parseFloat(document.getElementById('max_shadow_ratio')?.value || 0.05);
-        const candleColor = document.getElementById('candle_color')?.value || 'both';
+        const shadowRatio = this.getParameterValue('max_shadow_ratio', 0.05);
+        const candleColor = this.getParameterValue('candle_color', 'both');
         
         this.updateMarubozuCandlestick(shadowRatio, candleColor);
         this.updatePatternInfo(shadowRatio, candleColor);
-        this.logVisualizationUpdate(shadowRatio, candleColor);
+        this.logVisualizationUpdate({
+            shadowRatio,
+            candleColor,
+            bodySize: `${((1.0 - (shadowRatio * 2)) * 100).toFixed(0)}%`,
+            shadowHeight: `${(shadowRatio * 100).toFixed(0)}%`,
+            patternStrength: shadowRatio <= 0.02 ? 'Very Strong' : shadowRatio <= 0.05 ? 'Strong' : 'Good',
+            colorFilter: candleColor === 'red' ? 'Bearish Only' : candleColor === 'green' ? 'Bullish Only' : 'Both'
+        });
     }
 
+    /**
+     * MARUBOZU-SPECIFIC: Update candlestick with marubozu logic
+     */
     updateMarubozuCandlestick(shadowRatio, candleColor) {
         const upperShadow = document.getElementById('upperShadow');
         const lowerShadow = document.getElementById('lowerShadow');
@@ -64,6 +66,9 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
         }
     }
 
+    /**
+     * MARUBOZU-SPECIFIC: Update candlestick color with gradients
+     */
     updateCandlestickColor(candleColor, bodyFill) {
         if (!bodyFill) {
             bodyFill = document.getElementById('bodyFill');
@@ -79,6 +84,9 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
         }
     }
 
+    /**
+     * MARUBOZU-SPECIFIC: Update pattern information display
+     */
     updatePatternInfo(shadowRatio, candleColor) {
         const bodySize = (1.0 - (shadowRatio * 2)) * 100; // Body is 100% - (2 * shadow)
         const bodySizeDisplay = document.getElementById('bodySizeDisplay');
@@ -123,29 +131,37 @@ export class MarubozuCandlestickVisualizer extends CandlestickVisualizer {
         }
     }
 
+    /**
+     * Initialize pattern-specific event listeners
+     * MARUBOZU-SPECIFIC: Shadow ratio and candle color controls
+     */
+    initializePatternSpecificEventListeners() {
+        // Shadow ratio slider
+        const shadowRatioSlider = document.getElementById('max_shadow_ratio');
+        if (shadowRatioSlider) {
+            shadowRatioSlider.addEventListener('input', (e) => {
+                this.updateRangeValue('max_shadow_ratio_value', e.target.value);
+                this.updateVisualization();
+            });
+        }
+
+        // Candle color selector
+        const candleColorSelect = document.getElementById('candle_color');
+        if (candleColorSelect) {
+            candleColorSelect.addEventListener('change', (e) => {
+                this.updateCandlestickColor(e.target.value);
+                this.updateVisualization();
+            });
+        }
+    }
+
+    /**
+     * MARUBOZU-SPECIFIC: Update range value display for specific element
+     */
     updateRangeValue(elementId, value) {
         const element = document.getElementById(elementId);
         if (element) {
             element.textContent = value;
         }
-    }
-
-    logVisualizationUpdate(shadowRatio, candleColor) {
-        const bodySize = (1.0 - (shadowRatio * 2)) * 100;
-        console.log('🔴 Marubozu visualization updated with params:', {
-            shadowRatio: shadowRatio,
-            candleColor: candleColor,
-            bodySize: `${bodySize.toFixed(0)}%`,
-            shadowHeight: `${(shadowRatio * 100).toFixed(0)}%`,
-            patternStrength: shadowRatio <= 0.02 ? 'Very Strong' : shadowRatio <= 0.05 ? 'Strong' : 'Good',
-            colorFilter: candleColor === 'red' ? 'Bearish Only' : candleColor === 'green' ? 'Bullish Only' : 'Both'
-        });
-    }
-
-    getPatternSpecificParameters() {
-        return [
-            'max_shadow_ratio',
-            'candle_color'
-        ];
     }
 }

@@ -1,5 +1,6 @@
 /**
  * HammerCandlestickVisualizer - Handles hammer-specific visualization logic
+ * Refactored to use enhanced base class - only contains pattern-specific logic
  */
 import { CandlestickVisualizer } from '/shared/js/modules/shared/candlestick-visualizer.js';
 
@@ -18,6 +19,7 @@ export class HammerCandlestickVisualizer extends CandlestickVisualizer {
 
     /**
      * Update the candlestick visualization based on current parameters
+     * HAMMER-SPECIFIC LOGIC ONLY
      */
     updateVisualization() {
         const bodySizeRatio = this.getParameterValue('body_size_ratio', 0.1);
@@ -40,23 +42,13 @@ export class HammerCandlestickVisualizer extends CandlestickVisualizer {
         // Position the body in the middle of the candlestick
         const bodyTop = (totalHeight - bodyHeight) / 2;
         
-        // Add transition class for smooth animation
-        if (this.candlestickBody) this.candlestickBody.classList.add('transitioning');
-        if (this.upperShadow) this.upperShadow.classList.add('transitioning');
-        if (this.lowerShadow) this.lowerShadow.classList.add('transitioning');
+        // Use common functionality for transitions
+        this.addTransitionClasses();
         
-        // Update the body
-        this.setElementStyle(this.candlestickBody, 'height', `${bodyHeight}px`);
-        this.setElementStyle(this.candlestickBody, 'top', `${bodyTop}px`);
+        // Use common functionality for updating elements
+        this.updateCandlestickElements(bodyHeight, bodyTop, upperShadowHeight, lowerShadowHeight);
         
-        // Update the shadows
-        this.setElementStyle(this.upperShadow, 'height', `${upperShadowHeight}px`);
-        this.setElementStyle(this.upperShadow, 'top', `${bodyTop - upperShadowHeight}px`);
-        
-        this.setElementStyle(this.lowerShadow, 'height', `${lowerShadowHeight}px`);
-        this.setElementStyle(this.lowerShadow, 'top', `${bodyTop + bodyHeight}px`);
-        
-        // Set the color based on whether it's a green or red candle
+        // HAMMER-SPECIFIC: Set the color based on whether it's a green or red candle
         if (requireGreen) {
             if (this.candlestickBody) {
                 this.candlestickBody.classList.add('green');
@@ -76,12 +68,8 @@ export class HammerCandlestickVisualizer extends CandlestickVisualizer {
             }
         }
         
-        // Remove transition class after animation completes
-        setTimeout(() => {
-            if (this.candlestickBody) this.candlestickBody.classList.remove('transitioning');
-            if (this.upperShadow) this.upperShadow.classList.remove('transitioning');
-            if (this.lowerShadow) this.lowerShadow.classList.remove('transitioning');
-        }, 300);
+        // Use common functionality for removing transitions
+        this.removeTransitionClasses();
         
         // Log the visualization update
         this.logVisualizationUpdate({
@@ -93,54 +81,10 @@ export class HammerCandlestickVisualizer extends CandlestickVisualizer {
     }
 
     /**
-     * Update the range value display
-     * @param {HTMLInputElement} input - The range input element
+     * Initialize pattern-specific event listeners
+     * HAMMER-SPECIFIC: Only the require green checkbox
      */
-    updateRangeValue(input) {
-        const container = input.closest('.range-container');
-        const valueDisplay = container.querySelector('.range-value');
-        const value = input.value;
-        
-        // Update the value display
-        if (valueDisplay) {
-            valueDisplay.textContent = value;
-            
-            // Calculate the position
-            const percent = (value - input.min) / (input.max - input.min);
-            const leftOffset = percent * (input.offsetWidth - 20); // 20 is thumb width
-            
-            // Update value display position
-            valueDisplay.style.left = `${leftOffset + 10}px`; // 10 is half of thumb width
-            valueDisplay.style.transform = 'translateX(-50%)';
-        }
-    }
-
-    /**
-     * Initialize event listeners for visualization elements
-     */
-    initializeEventListeners() {
-        // Add event listeners for range inputs
-        const rangeInputs = document.querySelectorAll('input[type="range"]');
-        rangeInputs.forEach(input => {
-            // Initialize range value displays
-            this.updateRangeValue(input);
-            
-            // Add event listeners for range input changes
-            input.addEventListener('input', () => {
-                this.updateRangeValue(input);
-                if (input.id === 'body_size_ratio' || 
-                    input.id === 'lower_shadow_ratio' || 
-                    input.id === 'upper_shadow_ratio') {
-                    this.updateVisualization();
-                }
-            });
-            
-            // Add event listener for when dragging ends
-            input.addEventListener('change', () => {
-                this.updateRangeValue(input);
-            });
-        });
-        
+    initializePatternSpecificEventListeners() {
         // Add event listener for the require green checkbox
         const requireGreenCheckbox = document.getElementById('require_green');
         if (requireGreenCheckbox) {
