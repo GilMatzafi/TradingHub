@@ -1,0 +1,104 @@
+{% macro candlestick_visualization() %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <i class="bi bi-lightning me-2"></i>
+                <h5 class="mb-0">Kicker Pattern Visualization</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div id="candlestickChart" style="height: 400px; border: 1px solid #dee2e6; border-radius: 0.375rem;">
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <div class="text-center">
+                                    <i class="bi bi-lightning display-4 mb-3"></i>
+                                    <p class="mb-0">Run analysis to see Kicker patterns</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pattern-info">
+                            <h6 class="fw-bold mb-3">Kicker Pattern Info</h6>
+                            
+                            <div class="pattern-example mb-3">
+                                <h6 class="text-success">Bullish Kicker</h6>
+                                <div class="candlestick-example d-flex justify-content-center mb-2">
+                                    <div class="candle red-candle me-1" style="width: 20px; height: 15px; background: #dc3545;"></div>
+                                    <div class="candle green-candle" style="width: 20px; height: 20px; background: #198754; margin-top: -8px; margin-left: -2px;"></div>
+                                </div>
+                                <small class="text-muted">Gap up with no overlap showing bullish momentum</small>
+                            </div>
+                            
+                            <div class="pattern-example mb-3">
+                                <h6 class="text-danger">Bearish Kicker</h6>
+                                <div class="candlestick-example d-flex justify-content-center mb-2">
+                                    <div class="candle green-candle me-1" style="width: 20px; height: 20px; background: #198754;"></div>
+                                    <div class="candle red-candle" style="width: 20px; height: 15px; background: #dc3545; margin-top: 8px; margin-left: -2px;"></div>
+                                </div>
+                                <small class="text-muted">Gap down with no overlap showing bearish momentum</small>
+                            </div>
+                            
+                            <div class="pattern-characteristics">
+                                <h6 class="fw-bold">Pattern Characteristics:</h6>
+                                <ul class="list-unstyled small">
+                                    <li><i class="bi bi-arrow-up text-success me-2"></i>Bullish: Gap up after downtrend</li>
+                                    <li><i class="bi bi-arrow-down text-danger me-2"></i>Bearish: Gap down after uptrend</li>
+                                    <li><i class="bi bi-x-circle text-warning me-2"></i>No overlap between candle bodies</li>
+                                    <li><i class="bi bi-lightning text-info me-2"></i>Sudden and decisive sentiment change</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="pattern-insights">
+                                <h6 class="fw-bold">Key Insights:</h6>
+                                <ul class="list-unstyled small">
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>One of the most powerful reversal patterns</li>
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Signals complete sentiment reversal</li>
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Often marks beginning of strong trends</li>
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Reflects sudden shift in psychology</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.candlestick-example {
+    height: 50px;
+    align-items: center;
+    position: relative;
+}
+
+.candle {
+    border-radius: 2px;
+    position: relative;
+}
+
+.red-candle::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 4px;
+    background: #dc3545;
+}
+
+.green-candle::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 4px;
+    background: #198754;
+}
+</style>
+{% endmacro %}

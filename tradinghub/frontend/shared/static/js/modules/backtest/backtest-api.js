@@ -7,7 +7,7 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 function initBacktestApi() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the current strategy instance (works for any pattern)
-        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy || window.counter_attackStrategy || window.darkCloudCoverStrategy || window.tweezerTopStrategy || window.tweezerBottomStrategy;
+        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy || window.counter_attackStrategy || window.darkCloudCoverStrategy || window.tweezerTopStrategy || window.tweezerBottomStrategy || window.kickerStrategy || window.threeWhiteSoldiersStrategy || window.threeBlackCrowsStrategy || window.threeInsideUpStrategy || window.threeInsideDownStrategy || window.morningStarStrategy || window.eveningStarStrategy;
         
         // Debug: Log what strategies are available
         console.log('🔍 Backtest API Debug:', {
@@ -23,6 +23,13 @@ function initBacktestApi() {
             darkCloudCoverStrategy: !!window.darkCloudCoverStrategy,
             tweezerTopStrategy: !!window.tweezerTopStrategy,
             tweezerBottomStrategy: !!window.tweezerBottomStrategy,
+            kickerStrategy: !!window.kickerStrategy,
+            threeWhiteSoldiersStrategy: !!window.threeWhiteSoldiersStrategy,
+            threeBlackCrowsStrategy: !!window.threeBlackCrowsStrategy,
+            threeInsideUpStrategy: !!window.threeInsideUpStrategy,
+            threeInsideDownStrategy: !!window.threeInsideDownStrategy,
+            morningStarStrategy: !!window.morningStarStrategy,
+            eveningStarStrategy: !!window.eveningStarStrategy,
             currentStrategy: !!currentStrategy
         });
         
@@ -40,7 +47,14 @@ function initBacktestApi() {
                 counter_attack: !!window.counter_attackStrategy,
                 dark_cloud_cover: !!window.darkCloudCoverStrategy,
                 tweezer_top: !!window.tweezerTopStrategy,
-                tweezer_bottom: !!window.tweezerBottomStrategy
+                tweezer_bottom: !!window.tweezerBottomStrategy,
+                kicker: !!window.kickerStrategy,
+                three_white_soldiers: !!window.threeWhiteSoldiersStrategy,
+                three_black_crows: !!window.threeBlackCrowsStrategy,
+                three_inside_up: !!window.threeInsideUpStrategy,
+                three_inside_down: !!window.threeInsideDownStrategy,
+                morning_star: !!window.morningStarStrategy,
+                evening_star: !!window.eveningStarStrategy
             });
             alert('Error: Strategy not initialized');
             return;
@@ -92,7 +106,8 @@ function collectFormData(filteredPatterns) {
         'body_size_ratio', 'lower_shadow_ratio', 'upper_shadow_ratio',
         'ma_period', 'require_green', 'require_high_volume', 'piercing_ratio', 'require_trend',
         'close_tolerance', 'counter_attack_type', 'max_shadow_ratio', 'penetration_ratio',
-        'high_tolerance', 'low_tolerance'
+        'high_tolerance', 'low_tolerance', 'gap_size_ratio', 'kicker_type', 'progressive_close',
+        'harami_body_ratio', 'confirmation_strength', 'gap_ratio', 'star_body_ratio'
     ];
 
     patternParams.forEach(param => {

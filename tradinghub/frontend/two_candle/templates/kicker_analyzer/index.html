@@ -1,0 +1,53 @@
+{% extends "base_analyzer.html" %}
+{% from "kicker_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "kicker_analyzer/components/pattern_params.html" import pattern_params %}
+{% from "components/volume_params.html" import volume_params %}
+
+{% block title %}TradingHub - Kicker Pattern Detector{% endblock %}
+
+{% set pattern_name = "Kicker" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+    {{ volume_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Kicker-specific form fields -->
+    <div class="col-md-6">
+        <label for="gap_size_ratio" class="form-label">Gap Size Ratio (%)</label>
+        <div class="range-container">
+            <input type="range" class="form-range" id="gap_size_ratio" name="gap_size_ratio" 
+                   min="0.1" max="2.0" step="0.1" value="0.5">
+            <span class="range-value">0.5</span>
+        </div>
+        <small class="form-text text-muted">Minimum gap size as percentage of price</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="kicker_type" class="form-label">Kicker Type</label>
+        <select class="form-select" id="kicker_type" name="kicker_type">
+            <option value="both">Both Bullish & Bearish</option>
+            <option value="bullish">Bullish Only</option>
+            <option value="bearish">Bearish Only</option>
+        </select>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_trend" name="require_trend" checked>
+            <label class="form-check-label" for="require_trend">
+                Require Trend Context
+            </label>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Kicker-specific JavaScript -->
+    <script type="module" src="/two_candle/js/modules/kicker-strategy/index.js"></script>
+{% endblock %}

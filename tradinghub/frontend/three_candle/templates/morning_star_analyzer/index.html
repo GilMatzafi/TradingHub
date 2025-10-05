@@ -1,0 +1,64 @@
+{% extends "base_analyzer.html" %}
+{% from "morning_star_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "morning_star_analyzer/components/pattern_params.html" import pattern_params %}
+{% from "components/volume_params.html" import volume_params %}
+
+{% block title %}TradingHub - Morning Star Pattern Detector{% endblock %}
+
+{% set pattern_name = "Morning Star" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+    {{ volume_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Morning Star-specific form fields -->
+    <div class="col-md-6">
+        <label for="gap_ratio" class="form-label">Gap Ratio</label>
+        <div class="range-container">
+            <input type="range" class="form-range" id="gap_ratio" name="gap_ratio" 
+                   min="0.05" max="0.3" step="0.05" value="0.1">
+            <span class="range-value">0.1</span>
+        </div>
+        <small class="form-text text-muted">Minimum gap size as fraction of first candle body</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="penetration_ratio" class="form-label">Penetration Ratio</label>
+        <div class="range-container">
+            <input type="range" class="form-range" id="penetration_ratio" name="penetration_ratio" 
+                   min="0.3" max="0.8" step="0.05" value="0.5">
+            <span class="range-value">0.5</span>
+        </div>
+        <small class="form-text text-muted">Minimum third candle penetration into first candle</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="star_body_ratio" class="form-label">Star Body Ratio</label>
+        <div class="range-container">
+            <input type="range" class="form-range" id="star_body_ratio" name="star_body_ratio" 
+                   min="0.1" max="0.5" step="0.05" value="0.3">
+            <span class="range-value">0.3</span>
+        </div>
+        <small class="form-text text-muted">Maximum star candle body size relative to first</small>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_trend" name="require_trend" checked>
+            <label class="form-check-label" for="require_trend">
+                Require Downtrend Context
+            </label>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Morning Star-specific JavaScript -->
+    <script type="module" src="/three_candle/js/modules/morning-star-strategy/index.js"></script>
+{% endblock %}

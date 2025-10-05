@@ -166,47 +166,73 @@
                         <a href="/tweezer_bottom" class="btn btn-outline-primary">Analyze</a>
                     </div>
                 </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="pattern-card">
+                        <div class="pattern-icon kicker">
+                            <i class="bi bi-lightning"></i>
+                        </div>
+                        <h4>Kicker</h4>
+                        <p>Powerful reversal with gap and no overlap between candles</p>
+                        <a href="/kicker" class="btn btn-outline-primary">Analyze</a>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Three Candle Patterns - Coming Soon -->
-        <section class="hero-pattern-section coming-soon-section">
+        <section class="patterns-section">
             <div class="pattern-hero-content">
                 <h2 class="pattern-hero-title">Three Candlestick Patterns</h2>
                 <p class="pattern-hero-subtitle">Advanced multi-candle formations coming soon</p>
             </div>
             <div class="coming-soon-cards">
-                <div class="coming-soon-card">
-                    <div class="coming-soon-icon">
-                        <i class="bi bi-clock"></i>
+                <div class="pattern-card">
+                    <div class="pattern-icon three-inside-up">
+                        <i class="bi bi-arrow-up-circle"></i>
                     </div>
-                    <h4>Morning Star</h4>
-                    <p>Three-candle bullish reversal pattern</p>
-                    <div class="coming-soon-badge">Coming Soon</div>
+                    <h4>Three Inside Up</h4>
+                    <p>Bullish reversal with Harami + confirmation candle</p>
+                    <a href="/three_inside_up" class="btn btn-outline-primary">Analyze</a>
                 </div>
-                <div class="coming-soon-card">
-                    <div class="coming-soon-icon">
-                        <i class="bi bi-clock"></i>
+                <div class="pattern-card">
+                    <div class="pattern-icon three-inside-down">
+                        <i class="bi bi-arrow-down-circle"></i>
                     </div>
-                    <h4>Evening Star</h4>
-                    <p>Three-candle bearish reversal pattern</p>
-                    <div class="coming-soon-badge">Coming Soon</div>
+                    <h4>Three Inside Down</h4>
+                    <p>Bearish reversal with Harami + confirmation candle</p>
+                    <a href="/three_inside_down" class="btn btn-outline-primary">Analyze</a>
                 </div>
-                <div class="coming-soon-card">
-                    <div class="coming-soon-icon">
-                        <i class="bi bi-clock"></i>
+                <div class="pattern-card">
+                    <div class="pattern-icon three-white-soldiers">
+                        <i class="bi bi-three-dots"></i>
                     </div>
                     <h4>Three White Soldiers</h4>
-                    <p>Strong bullish continuation pattern</p>
-                    <div class="coming-soon-badge">Coming Soon</div>
+                    <p>Bullish reversal with three consecutive bullish candles</p>
+                    <a href="/three_white_soldiers" class="btn btn-outline-primary">Analyze</a>
                 </div>
-                <div class="coming-soon-card">
-                    <div class="coming-soon-icon">
-                        <i class="bi bi-clock"></i>
+                <div class="pattern-card">
+                    <div class="pattern-icon three-black-crows">
+                        <i class="bi bi-three-dots"></i>
                     </div>
                     <h4>Three Black Crows</h4>
-                    <p>Strong bearish continuation pattern</p>
-                    <div class="coming-soon-badge">Coming Soon</div>
+                    <p>Bearish reversal with three consecutive bearish candles</p>
+                    <a href="/three_black_crows" class="btn btn-outline-primary">Analyze</a>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon morning-star">
+                        <i class="bi bi-sunrise"></i>
+                    </div>
+                    <h4>Morning Star</h4>
+                    <p>Bullish reversal with gap down and strong confirmation</p>
+                    <a href="/morning_star" class="btn btn-outline-primary">Analyze</a>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon evening-star">
+                        <i class="bi bi-sunset"></i>
+                    </div>
+                    <h4>Evening Star</h4>
+                    <p>Bearish reversal with gap up and strong confirmation</p>
+                    <a href="/evening_star" class="btn btn-outline-primary">Analyze</a>
                 </div>
             </div>
         </section>
@@ -532,6 +558,7 @@ body {
     margin-bottom: 4rem;
     z-index: 2;
     position: relative;
+    text-align: center;
 }
 
 .pattern-hero-title {
@@ -747,6 +774,34 @@ body {
 
 .pattern-icon.tweezer-bottom {
     background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.pattern-icon.kicker {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.pattern-icon.three-white-soldiers {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.pattern-icon.three-black-crows {
+    background: linear-gradient(135deg, #dc3545, #6f42c1);
+}
+
+.pattern-icon.three-inside-up {
+    background: linear-gradient(135deg, #198754, #20c997);
+}
+
+.pattern-icon.three-inside-down {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+.pattern-icon.morning-star {
+    background: linear-gradient(135deg, #ffc107, #ff8c00);
+}
+
+.pattern-icon.evening-star {
+    background: linear-gradient(135deg, #6f42c1, #dc3545);
 }
 
 .pattern-card h4 {

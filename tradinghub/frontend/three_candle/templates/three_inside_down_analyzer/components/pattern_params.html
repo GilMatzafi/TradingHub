@@ -1,0 +1,70 @@
+{% macro pattern_params() %}
+<div class="row">
+    <div class="col-md-6">
+        <label for="body_size_ratio" class="form-label">Minimum Body Size Ratio</label>
+        <input type="range" class="form-range" id="body_size_ratio" name="body_size_ratio" 
+               min="0.1" max="0.8" step="0.05" value="0.6">
+        <div class="d-flex justify-content-between">
+            <small class="text-muted">10%</small>
+            <small class="text-muted">80%</small>
+        </div>
+        <div class="text-center">
+            <small class="text-primary fw-bold" id="body_size_ratio_value">60%</small>
+        </div>
+        <small class="form-text text-muted">Minimum body size for first and third candles</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="harami_body_ratio" class="form-label">Harami Body Ratio</label>
+        <input type="range" class="form-range" id="harami_body_ratio" name="harami_body_ratio" 
+               min="0.1" max="0.8" step="0.05" value="0.5">
+        <div class="d-flex justify-content-between">
+            <small class="text-muted">10%</small>
+            <small class="text-muted">80%</small>
+        </div>
+        <div class="text-center">
+            <small class="text-primary fw-bold" id="harami_body_ratio_value">50%</small>
+        </div>
+        <small class="form-text text-muted">Maximum second candle body size relative to first</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="confirmation_strength" class="form-label">Confirmation Strength</label>
+        <input type="range" class="form-range" id="confirmation_strength" name="confirmation_strength" 
+               min="0.5" max="1.0" step="0.05" value="0.8">
+        <div class="d-flex justify-content-between">
+            <small class="text-muted">50%</small>
+            <small class="text-muted">100%</small>
+        </div>
+        <div class="text-center">
+            <small class="text-primary fw-bold" id="confirmation_strength_value">80%</small>
+        </div>
+        <small class="form-text text-muted">Minimum strength of third candle close</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="ma_period" class="form-label">Moving Average Period</label>
+        <input type="number" class="form-control" id="ma_period" name="ma_period" 
+               min="5" max="50" value="20">
+        <small class="form-text text-muted">Period for trend context analysis</small>
+    </div>
+</div>
+
+<script>
+// Update range value displays
+document.getElementById('body_size_ratio').addEventListener('input', function() {
+    const value = (this.value * 100).toFixed(0);
+    document.getElementById('body_size_ratio_value').textContent = value + '%';
+});
+
+document.getElementById('harami_body_ratio').addEventListener('input', function() {
+    const value = (this.value * 100).toFixed(0);
+    document.getElementById('harami_body_ratio_value').textContent = value + '%';
+});
+
+document.getElementById('confirmation_strength').addEventListener('input', function() {
+    const value = (this.value * 100).toFixed(0);
+    document.getElementById('confirmation_strength_value').textContent = value + '%';
+});
+</script>
+{% endmacro %}

@@ -19,6 +19,13 @@ from tradinghub.backend.two_candle.config.patterns.counter_attack_config import 
 from tradinghub.backend.two_candle.config.patterns.dark_cloud_cover_config import DARK_CLOUD_COVER_CONFIG
 from tradinghub.backend.two_candle.config.patterns.tweezer_top_config import TWEEZER_TOP_CONFIG
 from tradinghub.backend.two_candle.config.patterns.tweezer_bottom_config import TWEEZER_BOTTOM_CONFIG
+from tradinghub.backend.two_candle.config.patterns.kicker_config import KICKER_CONFIG
+from tradinghub.backend.three_candle.config.patterns.three_white_soldiers_config import THREE_WHITE_SOLDIERS_CONFIG
+from tradinghub.backend.three_candle.config.patterns.three_black_crows_config import THREE_BLACK_CROWS_CONFIG
+from tradinghub.backend.three_candle.config.patterns.three_inside_up_config import THREE_INSIDE_UP_CONFIG
+from tradinghub.backend.three_candle.config.patterns.three_inside_down_config import THREE_INSIDE_DOWN_CONFIG
+from tradinghub.backend.three_candle.config.patterns.morning_star_config import MORNING_STAR_CONFIG
+from tradinghub.backend.three_candle.config.patterns.evening_star_config import EVENING_STAR_CONFIG
 
 
 class PatternRegistry:
@@ -38,6 +45,13 @@ class PatternRegistry:
         'dark_cloud_cover': DARK_CLOUD_COVER_CONFIG,
         'tweezer_top': TWEEZER_TOP_CONFIG,
         'tweezer_bottom': TWEEZER_BOTTOM_CONFIG,
+        'kicker': KICKER_CONFIG,
+        'three_white_soldiers': THREE_WHITE_SOLDIERS_CONFIG,
+        'three_black_crows': THREE_BLACK_CROWS_CONFIG,
+        'three_inside_up': THREE_INSIDE_UP_CONFIG,
+        'three_inside_down': THREE_INSIDE_DOWN_CONFIG,
+        'morning_star': MORNING_STAR_CONFIG,
+        'evening_star': EVENING_STAR_CONFIG,
     }
     
     @classmethod
