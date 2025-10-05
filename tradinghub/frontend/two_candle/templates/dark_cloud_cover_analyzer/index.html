@@ -1,0 +1,54 @@
+{% extends "base_analyzer.html" %}
+{% from "dark_cloud_cover_analyzer/components/candlestick.html" import candlestick_visualization %}
+{% from "dark_cloud_cover_analyzer/components/pattern_params.html" import pattern_params %}
+{% from "components/volume_params.html" import volume_params %}
+
+{% block title %}TradingHub - Dark Cloud Cover Pattern Detector{% endblock %}
+
+{% set pattern_name = "Dark Cloud Cover" %}
+
+{% block pattern_params %}
+    {{ pattern_params() }}
+    {{ volume_params() }}
+{% endblock %}
+
+{% block candlestick_visualization %}
+    {{ candlestick_visualization() }}
+{% endblock %}
+
+{% block additional_form_fields %}
+    <!-- Dark Cloud Cover-specific form fields -->
+    <div class="col-md-6">
+        <label for="max_shadow_ratio" class="form-label">Max Shadow Ratio</label>
+        <div class="range-container">
+            <input type="range" class="form-range" id="max_shadow_ratio" name="max_shadow_ratio" 
+                   min="0.1" max="0.8" step="0.05" value="0.3">
+            <span class="range-value">0.3</span>
+        </div>
+        <small class="form-text text-muted">Maximum shadow ratio for both candles</small>
+    </div>
+    
+    <div class="col-md-6">
+        <label for="penetration_ratio" class="form-label">Penetration Ratio</label>
+        <div class="range-container">
+            <input type="range" class="form-range" id="penetration_ratio" name="penetration_ratio" 
+                   min="0.1" max="1.0" step="0.1" value="0.5">
+            <span class="range-value">0.5</span>
+        </div>
+        <small class="form-text text-muted">Minimum penetration into first candle's body</small>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="require_trend" name="require_trend" checked>
+            <label class="form-check-label" for="require_trend">
+                Require Uptrend Context
+            </label>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pattern_scripts %}
+    <!-- Dark Cloud Cover-specific JavaScript -->
+    <script type="module" src="/two_candle/js/modules/dark-cloud-cover-strategy/index.js"></script>
+{% endblock %}
