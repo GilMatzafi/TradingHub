@@ -1,0 +1,94 @@
+{% macro candlestick_visualization() %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <i class="bi bi-graph-up me-2"></i>
+                <h5 class="mb-0">Tweezer Bottom Pattern Visualization</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div id="candlestickChart" style="height: 400px; border: 1px solid #dee2e6; border-radius: 0.375rem;">
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <div class="text-center">
+                                    <i class="bi bi-graph-up display-4 mb-3"></i>
+                                    <p class="mb-0">Run analysis to see Tweezer Bottom patterns</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pattern-info">
+                            <h6 class="fw-bold mb-3">Tweezer Bottom Pattern Info</h6>
+                            
+                            <div class="pattern-example mb-3">
+                                <h6 class="text-success">Tweezer Bottom</h6>
+                                <div class="candlestick-example d-flex justify-content-center mb-2">
+                                    <div class="candle red-candle me-1" style="width: 20px; height: 15px; background: #dc3545;"></div>
+                                    <div class="candle green-candle" style="width: 20px; height: 20px; background: #198754; margin-top: -5px;"></div>
+                                </div>
+                                <small class="text-muted">Two candles with nearly identical lows showing support</small>
+                            </div>
+                            
+                            <div class="pattern-characteristics">
+                                <h6 class="fw-bold">Pattern Characteristics:</h6>
+                                <ul class="list-unstyled small">
+                                    <li><i class="bi bi-arrow-down text-danger me-2"></i>First candle: Bearish continuing downtrend</li>
+                                    <li><i class="bi bi-arrow-up text-success me-2"></i>Second candle: Bullish showing buying pressure</li>
+                                    <li><i class="bi bi-equals text-warning me-2"></i>Nearly identical lows (within tolerance)</li>
+                                    <li><i class="bi bi-shield text-info me-2"></i>Strong support level identified</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="pattern-insights">
+                                <h6 class="fw-bold">Key Insights:</h6>
+                                <ul class="list-unstyled small">
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Strong bullish reversal signal</li>
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Works best at end of downtrends</li>
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Identifies strong support levels</li>
+                                    <li><i class="bi bi-check-circle text-success me-2"></i>Shows selling momentum exhaustion</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.candlestick-example {
+    height: 40px;
+    align-items: end;
+}
+
+.candle {
+    border-radius: 2px;
+    position: relative;
+}
+
+.red-candle::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 4px;
+    background: #dc3545;
+}
+
+.green-candle::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 4px;
+    background: #198754;
+}
+</style>
+{% endmacro %}

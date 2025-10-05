@@ -17,6 +17,8 @@ from tradinghub.backend.two_candle.config.patterns.harami_config import HARAMI_C
 from tradinghub.backend.two_candle.config.patterns.piercing_line_config import PIERCING_LINE_CONFIG
 from tradinghub.backend.two_candle.config.patterns.counter_attack_config import COUNTER_ATTACK_CONFIG
 from tradinghub.backend.two_candle.config.patterns.dark_cloud_cover_config import DARK_CLOUD_COVER_CONFIG
+from tradinghub.backend.two_candle.config.patterns.tweezer_top_config import TWEEZER_TOP_CONFIG
+from tradinghub.backend.two_candle.config.patterns.tweezer_bottom_config import TWEEZER_BOTTOM_CONFIG
 
 
 class PatternRegistry:
@@ -34,6 +36,8 @@ class PatternRegistry:
         'piercing_line': PIERCING_LINE_CONFIG,
         'counter_attack': COUNTER_ATTACK_CONFIG,
         'dark_cloud_cover': DARK_CLOUD_COVER_CONFIG,
+        'tweezer_top': TWEEZER_TOP_CONFIG,
+        'tweezer_bottom': TWEEZER_BOTTOM_CONFIG,
     }
     
     @classmethod

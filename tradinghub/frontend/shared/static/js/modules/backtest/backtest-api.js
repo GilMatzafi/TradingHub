@@ -7,7 +7,7 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 function initBacktestApi() {
     document.getElementById('runBacktest')?.addEventListener('click', function() {
         // Get the current strategy instance (works for any pattern)
-        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy || window.counter_attackStrategy || window.darkCloudCoverStrategy;
+        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy || window.counter_attackStrategy || window.darkCloudCoverStrategy || window.tweezerTopStrategy || window.tweezerBottomStrategy;
         
         // Debug: Log what strategies are available
         console.log('🔍 Backtest API Debug:', {
@@ -21,6 +21,8 @@ function initBacktestApi() {
             piercingLineStrategy: !!window.piercingLineStrategy,
             counter_attackStrategy: !!window.counter_attackStrategy,
             darkCloudCoverStrategy: !!window.darkCloudCoverStrategy,
+            tweezerTopStrategy: !!window.tweezerTopStrategy,
+            tweezerBottomStrategy: !!window.tweezerBottomStrategy,
             currentStrategy: !!currentStrategy
         });
         
@@ -36,7 +38,9 @@ function initBacktestApi() {
                 harami: !!window.haramiStrategy,
                 piercingLine: !!window.piercingLineStrategy,
                 counter_attack: !!window.counter_attackStrategy,
-                dark_cloud_cover: !!window.darkCloudCoverStrategy
+                dark_cloud_cover: !!window.darkCloudCoverStrategy,
+                tweezer_top: !!window.tweezerTopStrategy,
+                tweezer_bottom: !!window.tweezerBottomStrategy
             });
             alert('Error: Strategy not initialized');
             return;
@@ -87,7 +91,8 @@ function collectFormData(filteredPatterns) {
     const patternParams = [
         'body_size_ratio', 'lower_shadow_ratio', 'upper_shadow_ratio',
         'ma_period', 'require_green', 'require_high_volume', 'piercing_ratio', 'require_trend',
-        'close_tolerance', 'counter_attack_type', 'max_shadow_ratio', 'penetration_ratio'
+        'close_tolerance', 'counter_attack_type', 'max_shadow_ratio', 'penetration_ratio',
+        'high_tolerance', 'low_tolerance'
     ];
 
     patternParams.forEach(param => {
