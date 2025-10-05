@@ -5,14 +5,12 @@
 {% block content %}
 <div class="container">
     <header class="text-center mb-5">
-        {% if pattern_name != "Hammer" %}
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="/" class="btn btn-outline-primary back-to-home-btn">
+            <a href="/landing" class="btn btn-outline-primary back-to-home-btn">
                 <i class="bi bi-arrow-left me-2"></i>Back to Home
             </a>
             <div class="flex-grow-1"></div>
         </div>
-        {% endif %}
         <h1 class="display-4 fw-bold mb-3">TradingHub</h1>
         <p class="lead text-muted">Advanced {{ pattern_name }} Pattern Detection for Smart Trading</p>
     </header>

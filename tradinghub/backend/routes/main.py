@@ -16,8 +16,13 @@ analyze_controller = AnalyzeController()
 
 @main_bp.route('/')
 def index():
-    """Home page showcasing all single candlestick strategies"""
-    return render_template('home.html')
+    """Redirect to Hammer pattern (only polished pattern)"""
+    return redirect(url_for('main.hammer_analyzer'))
+
+@main_bp.route('/landing')
+def landing():
+    """Landing page route"""
+    return render_template('landing.html')
 
 @main_bp.route('/home')
 def home():
