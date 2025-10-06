@@ -1,3 +1,77 @@
+/* Backtest Candlestick Chart Modal Styling */
+#backtestCandlestickModal .modal-dialog {
+  max-width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+
+#backtestCandlestickModal .modal-content {
+  border-radius: 0;
+  box-shadow: none;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#backtestCandlestickModal .modal-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border-radius: 0;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+
+#backtestCandlestickModal .modal-body {
+  padding: 1.5rem;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#backtestCandlestickModal .chart-container {
+  background-color: var(--background-white);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  flex: 1;
+  min-height: 0;
+}
+
+#backtestCandlestickModal canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 80vh;
+}
+
+#backtestCandlestickModal .modal-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 /* Portfolio Chart Styling */
 .portfolio-chart-container {
   background-color: var(--background-white);

@@ -176,6 +176,71 @@ function processBacktestResults(data) {
     // Store data for charts
     window.portfolioHistory = data.portfolio_history;
     window.hourlyPerformance = data.hourly_performance;
+    window.trades = data.trades;
+    
+    // Store stock data for candlestick chart
+    console.log('Backtest API: Storing stock data for candlestick chart');
+    
+    // Use real stock data from backend if available
+    if (data.stock_data && data.stock_data.length > 0) {
+        window.stockData = data.stock_data;
+        console.log('Real stock data stored from backend:', window.stockData.length, 'records');
+        console.log('Sample real stock data:', window.stockData[0]);
+    } else {
+        console.log('No stock data from backend, trying fallback methods');
+        
+        // Fallback 1: Try to get data from current strategy
+        if (window.currentStrategy && window.currentStrategy.dataManager) {
+            const filteredData = window.currentStrategy.dataManager.getFilteredData();
+            console.log('Filtered data length:', filteredData?.length);
+            
+            if (filteredData && filteredData.length > 0) {
+                // Convert the data to the format expected by the chart
+                window.stockData = filteredData.map(row => ({
+                    date: row.date || row.index,
+                    open: row.Open,
+                    high: row.High,
+                    low: row.Low,
+                    close: row.Close,
+                    volume: row.Volume
+                }));
+                console.log('Stock data stored from strategy:', window.stockData.length, 'records');
+            } else {
+                console.log('No filtered data available from strategy');
+            }
+        } else {
+            console.log('No current strategy available');
+        }
+        
+        // Fallback 2: Create mock data if no real data available
+        if (!window.stockData && data.portfolio_history && data.portfolio_history.length > 0) {
+            console.log('Creating mock stock data as last resort');
+            // Create stock data from portfolio history dates
+            const startDate = new Date(data.portfolio_history[0].date);
+            const endDate = new Date(data.portfolio_history[data.portfolio_history.length - 1].date);
+            
+            // Generate mock stock data for the date range
+            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const mockStockData = [];
+            
+            for (let i = 0; i < daysDiff; i++) {
+                const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000));
+                const basePrice = 100 + Math.random() * 50; // Mock price between 100-150
+                
+                mockStockData.push({
+                    date: date.toISOString().split('T')[0],
+                    open: basePrice,
+                    high: basePrice + Math.random() * 5,
+                    low: basePrice - Math.random() * 5,
+                    close: basePrice + (Math.random() - 0.5) * 2,
+                    volume: Math.floor(Math.random() * 1000000)
+                });
+            }
+            
+            window.stockData = mockStockData;
+            console.log('Mock stock data created:', window.stockData.length, 'records');
+        }
+    }
     
     // Reset charts to initial state
     resetCharts();

@@ -155,4 +155,18 @@ class BacktestService:
                 'trades': []
             }
         
+        # Add stock data for chart visualization
+        stock_data = []
+        for idx, row in df.iterrows():
+            stock_data.append({
+                'date': idx.strftime('%Y-%m-%d %H:%M:%S') if hasattr(idx, 'strftime') else str(idx),
+                'open': float(row['Open']),
+                'high': float(row['High']),
+                'low': float(row['Low']),
+                'close': float(row['Close']),
+                'volume': float(row['Volume']) if 'Volume' in row else 0
+            })
+        
+        results['stock_data'] = stock_data
+        
         return results

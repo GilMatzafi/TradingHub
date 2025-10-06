@@ -146,6 +146,9 @@
             <button type="button" class="btn btn-primary btn-lg" id="showHourlyChart">
                 <i class="bi bi-clock me-2"></i>Show Strategy Performance
             </button>
+            <button type="button" class="btn btn-success btn-lg" id="showBacktestCandlestickChart">
+                <i class="bi bi-graph-up me-2"></i>Show Price Chart with Trades
+            </button>
         </div>
         
         <!-- Portfolio Chart -->
@@ -189,6 +192,57 @@
             
             <div style="height: 400px; position: relative;">
                 <canvas id="hourlyChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Backtest Candlestick Chart Modal -->
+        <div class="modal fade" id="backtestCandlestickModal" tabindex="-1" aria-labelledby="backtestCandlestickModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="backtestCandlestickModalLabel">
+                            <i class="bi bi-graph-up me-2"></i>Backtest Results - Candlestick Chart with Trades
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="chart-legend mb-3">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #00c853;"></span>
+                                <span>Entry Points</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #d32f2f;"></span>
+                                <span>Stop Loss Exits</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #2196f3;"></span>
+                                <span>Take Profit Exits</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #ff9800;"></span>
+                                <span>Time-based Exits</span>
+                            </div>
+                        </div>
+                        <div class="chart-instructions mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Interactive Chart:</strong> 
+                                Use mouse wheel to zoom in/out, drag to pan left/right. 
+                                Double-click to reset zoom.
+                            </small>
+                        </div>
+                        <div class="chart-container" style="height: 80vh; position: relative;">
+                            <canvas id="backtestCandlestickChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary" id="resetZoomBtn">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Reset Zoom
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
         
