@@ -1,0 +1,200 @@
+{% macro short_backtest_params() %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Short Position Backtest Parameters</h5>
+    </div>
+    <div class="card-body">
+            <!-- Portfolio & Cost Parameters -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="initial_portfolio_size" class="form-label">Initial Portfolio Size ($)</label>
+                        <input type="number" class="form-control" id="initial_portfolio_size" name="initial_portfolio_size" value="10000" min="1000" step="1000">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="commission" class="form-label">Commission per Trade ($)</label>
+                        <input type="number" class="form-control" id="commission" name="commission" value="0.65" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="slippage" class="form-label">Slippage per Trade ($)</label>
+                        <input type="number" class="form-control" id="slippage" name="slippage" value="0.1" min="0" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Management Parameters -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="stop_loss_pct" class="form-label">Stop Loss (%)</label>
+                        <input type="number" class="form-control" id="stop_loss_pct" name="stop_loss_pct" value="2.0" min="0.1" max="20" step="0.1">
+                        <div class="form-text">Stop loss when price goes UP (bad for short)</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="take_profit_pct" class="form-label">Take Profit (%)</label>
+                        <input type="number" class="form-control" id="take_profit_pct" name="take_profit_pct" value="4.0" min="0.1" max="50" step="0.1">
+                        <div class="form-text">Take profit when price goes DOWN (good for short)</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="max_holding_periods" class="form-label">Max Holding Periods</label>
+                        <input type="number" class="form-control" id="max_holding_periods" name="max_holding_periods" value="20" min="1" max="100" step="1">
+                        <div class="form-text">Maximum periods to hold a short position</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entry Parameters -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="entry_delay" class="form-label">Entry Delay (Periods)</label>
+                        <input type="number" class="form-control" id="entry_delay" name="entry_delay" value="1" min="0" max="10" step="1">
+                        <div class="form-text">Wait N periods after pattern detection before entering short position</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Run Backtest Button -->
+            <div class="d-grid">
+                <button type="button" class="btn btn-danger" id="runShortBacktest">
+                    <i class="bi bi-arrow-down-circle me-2"></i>Run Short Backtest
+                </button>
+            </div>
+    </div>
+</div>
+
+<!-- Loading indicator for short backtest -->
+<div id="shortBacktestLoading" class="loading-overlay d-none">
+    <div class="loading-spinner">
+        <div class="spinner-border text-danger" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Running short position backtest...</p>
+    </div>
+</div>
+
+<!-- Short Backtest Results -->
+<div id="shortBacktestResults" class="card mb-4 d-none">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Short Position Backtest Results</h5>
+        <button id="downloadShortBacktestCSV" class="btn btn-success" style="display: none;">
+            <i class="bi bi-download me-2"></i>Download Short Trade History
+        </button>
+    </div>
+    <div class="card-body">
+        <!-- Performance Overview -->
+        <div class="backtest-metrics">
+            <div class="metric-group">
+                <h6>Performance Overview</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Initial Portfolio Value</span>
+                    <span class="metric-value" id="shortInitialPortfolioValue">$0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Final Portfolio Value</span>
+                    <span class="metric-value" id="shortFinalPortfolioValue">$0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Profit</span>
+                    <span class="metric-value" id="shortTotalProfit">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Max Drawdown</span>
+                    <span class="metric-value negative" id="shortMaxDrawdown">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Sharpe Ratio</span>
+                    <span class="metric-value" id="shortSharpeRatio">0.00</span>
+                </div>
+            </div>
+            
+            <!-- Trade Statistics -->
+            <div class="metric-group">
+                <h6>Trade Statistics</h6>
+                <div class="metric-row">
+                    <span class="metric-label">Total Trades</span>
+                    <span class="metric-value" id="shortTotalTrades">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Winning Trades</span>
+                    <span class="metric-value positive" id="shortWinningTrades">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Losing Trades</span>
+                    <span class="metric-value negative" id="shortLosingTrades">0</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Win Rate</span>
+                    <span class="metric-value" id="shortWinRate">0%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Profit Factor</span>
+                    <span class="metric-value" id="shortProfitFactor">0.00</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Profit per Trade</span>
+                    <span class="metric-value" id="shortAvgProfit">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hourly Performance Chart -->
+        <div class="hourly-performance">
+            <h6 class="mb-3">Hourly Performance Analysis</h6>
+            
+            <div class="hourly-stats">
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Best Hour</div>
+                    <div class="hourly-stat-value positive" id="shortBestHour">--:00</div>
+                </div>
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Worst Hour</div>
+                    <div class="hourly-stat-value negative" id="shortWorstHour">--:00</div>
+                </div>
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Most Active Hour</div>
+                    <div class="hourly-stat-value" id="shortMostActiveHour">--:00</div>
+                </div>
+                <div class="hourly-stat-card">
+                    <div class="hourly-stat-label">Average Trades per Hour</div>
+                    <div class="hourly-stat-value" id="shortAvgTradesPerHour">0</div>
+                </div>
+            </div>
+            
+            <div style="height: 400px; position: relative;">
+                <canvas id="shortHourlyChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Trade History -->
+        <div class="trade-history">
+            <h6 class="mb-3">Short Trade History</h6>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entry Date</th>
+                        <th>Exit Date</th>
+                        <th>Entry Price</th>
+                        <th>Exit Price</th>
+                        <th>Profit %</th>
+                        <th>Profit $</th>
+                        <th>Periods Held</th>
+                        <th>Exit Reason</th>
+                    </tr>
+                </thead>
+                <tbody id="shortTradesTable">
+                    <!-- Short trades will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endmacro %}

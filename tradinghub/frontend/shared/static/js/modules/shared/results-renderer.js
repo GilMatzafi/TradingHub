@@ -13,6 +13,7 @@ export class ResultsRenderer {
     initializeElements() {
         this.analysisResults = document.getElementById('analysisResults');
         this.backtestSection = document.getElementById('backtestSection');
+        this.shortBacktestSection = document.getElementById('shortBacktestSection');
         this.loadingIndicator = document.querySelector('.loading');
         this.resultsContent = document.getElementById('results');
         this.resultsBody = document.getElementById('resultsBody');
@@ -22,6 +23,7 @@ export class ResultsRenderer {
         console.log('ResultsRenderer: DOM elements initialized', {
             analysisResults: !!this.analysisResults,
             backtestSection: !!this.backtestSection,
+            shortBacktestSection: !!this.shortBacktestSection,
             loadingIndicator: !!this.loadingIndicator,
             resultsContent: !!this.resultsContent,
             resultsBody: !!this.resultsBody,
@@ -135,7 +137,8 @@ export class ResultsRenderer {
     showResults() {
         console.log('ResultsRenderer: showResults called', {
             analysisResults: !!this.analysisResults,
-            backtestSection: !!this.backtestSection
+            backtestSection: !!this.backtestSection,
+            shortBacktestSection: !!this.shortBacktestSection
         });
         
         if (this.analysisResults) {
@@ -152,6 +155,14 @@ export class ResultsRenderer {
             console.log('ResultsRenderer: backtestSection shown (d-none class removed)');
         } else {
             console.error('ResultsRenderer: backtestSection element not found!');
+        }
+        
+        if (this.shortBacktestSection) {
+            // Remove Bootstrap's d-none class instead of setting display style
+            this.shortBacktestSection.classList.remove('d-none');
+            console.log('ResultsRenderer: shortBacktestSection shown (d-none class removed)');
+        } else {
+            console.error('ResultsRenderer: shortBacktestSection element not found!');
         }
     }
 
