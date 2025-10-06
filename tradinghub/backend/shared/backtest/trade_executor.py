@@ -4,8 +4,9 @@ from tradinghub.backend.shared.models.dto.trade_results import Trade
 from tradinghub.backend.shared.models.dto.trade_params import TradeParams
 
 class TradeExecutor:
-    def __init__(self, trade_params: TradeParams):
+    def __init__(self, trade_params: TradeParams, position_type: str = 'long'):
         self.trade_params = trade_params
+        self.position_type = position_type  # 'long' or 'short'
         self.current_position = None
         self.trades: List[Trade] = []
         self.portfolio_history = []
@@ -35,13 +36,24 @@ class TradeExecutor:
         # Calculate position size and shares (use 100% of portfolio for each trade)
         shares = portfolio_value / entry_price
         
-        # Apply fixed dollar slippage to entry price
+        # Apply slippage based on position type
         slippage_cost = self.trade_params.slippage
-        entry_price = entry_price + (slippage_cost / shares)
+        if self.position_type == 'long':
+            # For long: buy at higher price (bad slippage)
+            entry_price = entry_price + (slippage_cost / shares)
+        else:  # short
+            # For short: sell at lower price (bad slippage)
+            entry_price = entry_price - (slippage_cost / shares)
         
-        # Calculate stop loss and take profit levels
-        stop_loss = entry_price * (1 - self.trade_params.stop_loss_pct)
-        take_profit = entry_price * (1 + self.trade_params.take_profit_pct)
+        # Calculate stop loss and take profit levels based on position type
+        if self.position_type == 'long':
+            # Long position: stop loss below entry, take profit above entry
+            stop_loss = entry_price * (1 - self.trade_params.stop_loss_pct)
+            take_profit = entry_price * (1 + self.trade_params.take_profit_pct)
+        else:  # short
+            # Short position: stop loss above entry, take profit below entry
+            stop_loss = entry_price * (1 + self.trade_params.stop_loss_pct)
+            take_profit = entry_price * (1 - self.trade_params.take_profit_pct)
         
         # Pay commission for entry
         commission = self.trade_params.commission
@@ -81,15 +93,27 @@ class TradeExecutor:
 
         self.current_position['periods_held'] += 1
         
-        # Check for exit conditions
+        # Check for exit conditions based on position type
         exit_reason = None
-        if current_bar['Low'] <= self.current_position['stop_loss']:
-            exit_reason = 'stop_loss'
-            exit_price = self.current_position['stop_loss']
-        elif current_bar['High'] >= self.current_position['take_profit']:
-            exit_reason = 'take_profit'
-            exit_price = self.current_position['take_profit']
-        elif self.current_position['periods_held'] >= self.trade_params.max_holding_periods:
+        if self.position_type == 'long':
+            # Long position exit conditions
+            if current_bar['Low'] <= self.current_position['stop_loss']:
+                exit_reason = 'stop_loss'
+                exit_price = self.current_position['stop_loss']
+            elif current_bar['High'] >= self.current_position['take_profit']:
+                exit_reason = 'take_profit'
+                exit_price = self.current_position['take_profit']
+        else:  # short
+            # Short position exit conditions
+            if current_bar['High'] >= self.current_position['stop_loss']:
+                exit_reason = 'stop_loss'
+                exit_price = self.current_position['stop_loss']
+            elif current_bar['Low'] <= self.current_position['take_profit']:
+                exit_reason = 'take_profit'
+                exit_price = self.current_position['take_profit']
+        
+        # Check for max holding periods (same for both)
+        if self.current_position['periods_held'] >= self.trade_params.max_holding_periods:
             exit_reason = 'max_periods'
             exit_price = current_bar['Close']
         
@@ -108,14 +132,25 @@ class TradeExecutor:
             exit_price: Price to close at
             exit_reason: Reason for closing the position
         """
-        # Apply fixed dollar slippage to exit price
+        # Apply slippage based on position type
         base_exit_price = exit_price
         slippage_cost = self.trade_params.slippage
-        exit_price = base_exit_price - (slippage_cost / self.current_position['shares'])
+        if self.position_type == 'long':
+            # For long: sell at lower price (bad slippage)
+            exit_price = base_exit_price - (slippage_cost / self.current_position['shares'])
+        else:  # short
+            # For short: buy back at higher price (bad slippage)
+            exit_price = base_exit_price + (slippage_cost / self.current_position['shares'])
         
-        # Calculate profit/loss
-        profit_pct = (exit_price - self.current_position['entry_price']) / self.current_position['entry_price']
-        profit_amount = self.current_position['shares'] * (exit_price - self.current_position['entry_price'])
+        # Calculate profit/loss based on position type
+        if self.position_type == 'long':
+            # Long position: profit = (exit_price - entry_price) / entry_price
+            profit_pct = (exit_price - self.current_position['entry_price']) / self.current_position['entry_price']
+            profit_amount = self.current_position['shares'] * (exit_price - self.current_position['entry_price'])
+        else:  # short
+            # Short position: profit = (entry_price - exit_price) / entry_price
+            profit_pct = (self.current_position['entry_price'] - exit_price) / self.current_position['entry_price']
+            profit_amount = self.current_position['shares'] * (self.current_position['entry_price'] - exit_price)
         
         # Calculate commission
         commission = self.trade_params.commission

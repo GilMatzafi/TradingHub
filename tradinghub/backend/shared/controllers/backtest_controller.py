@@ -46,9 +46,10 @@ class BacktestController:
                 slippage=float(data.get('slippage', 0.1))
             )
             
-            # Get patterns and pattern type from request
+            # Get patterns, pattern type, and position type from request
             patterns = data.get('patterns', [])
             pattern_type = data.get('pattern_type', 'hammer')
+            position_type = data.get('position_type', 'long')  # Default to long for backward compatibility
             
             # Run backtest
             results = self.backtest_service.run_backtest(
@@ -58,7 +59,8 @@ class BacktestController:
                 pattern_params=pattern_params,
                 backtest_params=backtest_params,
                 patterns=patterns,
-                pattern_type=pattern_type
+                pattern_type=pattern_type,
+                position_type=position_type
             )
             
             return jsonify(results), 200

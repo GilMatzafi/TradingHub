@@ -14,12 +14,13 @@ class BacktestService:
         self.stock_service = StockService()
         self._backtesters = {}  # Cache for backtesters
     
-    def get_backtester(self, pattern_type: str) -> BaseBacktest:
+    def get_backtester(self, pattern_type: str, position_type: str = 'long') -> BaseBacktest:
         """
         Get the appropriate backtester for the given pattern type
         
         Args:
             pattern_type: Type of pattern to backtest
+            position_type: 'long' or 'short' position type
             
         Returns:
             BaseBacktest instance for the given pattern type
@@ -27,15 +28,19 @@ class BacktestService:
         Raises:
             ValueError: If pattern type is not supported
         """
-        if pattern_type not in self._backtesters:
+        cache_key = f"{pattern_type}_{position_type}"
+        if cache_key not in self._backtesters:
             try:
                 backtest_class = PatternRegistry.get_backtest_class(pattern_type)
-                # Create backtester instance (it will create its own pattern detector)
-                self._backtesters[pattern_type] = backtest_class()
+                # Create backtester instance normally
+                backtester = backtest_class()
+                # Set the position type after creation
+                backtester.position_type = position_type
+                self._backtesters[cache_key] = backtester
             except ValueError as e:
                 raise ValueError(f'Unsupported pattern type: {pattern_type}. {e}')
         
-        return self._backtesters[pattern_type]
+        return self._backtesters[cache_key]
 
     def run_backtest(self, 
                     symbol: str, 
@@ -44,7 +49,8 @@ class BacktestService:
                     pattern_params: PatternParams,
                     backtest_params: BacktestParams,
                     patterns: List[Dict[str, Any]],
-                    pattern_type: str = 'hammer') -> Dict[str, Any]:
+                    pattern_type: str = 'hammer',
+                    position_type: str = 'long') -> Dict[str, Any]:
         """
         Run a backtest for the given parameters
         
@@ -99,7 +105,7 @@ class BacktestService:
         pattern_dates = patterns_df['date'].tolist()
         
         # Get the appropriate backtester
-        backtester = self.get_backtester(pattern_type)
+        backtester = self.get_backtester(pattern_type, position_type)
         
         # Mark patterns in the main dataframe
         pattern_column = backtester.pattern_detector.get_pattern_column_name()

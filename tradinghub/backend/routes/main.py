@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, jsonify, redirect, url_fo
 from tradinghub.backend.shared.services.stock_service import StockService
 from tradinghub.backend.shared.models.dto.pattern_params import PatternParams, AnalysisRequest
 from tradinghub.backend.shared.controllers.backtest_controller import BacktestController
-from tradinghub.backend.shared.controllers.short_backtest_controller import ShortBacktestController
 from tradinghub.backend.shared.controllers.analyze_controller import AnalyzeController
 from tradinghub.backend.shared.pattern_config.pattern_registry import PatternRegistry
 
@@ -13,7 +12,6 @@ main_bp = Blueprint('main', __name__)
 # Initialize services and controllers
 stock_service = StockService()
 backtest_controller = BacktestController()
-short_backtest_controller = ShortBacktestController()
 analyze_controller = AnalyzeController()
 
 @main_bp.route('/')
@@ -69,7 +67,10 @@ def backtest():
 @main_bp.route('/backtest-short', methods=['POST'])
 def backtest_short():
     """Run SHORT position backtest for pattern strategy"""
-    return short_backtest_controller.run_backtest(request.json)
+    data = request.get_json()
+    # Add position_type to the data for short backtests
+    data['position_type'] = 'short'
+    return backtest_controller.run_backtest(data)
 
 @main_bp.route('/patterns', methods=['GET'])
 def get_patterns():

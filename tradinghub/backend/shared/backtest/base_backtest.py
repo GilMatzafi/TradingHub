@@ -9,14 +9,16 @@ from tradinghub.backend.shared.models.dto.trade_params import TradeParams
 class BaseBacktest:
     """Base class for all pattern backtesters"""
     
-    def __init__(self, pattern_detector: BasePattern):
+    def __init__(self, pattern_detector: BasePattern, position_type: str = 'long'):
         """
         Initialize the backtester
         
         Args:
             pattern_detector: Pattern detector instance that implements BasePattern
+            position_type: 'long' or 'short' position type
         """
         self.pattern_detector = pattern_detector
+        self.position_type = position_type
         self.performance_analyzer = PerformanceAnalyzer()
     
     def run_backtest(self, df: pd.DataFrame, pattern_params: Dict[str, Any], backtest_params: BacktestParams) -> Dict[str, Any]:
@@ -44,7 +46,7 @@ class BaseBacktest:
             commission=backtest_params.commission,
             slippage=backtest_params.slippage
         )
-        trade_executor = TradeExecutor(trade_params)
+        trade_executor = TradeExecutor(trade_params, self.position_type)
         
         # Initialize portfolio
         portfolio_value = trade_executor.initialize_portfolio(
@@ -80,5 +82,8 @@ class BaseBacktest:
         results['portfolio_history'] = trade_executor.get_portfolio_history()
         results['total_commission'] = trade_executor.get_total_commission()
         results['total_slippage'] = trade_executor.get_total_slippage()
+        
+        # Add position type indicator
+        results['position_type'] = self.position_type
         
         return results 
