@@ -1,8 +1,14 @@
-from typing import Dict, Any
-from flask import jsonify
+from typing import Dict, Any, Tuple
+import logging
 from tradinghub.backend.shared.models.dto.backtest_params import BacktestParams
 from tradinghub.backend.shared.models.dto.pattern_params import PatternParams
 from tradinghub.backend.shared.services.backtest_service import BacktestService
+from tradinghub.backend.shared.utils.data_utils import (
+    parse_pattern_params,
+    parse_backtest_params,
+    normalize_patterns_payload,
+    normalize_request_params,
+)
 
 class BacktestController:
     """Controller for handling backtest requests"""
@@ -10,7 +16,7 @@ class BacktestController:
     def __init__(self):
         self.backtest_service = BacktestService()
 
-    def run_backtest(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+    def run_backtest(self, data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
         """
         Handle backtest request
         
@@ -21,51 +27,44 @@ class BacktestController:
             Tuple containing response data and HTTP status code
         """
         try:
-            # Create pattern parameters
-            pattern_params = PatternParams(
-                body_size_ratio=float(data.get('body_size_ratio', 0.3)),
-                lower_shadow_ratio=float(data.get('lower_shadow_ratio', 2.0)),
-                upper_shadow_ratio=float(data.get('upper_shadow_ratio', 0.1)),
-                ma_period=int(data.get('ma_period', 5)),
-                require_green=data.get('require_green', True)
+            logging.info("BacktestController: incoming data keys=%s", list(data.keys()))
+            # Create params
+            pattern_params = parse_pattern_params(data)
+            backtest_params = parse_backtest_params(data)
+
+            # Normalize request basics
+            symbol, days, interval = normalize_request_params(data)
+
+            # Normalize pattern payload
+            incoming_patterns = data.get('patterns', [])
+            logging.info(
+                "BacktestController: patterns count=%d pattern_type=%s position_type=%s",
+                len(incoming_patterns), data.get('pattern_type'), data.get('position_type')
             )
-            
-            # Add volume parameters if they exist in the request
-            if 'min_relative_volume' in data:
-                pattern_params.min_relative_volume = float(data.get('min_relative_volume', 1.0))
-                pattern_params.volume_lookback = int(data.get('volume_lookback', 20))
-            
-            # Create backtest parameters
-            backtest_params = BacktestParams(
-                stop_loss_pct=float(data.get('stop_loss_pct', 0.02)),
-                take_profit_pct=float(data.get('take_profit_pct', 0.04)),
-                entry_delay=int(data.get('entry_delay', 1)),
-                max_holding_periods=int(data.get('max_holding_periods', 20)),
-                initial_portfolio_size=float(data.get('initial_portfolio_size', 10000)),
-                commission=float(data.get('commission', 0.65)),
-                slippage=float(data.get('slippage', 0.1))
-            )
-            
-            # Get patterns, pattern type, and position type from request
-            patterns = data.get('patterns', [])
+            patterns = normalize_patterns_payload(incoming_patterns)
+            if patterns:
+                sample = {k: patterns[0].get(k) for k in list(patterns[0].keys())[:6]}
+                logging.info("BacktestController: first pattern sample=%s", sample)
+
             pattern_type = data.get('pattern_type', 'hammer')
-            position_type = data.get('position_type', 'long')  # Default to long for backward compatibility
+            position_type = data.get('position_type', 'long')
             
             # Run backtest
             results = self.backtest_service.run_backtest(
-                symbol=data.get('symbol', 'AAPL'),
-                days=int(data.get('days', 50)),
-                interval=data.get('interval', '5m'),
+                symbol=symbol,
+                days=days,
+                interval=interval,
                 pattern_params=pattern_params,
                 backtest_params=backtest_params,
                 patterns=patterns,
                 pattern_type=pattern_type,
                 position_type=position_type
             )
-            
-            return jsonify(results), 200
+            return results, 200
             
         except ValueError as e:
-            return jsonify({'error': str(e)}), 400
+            logging.exception("BacktestController ValueError: %s", e)
+            return {'error': str(e)}, 400
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            logging.exception("BacktestController Exception: %s", e)
+            return {'error': str(e)}, 500

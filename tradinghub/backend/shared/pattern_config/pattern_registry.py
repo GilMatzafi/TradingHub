@@ -3,56 +3,70 @@ Pattern Registry - Central configuration for all candlestick patterns
 Modular version with separate configuration files
 """
 from typing import Dict, Any, Type
+import pkgutil
+import importlib
 from ..patterns.base_pattern import BasePattern
 from ..backtest.base_backtest import BaseBacktest
 
-# Import pattern configurations
-from tradinghub.backend.single_candle.config.patterns.hammer_config import HAMMER_CONFIG
-from tradinghub.backend.single_candle.config.patterns.doji_config import DOJI_CONFIG
-from tradinghub.backend.single_candle.config.patterns.elephant_bar_config import ELEPHANT_BAR_CONFIG
-from tradinghub.backend.single_candle.config.patterns.marubozu_config import MARUBOZU_CONFIG
-from tradinghub.backend.single_candle.config.patterns.shooting_star_config import SHOOTING_STAR_CONFIG
-from tradinghub.backend.two_candle.config.patterns.engulfing_config import ENGULFING_CONFIG
-from tradinghub.backend.two_candle.config.patterns.harami_config import HARAMI_CONFIG
-from tradinghub.backend.two_candle.config.patterns.piercing_line_config import PIERCING_LINE_CONFIG
-from tradinghub.backend.two_candle.config.patterns.counter_attack_config import COUNTER_ATTACK_CONFIG
-from tradinghub.backend.two_candle.config.patterns.dark_cloud_cover_config import DARK_CLOUD_COVER_CONFIG
-from tradinghub.backend.two_candle.config.patterns.tweezer_top_config import TWEEZER_TOP_CONFIG
-from tradinghub.backend.two_candle.config.patterns.tweezer_bottom_config import TWEEZER_BOTTOM_CONFIG
-from tradinghub.backend.two_candle.config.patterns.kicker_config import KICKER_CONFIG
-from tradinghub.backend.three_candle.config.patterns.three_white_soldiers_config import THREE_WHITE_SOLDIERS_CONFIG
-from tradinghub.backend.three_candle.config.patterns.three_black_crows_config import THREE_BLACK_CROWS_CONFIG
-from tradinghub.backend.three_candle.config.patterns.three_inside_up_config import THREE_INSIDE_UP_CONFIG
-from tradinghub.backend.three_candle.config.patterns.three_inside_down_config import THREE_INSIDE_DOWN_CONFIG
-from tradinghub.backend.three_candle.config.patterns.morning_star_config import MORNING_STAR_CONFIG
-from tradinghub.backend.three_candle.config.patterns.evening_star_config import EVENING_STAR_CONFIG
+# Auto-registration now discovers pattern configs dynamically. Manual imports removed.
 
 
 class PatternRegistry:
     """Central registry for all candlestick patterns and their configurations"""
     
     # Pattern definitions with their metadata
-    PATTERNS = {
-        'hammer': HAMMER_CONFIG,
-        'doji': DOJI_CONFIG,
-        'elephant_bar': ELEPHANT_BAR_CONFIG,
-        'marubozu': MARUBOZU_CONFIG,
-        'shooting_star': SHOOTING_STAR_CONFIG,
-        'engulfing': ENGULFING_CONFIG,
-        'harami': HARAMI_CONFIG,
-        'piercing_line': PIERCING_LINE_CONFIG,
-        'counter_attack': COUNTER_ATTACK_CONFIG,
-        'dark_cloud_cover': DARK_CLOUD_COVER_CONFIG,
-        'tweezer_top': TWEEZER_TOP_CONFIG,
-        'tweezer_bottom': TWEEZER_BOTTOM_CONFIG,
-        'kicker': KICKER_CONFIG,
-        'three_white_soldiers': THREE_WHITE_SOLDIERS_CONFIG,
-        'three_black_crows': THREE_BLACK_CROWS_CONFIG,
-        'three_inside_up': THREE_INSIDE_UP_CONFIG,
-        'three_inside_down': THREE_INSIDE_DOWN_CONFIG,
-        'morning_star': MORNING_STAR_CONFIG,
-        'evening_star': EVENING_STAR_CONFIG,
-    }
+    PATTERNS = {}
+
+    @classmethod
+    def auto_register_patterns(cls) -> None:
+        """
+        Discover and register pattern configs dynamically from config packages.
+
+        This scans known pattern config packages and, for each module, if a
+        top-level CONFIG (or *_CONFIG) dict exists, it registers it.
+        """
+        packages_to_scan = [
+            'tradinghub.backend.single_candle.config.patterns',
+            'tradinghub.backend.two_candle.config.patterns',
+            'tradinghub.backend.three_candle.config.patterns',
+        ]
+
+        for package_path in packages_to_scan:
+            try:
+                module = importlib.import_module(package_path)
+            except Exception:
+                continue
+            for _, name, is_pkg in pkgutil.iter_modules(module.__path__):
+                if is_pkg:
+                    continue
+                full_mod = f"{package_path}.{name}"
+                try:
+                    config_module = importlib.import_module(full_mod)
+                except Exception:
+                    continue
+
+                # Prefer a conventional CONFIG dict; fallback to any *CONFIG symbol
+                candidate = getattr(config_module, 'CONFIG', None)
+                if candidate is None:
+                    # search for any ALL_CAPS ending with _CONFIG
+                    for attr_name in dir(config_module):
+                        if attr_name.endswith('_CONFIG') and attr_name.isupper():
+                            candidate = getattr(config_module, attr_name)
+                            break
+
+                if not isinstance(candidate, dict):
+                    continue
+
+                # Determine stable registry key (pattern_type)
+                # Prefer explicit 'pattern_type' in config; otherwise derive from module name
+                key = candidate.get('pattern_type')
+                if not key or not isinstance(key, str):
+                    mod_name = full_mod.rsplit('.', 1)[-1]
+                    key = mod_name[:-7] if mod_name.endswith('_config') else mod_name
+
+                # Merge without overwriting explicit, pre-declared entries
+                if key not in cls.PATTERNS:
+                    cls.PATTERNS[key] = candidate
     
     @classmethod
     def get_pattern_config(cls, pattern_type: str) -> Dict[str, Any]:

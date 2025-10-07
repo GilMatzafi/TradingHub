@@ -17,44 +17,20 @@ class PerformanceAnalyzer:
                 'average_profit': 0,
                 'total_profit_pct': 0,
                 'trades': [],
-                'hourly_performance': self._calculate_hourly_performance(trades)
+                'hourly_performance': self._empty_hourly_performance()
             }
-        
-        winning_trades = [t for t in trades if t.profit_pct > 0]
-        losing_trades = [t for t in trades if t.profit_pct < 0]
-        
-        total_profit = sum(t.profit_pct for t in trades)
-        total_win = sum(t.profit_pct for t in winning_trades)
-        total_loss = abs(sum(t.profit_pct for t in losing_trades))
-        
-        # Ensure we don't divide by zero
-        win_rate = len(winning_trades) / len(trades) if trades else 0
-        profit_factor = total_win / total_loss if total_loss > 0 else 0
-        average_profit = total_profit / len(trades) if trades else 0
-        
+
+        core = self._compute_core_stats(trades)
+
         return {
-            'total_trades': len(trades),
-            'winning_trades': len(winning_trades),
-            'losing_trades': len(losing_trades),
-            'win_rate': win_rate,
-            'profit_factor': profit_factor,
-            'average_profit': average_profit,
-            'total_profit_pct': total_profit * 100,
-            'trades': [
-                {
-                    'entry_date': t.entry_date.strftime('%Y-%m-%d %H:%M'),
-                    'exit_date': t.exit_date.strftime('%Y-%m-%d %H:%M'),
-                    'entry_price': t.entry_price,
-                    'exit_price': t.exit_price,
-                    'profit_pct': t.profit_pct * 100,
-                    'profit_amount': t.profit_amount,
-                    'commission': t.commission,
-                    'slippage_cost': t.slippage_cost,
-                    'periods_held': t.periods_held,
-                    'exit_reason': t.exit_reason
-                }
-                for t in trades
-            ],
+            'total_trades': core['total_trades'],
+            'winning_trades': core['winning_trades'],
+            'losing_trades': core['losing_trades'],
+            'win_rate': core['win_rate'],
+            'profit_factor': core['profit_factor'],
+            'average_profit': core['average_profit'],
+            'total_profit_pct': core['total_profit'] * 100,
+            'trades': self._serialize_trades(trades),
             'hourly_performance': self._calculate_hourly_performance(trades)
         }
         
@@ -69,12 +45,7 @@ class PerformanceAnalyzer:
             Dictionary containing hourly performance metrics
         """
         if not trades:
-            return {
-                'hourly_trades': [0] * 24,
-                'hourly_profits': [0] * 24,
-                'hourly_win_rates': [0] * 24,
-                'hourly_avg_profits': [0] * 24
-            }
+            return self._empty_hourly_performance()
         
         # Initialize arrays for each hour (0-23)
         hourly_trades = [0] * 24
@@ -111,4 +82,60 @@ class PerformanceAnalyzer:
             'hourly_profits': hourly_profits,
             'hourly_win_rates': hourly_win_rates,
             'hourly_avg_profits': hourly_avg_profits
+        }
+
+    def _empty_hourly_performance(self) -> Dict[str, Any]:
+        return {
+            'hourly_trades': [0] * 24,
+            'hourly_profits': [0] * 24,
+            'hourly_win_rates': [0] * 24,
+            'hourly_avg_profits': [0] * 24
+        }
+
+    def _serialize_trades(self, trades: List[Trade]) -> List[Dict[str, Any]]:
+        return [
+            {
+                'entry_date': t.entry_date.strftime('%Y-%m-%d %H:%M'),
+                'exit_date': t.exit_date.strftime('%Y-%m-%d %H:%M'),
+                'entry_price': t.entry_price,
+                'exit_price': t.exit_price,
+                'profit_pct': t.profit_pct * 100,
+                'profit_amount': t.profit_amount,
+                'commission': t.commission,
+                'slippage_cost': t.slippage_cost,
+                'periods_held': t.periods_held,
+                'exit_reason': t.exit_reason
+            }
+            for t in trades
+        ]
+
+    def _compute_core_stats(self, trades: List[Trade]) -> Dict[str, Any]:
+        winning_trades = 0
+        losing_trades = 0
+        total_profit = 0.0
+        total_win = 0.0
+        total_loss_abs = 0.0
+
+        for t in trades:
+            total_profit += t.profit_pct
+            if t.profit_pct > 0:
+                winning_trades += 1
+                total_win += t.profit_pct
+            elif t.profit_pct < 0:
+                losing_trades += 1
+                total_loss_abs += -t.profit_pct  # accumulate absolute loss
+
+        total_trades = len(trades)
+        win_rate = winning_trades / total_trades if total_trades > 0 else 0
+        profit_factor = (total_win / total_loss_abs) if total_loss_abs > 0 else 0
+        average_profit = (total_profit / total_trades) if total_trades > 0 else 0
+
+        return {
+            'total_trades': total_trades,
+            'winning_trades': winning_trades,
+            'losing_trades': losing_trades,
+            'win_rate': win_rate,
+            'profit_factor': profit_factor,
+            'average_profit': average_profit,
+            'total_profit': total_profit,
         }

@@ -5,6 +5,22 @@
     </div>
     <div class="card-body">
         <form id="backtest-form">
+            <!-- Position Type Selector -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="position_type" class="form-label">Position Type</label>
+                        <select class="form-select" id="position_type" name="position_type">
+                            <option value="long">Long Position (Buy)</option>
+                            <option value="short">Short Position (Sell)</option>
+                        </select>
+                        <div class="form-text" id="position_type_help">
+                            Long: Buy when pattern detected, profit when price goes up. Short: Sell when pattern detected, profit when price goes down.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Portfolio & Cost Parameters -->
             <div class="row mb-4">
                 <div class="col-md-4">

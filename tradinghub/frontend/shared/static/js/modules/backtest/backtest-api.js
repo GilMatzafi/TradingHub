@@ -5,15 +5,39 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 
 // API functionality - Works for ANY pattern (hammer, doji, shooting star, etc.)
 function initBacktestApi() {
-    // Long backtest button
+    // Single backtest button that reads position type from selector
     document.getElementById('runBacktest')?.addEventListener('click', function() {
-        runBacktest('long');
+        const positionType = document.getElementById('position_type')?.value || 'long';
+        runBacktest(positionType);
     });
     
-    // Short backtest button
-    document.getElementById('runShortBacktest')?.addEventListener('click', function() {
-        runBacktest('short');
+    // Update button text and help text when position type changes
+    document.getElementById('position_type')?.addEventListener('change', function() {
+        updateBacktestUI(this.value);
     });
+    
+    // Initialize UI with default position type
+    updateBacktestUI('long');
+}
+
+// Update UI elements based on position type
+function updateBacktestUI(positionType) {
+    const button = document.getElementById('runBacktest');
+    const helpText = document.getElementById('position_type_help');
+    
+    if (positionType === 'short') {
+        button.innerHTML = '<i class="bi bi-arrow-down-circle me-2"></i>Run Short Backtest';
+        button.className = 'btn btn-danger';
+        if (helpText) {
+            helpText.textContent = 'Short: Sell when pattern detected, profit when price goes down. Stop loss when price goes UP (bad for short).';
+        }
+    } else {
+        button.innerHTML = '<i class="bi bi-play-fill me-2"></i>Run Backtest';
+        button.className = 'btn btn-primary';
+        if (helpText) {
+            helpText.textContent = 'Long: Buy when pattern detected, profit when price goes up. Short: Sell when pattern detected, profit when price goes down.';
+        }
+    }
 }
 
 // Unified backtest function for both long and short positions
@@ -88,7 +112,7 @@ function runBacktest(positionType) {
     setTimeout(() => loading.style.opacity = '1', 50);
     
     // Collect form data
-    const formData = collectFormData(filteredPatterns, positionType);
+    const formData = collectFormData(filteredPatterns);
     console.log(`📋 ${positionType.toUpperCase()} Backtest form data:`, formData);
     
     // Send backtest request
@@ -96,14 +120,18 @@ function runBacktest(positionType) {
 }
 
 // Collect form data for the backtest request - Works for ANY pattern
-function collectFormData(filteredPatterns, positionType = 'long') {
+function collectFormData(filteredPatterns) {
     // Base form data (same for all patterns)
     const formData = {
         symbol: document.getElementById('symbol').value.toUpperCase(),
         days: document.getElementById('days').value,
         interval: document.getElementById('interval').value,
+        // Ensure backend knows which pattern backtest class to use
+        pattern_type: (document.getElementById('pattern_type')?.value)
+            || (window.currentPatternType)
+            || (window.location.pathname.replace('/', '') || 'hammer'),
         patterns: filteredPatterns,
-        position_type: positionType,
+        position_type: document.getElementById('position_type')?.value || 'long',
         
         // Backtest parameters (same for all patterns)
         stop_loss_pct: document.getElementById('stop_loss_pct').value / 100,

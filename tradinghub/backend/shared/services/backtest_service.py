@@ -1,11 +1,14 @@
 from typing import Dict, Any, List, Type
+import logging
 import pandas as pd
 from ..models.dto.backtest_params import BacktestParams
 from ..models.dto.pattern_params import PatternParams
+from tradinghub.backend.shared.utils.time_utils import normalize_series_to_israel_naive
 from tradinghub.backend.shared.backtest.base_backtest import BaseBacktest
 from tradinghub.backend.single_candle.backtest.hammer_backtest import HammerBacktest
 from .stock_service import StockService
 from tradinghub.backend.shared.pattern_config.pattern_registry import PatternRegistry
+from tradinghub.backend.shared.utils.data_utils import format_stock_data, serialize_datetime_fields
 
 class BacktestService:
     """Service for running backtests on different pattern strategies"""
@@ -43,18 +46,37 @@ class BacktestService:
         return self._backtesters[cache_key]
 
     def _format_stock_data(self, df: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Helper function to format stock data for frontend consumption"""
-        stock_data = []
-        for idx, row in df.iterrows():
-            stock_data.append({
-                'date': idx.strftime('%Y-%m-%d %H:%M:%S') if hasattr(idx, 'strftime') else str(idx),
-                'open': float(row['Open']),
-                'high': float(row['High']),
-                'low': float(row['Low']),
-                'close': float(row['Close']),
-                'volume': float(row.get('Volume', 0))
-            })
-        return stock_data
+        return format_stock_data(df)
+
+    def _serialize_datetime_fields(self, obj: Any) -> Any:
+        """Recursively convert datetime-like objects in dict/list to ISO strings."""
+        try:
+            import datetime as _dt
+            import pandas as _pd
+        except Exception:
+            _dt = None
+            _pd = None
+        
+        if isinstance(obj, list):
+            return [self._serialize_datetime_fields(x) for x in obj]
+        if isinstance(obj, dict):
+            out = {}
+            for k, v in obj.items():
+                out[k] = self._serialize_datetime_fields(v)
+            return out
+        # pandas Timestamp
+        if 'pandas' in str(type(obj)) or (hasattr(obj, 'isoformat') and str(type(obj)).endswith("Timestamp'>")):
+            try:
+                return obj.isoformat() if hasattr(obj, 'isoformat') else str(obj)
+            except Exception:
+                return str(obj)
+        # datetime
+        if _dt and isinstance(obj, _dt.datetime):
+            try:
+                return obj.isoformat()
+            except Exception:
+                return str(obj)
+        return obj
 
     def run_backtest(self, 
                     symbol: str, 
@@ -80,6 +102,7 @@ class BacktestService:
         Returns:
             Dictionary containing backtest results
         """
+        logging.info("BacktestService: start run_backtest pattern_type=%s position_type=%s patterns=%d", pattern_type, position_type, len(patterns))
         # Get historical data
         df = self.stock_service.download_stock_data(symbol, days, interval)
         
@@ -93,33 +116,21 @@ class BacktestService:
         patterns_df = pd.DataFrame(patterns)
         if patterns_df.empty:
             raise ValueError('Empty patterns data provided')
+        logging.info("BacktestService: patterns_df columns=%s", list(patterns_df.columns))
         
         # Convert date strings to datetime objects
-        patterns_df['date'] = pd.to_datetime(patterns_df['date'])
+        patterns_df['date'] = pd.to_datetime(patterns_df['date'], errors='raise')
         
-        # Handle timezone conversion for pattern dates
-        israel_tz = 'Asia/Jerusalem'
-        
-        # If pattern dates have timezone info, convert to Israel timezone
-        if patterns_df['date'].dt.tz is not None:
-            patterns_df['date'] = patterns_df['date'].dt.tz_convert(israel_tz)
-        else:
-            # If pattern dates are timezone-naive, assume they're in Israel timezone
-            patterns_df['date'] = patterns_df['date'].dt.tz_localize(israel_tz)
-        
-        # Handle timezone for DataFrame index
-        if df.index.tz is not None:
-            # If index has timezone, convert to Israel timezone
-            df.index = df.index.tz_convert(israel_tz)
-        else:
-            # If index is timezone-naive, assume it's in Israel timezone
-            df.index = df.index.tz_localize(israel_tz)
+        # Robust timezone normalization: align both to naive timestamps in Israel time
+        patterns_df['date'] = normalize_series_to_israel_naive(patterns_df['date'])
+        df.index = normalize_series_to_israel_naive(df.index)
         
         # Create a list of pattern dates for matching
         pattern_dates = patterns_df['date'].tolist()
         
         # Get the appropriate backtester
         backtester = self.get_backtester(pattern_type, position_type)
+        logging.info("BacktestService: obtained backtester=%s detector=%s", type(backtester).__name__, type(backtester.pattern_detector).__name__)
         
         # Mark patterns in the main dataframe
         pattern_column = backtester.pattern_detector.get_pattern_column_name()
@@ -152,6 +163,7 @@ class BacktestService:
         
         # Run backtest
         results = backtester.run_backtest(df, pattern_params.__dict__, backtest_params)
+        logging.info("BacktestService: backtest completed trades=%d", len(results.get('trades', [])) if isinstance(results, dict) else -1)
         
         # Ensure all required fields are present in the results
         if not results:
@@ -178,4 +190,10 @@ class BacktestService:
             # Fallback to filtered data if original data not available
             results['stock_data'] = self._format_stock_data(df)
         
+        # Ensure JSON-serializable results (convert datetime-like fields)
+        if isinstance(results, dict):
+            if 'portfolio_history' in results:
+                results['portfolio_history'] = serialize_datetime_fields(results['portfolio_history'])
+            if 'trades' in results:
+                results['trades'] = serialize_datetime_fields(results['trades'])
         return results

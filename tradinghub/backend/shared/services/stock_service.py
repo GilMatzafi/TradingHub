@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-from typing import Dict, Any
+from typing import Dict, Any, Protocol
 import time
 import logging
 from tradinghub.backend.shared.models.dto.pattern_params import PatternParams, AnalysisRequest
@@ -14,14 +14,26 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class DataFetcher(Protocol):
+    def fetch(self, symbol: str, start: str, end: str, interval: str) -> pd.DataFrame:
+        ...
+
+
+class YahooFetcher:
+    def fetch(self, symbol: str, start: str, end: str, interval: str) -> pd.DataFrame:
+        stock = yf.Ticker(symbol)
+        return stock.history(start=start, end=end, interval=interval)
+
+
 class StockService:
     """Service for handling stock data operations"""
     
-    def __init__(self, config: Config = None):
+    def __init__(self, config: Config = None, fetcher: DataFetcher = None):
         self.config = config or Config()
         self._cache = {}  # Simple in-memory cache
         self._cache_ttl = self.config.CACHE_TTL  # Cache TTL in seconds
         self._pattern_detectors = {}  # Cache for pattern detectors
+        self.fetcher: DataFetcher = fetcher or YahooFetcher()
     
     def _get_cache_key(self, symbol: str, start_date: str, end_date: str, interval: str) -> str:
         """Generate a cache key for the request"""
@@ -87,14 +99,8 @@ class StockService:
             DataFrame with stock data
         """
         try:
-            stock = yf.Ticker(symbol)
             logger.info(f"Downloading {symbol} data from {start_date} to {end_date} with interval {interval}")
-            
-            df = stock.history(
-                start=start_date,
-                end=end_date,
-                interval=interval
-            )
+            df = self.fetcher.fetch(symbol, start_date, end_date, interval)
             
             logger.info(f"Downloaded {len(df)} rows of data for {symbol}")
             
@@ -117,41 +123,37 @@ class StockService:
         Returns:
             AnalysisResult: Analysis results
         """
-        # Download data
-        df = self.download_stock_data(
-            request.symbol,
-            request.days,
-            request.interval
-        )
-        
+        df = self._fetch_data(request)
         if df.empty:
             return AnalysisResult(count=0, patterns=[])
-        
-        # Get pattern detector from registry
+
+        patterns_found = self._detect_patterns(df, request)
+        patterns = self._build_pattern_results(patterns_found)
+        return AnalysisResult(count=len(patterns), patterns=patterns)
+
+    # --- helpers to simplify analyze_stock ---
+    def _fetch_data(self, request: AnalysisRequest) -> pd.DataFrame:
+        return self.download_stock_data(request.symbol, request.days, request.interval)
+
+    def _detect_patterns(self, df: pd.DataFrame, request: AnalysisRequest) -> pd.DataFrame:
         pattern_detector = self._get_pattern_detector(request.pattern_type)
-        
-        # Detect patterns
-        df = pattern_detector.detect(df, request.pattern_params.__dict__)
-        
-        # Find patterns using the pattern column name
+        detected_df = pattern_detector.detect(df, request.pattern_params.__dict__)
         pattern_column = pattern_detector.get_pattern_column_name()
-        patterns_found = df[df[pattern_column]]
-        
-        # Convert to result objects
+        return detected_df[detected_df[pattern_column]]
+
+    def _build_pattern_results(self, patterns_found: pd.DataFrame):
         patterns = []
         for date, row in patterns_found.iterrows():
             israel_time = convert_to_israel_time(date)
-            pattern = PatternResult(
+            patterns.append(PatternResult(
                 date=israel_time,
                 trend=row.get('trend', 'unknown'),
                 open_price=float(row['Open']),
                 high_price=float(row['High']),
                 low_price=float(row['Low']),
                 close_price=float(row['Close'])
-            )
-            patterns.append(pattern)
-        
-        return AnalysisResult(count=len(patterns), patterns=patterns)
+            ))
+        return patterns
     
     def download_stock_data(self, symbol: str, days: int, interval: str) -> pd.DataFrame:
         """

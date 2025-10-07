@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Current path:', path);
     
     if (path === '/hammer' || path.endsWith('/hammer')) {
-        // Load hammer strategy
-        import('./modules/hammer-strategy.js').then(module => {
+        // Load hammer strategy (use absolute path to avoid resolution issues)
+        import('/static/js/modules/hammer-strategy/index.js').then(module => {
             console.log('Hammer strategy loaded successfully');
         }).catch(error => {
             console.error('Error loading hammer strategy:', error);

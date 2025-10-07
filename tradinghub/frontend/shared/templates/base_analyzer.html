@@ -75,16 +75,8 @@
 
     <!-- Backtest Parameters Section -->
     <div id="backtestSection" class="d-none">
-        <!-- Universal backtest parameters -->
         {% from 'components/backtest_params.html' import backtest_params %}
         {{ backtest_params() }}
-    </div>
-
-    <!-- Short Backtest Parameters Section -->
-    <div id="shortBacktestSection" class="d-none">
-        <!-- Universal short backtest parameters -->
-        {% from 'components/short_backtest_params.html' import short_backtest_params %}
-        {{ short_backtest_params() }}
     </div>
 </div>
 
