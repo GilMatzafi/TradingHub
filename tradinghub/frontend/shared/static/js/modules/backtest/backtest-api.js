@@ -5,12 +5,24 @@ import { updateMetrics, showBacktestResults } from './backtest-metrics.js';
 
 // API functionality - Works for ANY pattern (hammer, doji, shooting star, etc.)
 function initBacktestApi() {
+    // Long backtest button
     document.getElementById('runBacktest')?.addEventListener('click', function() {
-        // Get the current strategy instance (works for any pattern)
-        const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy || window.counter_attackStrategy || window.darkCloudCoverStrategy || window.tweezerTopStrategy || window.tweezerBottomStrategy || window.kickerStrategy || window.threeWhiteSoldiersStrategy || window.threeBlackCrowsStrategy || window.threeInsideUpStrategy || window.threeInsideDownStrategy || window.morningStarStrategy || window.eveningStarStrategy;
-        
-        // Debug: Log what strategies are available
-        console.log('🔍 Backtest API Debug:', {
+        runBacktest('long');
+    });
+    
+    // Short backtest button
+    document.getElementById('runShortBacktest')?.addEventListener('click', function() {
+        runBacktest('short');
+    });
+}
+
+// Unified backtest function for both long and short positions
+function runBacktest(positionType) {
+    // Get the current strategy instance (works for any pattern)
+    const currentStrategy = window.hammerStrategy || window.dojiStrategy || window.elephantBarStrategy || window.marubozuStrategy || window.shootingStarStrategy || window.engulfingStrategy || window.haramiStrategy || window.piercingLineStrategy || window.counter_attackStrategy || window.darkCloudCoverStrategy || window.tweezerTopStrategy || window.tweezerBottomStrategy || window.kickerStrategy || window.threeWhiteSoldiersStrategy || window.threeBlackCrowsStrategy || window.threeInsideUpStrategy || window.threeInsideDownStrategy || window.morningStarStrategy || window.eveningStarStrategy;
+    
+    // Debug: Log what strategies are available
+    console.log(`🔍 ${positionType.toUpperCase()} Backtest API Debug:`, {
             hammerStrategy: !!window.hammerStrategy,
             dojiStrategy: !!window.dojiStrategy,
             elephantBarStrategy: !!window.elephantBarStrategy,
@@ -33,63 +45,65 @@ function initBacktestApi() {
             currentStrategy: !!currentStrategy
         });
         
-        if (!currentStrategy) {
-            console.error('Strategy not initialized');
-            console.error('Available strategies:', {
-                hammer: !!window.hammerStrategy,
-                doji: !!window.dojiStrategy,
-                elephantBar: !!window.elephantBarStrategy,
-                marubozu: !!window.marubozuStrategy,
-                shootingStar: !!window.shootingStarStrategy,
-                engulfing: !!window.engulfingStrategy,
-                harami: !!window.haramiStrategy,
-                piercingLine: !!window.piercingLineStrategy,
-                counter_attack: !!window.counter_attackStrategy,
-                dark_cloud_cover: !!window.darkCloudCoverStrategy,
-                tweezer_top: !!window.tweezerTopStrategy,
-                tweezer_bottom: !!window.tweezerBottomStrategy,
-                kicker: !!window.kickerStrategy,
-                three_white_soldiers: !!window.threeWhiteSoldiersStrategy,
-                three_black_crows: !!window.threeBlackCrowsStrategy,
-                three_inside_up: !!window.threeInsideUpStrategy,
-                three_inside_down: !!window.threeInsideDownStrategy,
-                morning_star: !!window.morningStarStrategy,
-                evening_star: !!window.eveningStarStrategy
-            });
-            alert('Error: Strategy not initialized');
-            return;
-        }
-        
-        // Get the filtered patterns from the pattern data manager
-        const filteredPatterns = currentStrategy.dataManager.getFilteredPatterns();
-        
-        if (filteredPatterns.length === 0) {
-            alert('Please run pattern analysis first before running backtest');
-            return;
-        }
-        
-        // Show loading indicator
-        const loading = document.querySelector('.loading');
-        loading.style.display = 'block';
-        loading.style.opacity = '0';
-        setTimeout(() => loading.style.opacity = '1', 50);
-        
-        // Collect form data
-        const formData = collectFormData(filteredPatterns);
-        
-        // Send backtest request
-        sendBacktestRequest(formData, loading);
-    });
+    if (!currentStrategy) {
+        console.error('Strategy not initialized');
+        console.error('Available strategies:', {
+            hammer: !!window.hammerStrategy,
+            doji: !!window.dojiStrategy,
+            elephantBar: !!window.elephantBarStrategy,
+            marubozu: !!window.marubozuStrategy,
+            shootingStar: !!window.shootingStarStrategy,
+            engulfing: !!window.engulfingStrategy,
+            harami: !!window.haramiStrategy,
+            piercingLine: !!window.piercingLineStrategy,
+            counter_attack: !!window.counter_attackStrategy,
+            dark_cloud_cover: !!window.darkCloudCoverStrategy,
+            tweezer_top: !!window.tweezerTopStrategy,
+            tweezer_bottom: !!window.tweezerBottomStrategy,
+            kicker: !!window.kickerStrategy,
+            three_white_soldiers: !!window.threeWhiteSoldiersStrategy,
+            three_black_crows: !!window.threeBlackCrowsStrategy,
+            three_inside_up: !!window.threeInsideUpStrategy,
+            three_inside_down: !!window.threeInsideDownStrategy,
+            morning_star: !!window.morningStarStrategy,
+            evening_star: !!window.eveningStarStrategy
+        });
+        alert('Error: Strategy not initialized');
+        return;
+    }
+    
+    // Get the filtered patterns from the pattern data manager
+    const filteredPatterns = currentStrategy.dataManager.getFilteredPatterns();
+    console.log(`📊 Filtered patterns for ${positionType.toUpperCase()} backtest:`, filteredPatterns.length);
+    
+    if (filteredPatterns.length === 0) {
+        alert('No patterns found. Please run analysis first.');
+        return;
+    }
+    
+    // Show loading indicator
+    const loading = document.querySelector('.loading');
+    loading.style.display = 'block';
+    loading.style.opacity = '0';
+    setTimeout(() => loading.style.opacity = '1', 50);
+    
+    // Collect form data
+    const formData = collectFormData(filteredPatterns, positionType);
+    console.log(`📋 ${positionType.toUpperCase()} Backtest form data:`, formData);
+    
+    // Send backtest request
+    sendBacktestRequest(formData, loading, positionType);
 }
 
 // Collect form data for the backtest request - Works for ANY pattern
-function collectFormData(filteredPatterns) {
+function collectFormData(filteredPatterns, positionType = 'long') {
     // Base form data (same for all patterns)
     const formData = {
         symbol: document.getElementById('symbol').value.toUpperCase(),
         days: document.getElementById('days').value,
         interval: document.getElementById('interval').value,
         patterns: filteredPatterns,
+        position_type: positionType,
         
         // Backtest parameters (same for all patterns)
         stop_loss_pct: document.getElementById('stop_loss_pct').value / 100,
@@ -115,6 +129,8 @@ function collectFormData(filteredPatterns) {
         if (element) {
             if (element.type === 'checkbox') {
                 formData[param] = element.checked;
+            } else if (element.type === 'range') {
+                formData[param] = parseFloat(element.value);
             } else {
                 formData[param] = element.value;
             }
@@ -137,8 +153,9 @@ function collectFormData(filteredPatterns) {
 }
 
 // Send backtest request to the server
-function sendBacktestRequest(formData, loading) {
-    fetch('/backtest', {
+function sendBacktestRequest(formData, loading, positionType = 'long') {
+    const endpoint = positionType === 'short' ? '/backtest-short' : '/backtest';
+    fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -152,11 +169,11 @@ function sendBacktestRequest(formData, loading) {
         }
         
         // Process backtest results
-        processBacktestResults(data);
+        processBacktestResults(data, positionType);
     })
     .catch(error => {
-        console.error('Backtest error:', error);
-        alert('Error running backtest: ' + error.message);
+        console.error(`${positionType} backtest error:`, error);
+        alert(`Error running ${positionType} backtest: ` + error.message);
     })
     .finally(() => {
         // Hide loading indicator
@@ -166,7 +183,7 @@ function sendBacktestRequest(formData, loading) {
 }
 
 // Process backtest results
-function processBacktestResults(data) {
+function processBacktestResults(data, positionType = 'long') {
     // Show backtest results section
     showBacktestResults();
     
@@ -179,7 +196,7 @@ function processBacktestResults(data) {
     window.trades = data.trades;
     
     // Store stock data for candlestick chart
-    console.log('Backtest API: Storing stock data for candlestick chart');
+    console.log(`${positionType.toUpperCase()} Backtest API: Storing stock data for candlestick chart`);
     
     // Use real stock data from backend if available
     if (data.stock_data && data.stock_data.length > 0) {
