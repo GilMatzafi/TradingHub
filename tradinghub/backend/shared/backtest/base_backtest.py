@@ -1,5 +1,6 @@
 from typing import Dict, Any
 import pandas as pd
+import numpy as np
 from ..patterns.base_pattern import BasePattern
 from tradinghub.backend.shared.models.dto.backtest_params import BacktestParams
 from .performance_analyzer import PerformanceAnalyzer
@@ -54,20 +55,28 @@ class BaseBacktest:
             df.index[0]
         )
         
-        # Iterate through data
-        for i in range(len(df) - backtest_params.entry_delay):
+        # Pre-compute arrays for faster access (vectorization optimization)
+        pattern_signals = df[pattern_column].values
+        dates = df.index.values
+        open_prices = df['Open'].values
+        max_iterations = len(df) - backtest_params.entry_delay
+        
+        # Iterate through data with optimized access
+        for i in range(max_iterations):
             # Check if this is a pattern and we don't have an open position
-            if df.iloc[i][pattern_column]:
+            if pattern_signals[i]:
                 # Enter position after entry_delay
-                if i + backtest_params.entry_delay < len(df):
-                    entry_date = df.index[i + backtest_params.entry_delay]
-                    entry_price = df.iloc[i + backtest_params.entry_delay]['Open']
+                entry_idx = i + backtest_params.entry_delay
+                if entry_idx < len(df):
+                    entry_date = pd.Timestamp(dates[entry_idx])
+                    entry_price = open_prices[entry_idx]
                     trade_executor.enter_position(entry_date, entry_price, portfolio_value)
             
             # Manage open position
-            if i + backtest_params.entry_delay < len(df):
-                current_date = df.index[i + backtest_params.entry_delay]
-                current_bar = df.iloc[i + backtest_params.entry_delay]
+            current_idx = i + backtest_params.entry_delay
+            if current_idx < len(df):
+                current_date = pd.Timestamp(dates[current_idx])
+                current_bar = df.iloc[current_idx]  # Still need full bar for OHLC data
                 position_closed = trade_executor.manage_position(current_date, current_bar)
                 
                 if position_closed:
