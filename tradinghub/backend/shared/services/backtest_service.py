@@ -156,17 +156,32 @@ class BacktestService:
             }
         
         # Add stock data for chart visualization
-        stock_data = []
-        for idx, row in df.iterrows():
-            stock_data.append({
-                'date': idx.strftime('%Y-%m-%d %H:%M:%S') if hasattr(idx, 'strftime') else str(idx),
-                'open': float(row['Open']),
-                'high': float(row['High']),
-                'low': float(row['Low']),
-                'close': float(row['Close']),
-                'volume': float(row['Volume']) if 'Volume' in row else 0
-            })
-        
-        results['stock_data'] = stock_data
+        # Use the original full dataset for chart, not the filtered backtest data
+        original_df = self.stock_service.download_stock_data(symbol, days, interval)
+        if original_df is not None and not original_df.empty:
+            stock_data = []
+            for idx, row in original_df.iterrows():
+                stock_data.append({
+                    'date': idx.strftime('%Y-%m-%d %H:%M:%S') if hasattr(idx, 'strftime') else str(idx),
+                    'open': float(row['Open']),
+                    'high': float(row['High']),
+                    'low': float(row['Low']),
+                    'close': float(row['Close']),
+                    'volume': float(row['Volume']) if 'Volume' in row else 0
+                })
+            results['stock_data'] = stock_data
+        else:
+            # Fallback to filtered data if original data not available
+            stock_data = []
+            for idx, row in df.iterrows():
+                stock_data.append({
+                    'date': idx.strftime('%Y-%m-%d %H:%M:%S') if hasattr(idx, 'strftime') else str(idx),
+                    'open': float(row['Open']),
+                    'high': float(row['High']),
+                    'low': float(row['Low']),
+                    'close': float(row['Close']),
+                    'volume': float(row['Volume']) if 'Volume' in row else 0
+                })
+            results['stock_data'] = stock_data
         
         return results

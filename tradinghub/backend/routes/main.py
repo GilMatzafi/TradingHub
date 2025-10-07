@@ -27,7 +27,7 @@ def landing():
 @main_bp.route('/home')
 def home():
     """Alternative home page route"""
-    return render_template('home.html')
+    return render_template('landing.html')
 
 # Dynamically register routes for all available patterns
 def register_pattern_routes():

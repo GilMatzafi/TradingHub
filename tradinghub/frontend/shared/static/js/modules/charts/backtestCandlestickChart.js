@@ -350,8 +350,13 @@ export class BacktestCandlestickChart {
         // Remove existing canvas content (we'll use a div for LW Charts)
         const canvas = document.getElementById(this.canvasId);
         canvas.classList.add('d-none');
+        
+        // Remove existing Lightweight Charts container if it exists
         const existing = container.querySelector('#lwChartContainer');
-        if (existing) existing.remove();
+        if (existing) {
+            existing.remove();
+        }
+        
         const chartDiv = document.createElement('div');
         chartDiv.id = 'lwChartContainer';
         chartDiv.style.width = '100%';
@@ -391,6 +396,9 @@ export class BacktestCandlestickChart {
 
         // Resize on modal shown
         setTimeout(() => chart.timeScale().fitContent(), 50);
+
+        // Store chart reference for reset zoom functionality
+        this.chart = chart;
 
         console.log('BacktestCandlestickChart: Rendered with Lightweight Charts');
         return chart;
@@ -461,7 +469,24 @@ export class BacktestCandlestickChart {
 
     destroy() {
         if (this.chart) {
-            this.chart.destroy();
+            // Check if it's a Lightweight Charts instance
+            if (this.chart.remove) {
+                // Lightweight Charts - use remove()
+                this.chart.remove();
+                // Also remove the container div
+                const container = document.querySelector('#lwChartContainer');
+                if (container) {
+                    container.remove();
+                }
+                // Show the canvas again
+                const canvas = document.getElementById(this.canvasId);
+                if (canvas) {
+                    canvas.classList.remove('d-none');
+                }
+            } else {
+                // Chart.js - use destroy()
+                this.chart.destroy();
+            }
             this.chart = null;
         }
     }

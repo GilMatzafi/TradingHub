@@ -101,13 +101,23 @@ function initBacktestCharts() {
         }
     });
 
-    // Add event listener for reset zoom button
-    document.getElementById('resetZoomBtn').addEventListener('click', function() {
-        console.log('Backtest Charts: Reset zoom button clicked');
-        if (backtestCandlestickChart && backtestCandlestickChart.chart) {
-            backtestCandlestickChart.chart.resetZoom();
-        }
-    });
+    // Add event listener for reset zoom button (if it exists)
+    const resetZoomBtn = document.getElementById('resetZoomBtn');
+    if (resetZoomBtn) {
+        resetZoomBtn.addEventListener('click', function() {
+            console.log('Backtest Charts: Reset zoom button clicked');
+            if (backtestCandlestickChart && backtestCandlestickChart.chart) {
+                // Check if it's a Lightweight Charts instance
+                if (backtestCandlestickChart.chart.timeScale) {
+                    // Lightweight Charts - fit content to reset zoom
+                    backtestCandlestickChart.chart.timeScale().fitContent();
+                } else {
+                    // Chart.js - reset zoom
+                    backtestCandlestickChart.chart.resetZoom();
+                }
+            }
+        });
+    }
 }
 
 // Reset charts to initial state
