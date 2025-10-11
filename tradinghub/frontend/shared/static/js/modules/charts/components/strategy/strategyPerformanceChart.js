@@ -1,4 +1,11 @@
-import { chartColors, defaultChartOptions, formatTime, formatPercentage } from './chartUtils.js';
+/**
+ * Strategy Performance Chart
+ * Renders hourly performance metrics using Chart.js
+ */
+
+import { chartColors, defaultChartOptions } from '../../core/chartUtils.js';
+import { prepareChartData, getSummaryStats } from './strategy-data.js';
+import { updateSummaryStats, setupToggleButtons } from './strategy-ui.js';
 
 export class StrategyPerformanceChart {
     constructor(containerId = 'hourlyChartContainer', canvasId = 'hourlyChart') {
@@ -7,44 +14,63 @@ export class StrategyPerformanceChart {
         this.chart = null;
     }
 
+    /**
+     * Initialize chart with hourly performance data
+     */
     initialize(hourlyPerformance) {
-        const container = document.getElementById(this.containerId);
-        const canvas = document.getElementById(this.canvasId);
+        console.log('[StrategyChart] Initializing with hourly performance data');
         
-        if (!container || !canvas) {
-            console.error('Container or canvas element not found');
+        const canvas = this.getCanvas();
+        if (!canvas) {
+            console.error('[StrategyChart] Canvas element not found');
             return;
         }
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-            console.error('Could not get canvas context');
+            console.error('[StrategyChart] Could not get canvas context');
             return;
         }
 
         // Prepare data
-        const hours = Array.from({length: 24}, (_, i) => i);
-        const labels = hours.map(formatTime);
-        const avgProfits = hourlyPerformance.hourly_avg_profits;
-        const tradeCounts = hourlyPerformance.hourly_trades;
+        const { labels, avgProfits, tradeCounts } = prepareChartData(hourlyPerformance);
 
         // Update summary statistics
-        this.updateSummaryStats(labels, avgProfits, tradeCounts);
+        const stats = getSummaryStats(avgProfits, tradeCounts);
+        updateSummaryStats(labels, stats);
 
-        // Create datasets
+        // Render chart
+        this.renderChart(ctx, labels, avgProfits, tradeCounts);
+
+        // Setup toggle buttons
+        setupToggleButtons((metric) => this.handleMetricToggle(metric));
+        
+        console.log('[StrategyChart] Initialization complete');
+    }
+
+    /**
+     * Get canvas element
+     */
+    getCanvas() {
+        return document.getElementById(this.canvasId);
+    }
+
+    /**
+     * Render Chart.js chart
+     */
+    renderChart(ctx, labels, avgProfits, tradeCounts) {
         const datasets = this.createDatasets(avgProfits, tradeCounts);
 
-        // Create and store the chart
         this.chart = new Chart(ctx, {
             type: 'bar',
             data: { labels, datasets },
             options: this.createChartOptions()
         });
-
-        // Set up toggle buttons
-        this.setupToggleButtons();
     }
 
+    /**
+     * Create chart datasets
+     */
     createDatasets(avgProfits, tradeCounts) {
         return [
             {
@@ -74,6 +100,9 @@ export class StrategyPerformanceChart {
         ];
     }
 
+    /**
+     * Create chart configuration options
+     */
     createChartOptions() {
         return {
             ...defaultChartOptions,
@@ -111,54 +140,16 @@ export class StrategyPerformanceChart {
         };
     }
 
-    updateSummaryStats(labels, avgProfits, tradeCounts) {
-        const bestHourIndex = avgProfits.indexOf(Math.max(...avgProfits));
-        const worstHourIndex = avgProfits.indexOf(Math.min(...avgProfits));
-        const mostActiveHourIndex = tradeCounts.indexOf(Math.max(...tradeCounts));
-        const avgTradesPerHour = tradeCounts.reduce((a, b) => a + b, 0) / tradeCounts.filter(x => x > 0).length || 0;
-
-        // Update summary cards
-        const elements = {
-            bestHour: document.getElementById('bestHour'),
-            worstHour: document.getElementById('worstHour'),
-            mostActiveHour: document.getElementById('mostActiveHour'),
-            avgTradesPerHour: document.getElementById('avgTradesPerHour')
-        };
-
-        if (elements.bestHour) elements.bestHour.textContent = `${labels[bestHourIndex]} (${formatPercentage(avgProfits[bestHourIndex])})`;
-        if (elements.worstHour) elements.worstHour.textContent = `${labels[worstHourIndex]} (${formatPercentage(avgProfits[worstHourIndex])})`;
-        if (elements.mostActiveHour) elements.mostActiveHour.textContent = `${labels[mostActiveHourIndex]} (${tradeCounts[mostActiveHourIndex]} trades)`;
-        if (elements.avgTradesPerHour) elements.avgTradesPerHour.textContent = avgTradesPerHour.toFixed(1);
-    }
-
-    setupToggleButtons() {
-        const toggleContainer = document.querySelector('.hourly-chart-toggle');
-        if (toggleContainer) {
-            toggleContainer.innerHTML = `
-                <button type="button" class="active" data-metric="profit">Profit</button>
-                <button type="button" data-metric="volume">Volume</button>
-            `;
-
-            toggleContainer.querySelectorAll('button').forEach(button => {
-                button.addEventListener('click', () => this.handleMetricToggle(button));
-            });
-        }
-    }
-
-    handleMetricToggle(button) {
-        const metric = button.dataset.metric;
-        
-        // Update active state
-        button.parentElement.querySelectorAll('button').forEach(btn => 
-            btn.classList.toggle('active', btn === button)
-        );
-
+    /**
+     * Handle metric toggle (profit vs volume)
+     */
+    handleMetricToggle(metric) {
         if (!this.chart) {
-            console.error('Chart not initialized');
+            console.error('[StrategyChart] Chart not initialized');
             return;
         }
 
-        // Update chart visibility
+        // Update chart visibility based on selected metric
         if (metric === 'profit') {
             this.chart.data.datasets[0].hidden = false;
             this.chart.data.datasets[1].hidden = true;
@@ -174,6 +165,9 @@ export class StrategyPerformanceChart {
         this.chart.update();
     }
 
+    /**
+     * Destroy chart instance
+     */
     destroy() {
         if (this.chart instanceof Chart) {
             this.chart.destroy();
